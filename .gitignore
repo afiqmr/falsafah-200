@@ -1,0 +1,11 @@
+# Scratch and superseded files from earlier experiments
+*.txt
+!tanzil_quran/*.txt
+quran-data.tar.gz
+quran_uthmani_full.json
+fonts/
+add_arabic.py
+trim_arabic.py
+revert_to_uthmani.py
+__pycache__/
+*.backup*.json

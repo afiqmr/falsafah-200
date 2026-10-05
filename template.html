@@ -1,0 +1,1437 @@
+<title>الفتح النوى - Falsafah 200</title>
+<meta name="description" content="Kaji dan hafaz 200 Falsafah Al Quran dari Al Fathun Nawa Jilid 7, dengan ayat asal, ulang kaji jarak masa, kuiz dan penjejakan kemajuan.">
+<style>
+  :root{
+    --bg:#0F172A;
+    --surface:#0D1A33;
+    --surface-2:#12244A;
+    --ink:#EAF2FF;
+    --muted:#8FA6CC;
+    --border:rgba(148,197,255,.14);
+    --gold:#D4AF37;
+    --gold-ink:#0B0F17;
+    --gold-soft:rgba(212,175,55,.14);
+    --gold-cite:#FBBF24;
+    --emerald:#34D399;
+    --emerald-soft:rgba(52,211,153,.14);
+    --rose:#F87171;
+    --rose-soft:rgba(248,113,113,.14);
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 32px -14px rgba(0,0,0,.65);
+    --radius:16px;
+    color-scheme:dark;
+  }
+
+  body[data-theme="light"]{
+    --bg:#FAF5EC;
+    --surface:#FFFDF9;
+    --surface-2:#F7ECD6;
+    --ink:#10212B;
+    --muted:#5F6B6D;
+    --border:rgba(16,33,43,.10);
+    --navy:#0F766E;
+    --on-navy:#FFFFFF;
+    --gold:#FF7F50;
+    --gold-ink:#10212B;
+    --gold-soft:rgba(255,127,80,.14);
+    --gold-cite:#0F766E;
+    --coral-deep:#B8451F;
+    --coral-btn:#E4572E;
+    --emerald:#0F766E;
+    --emerald-soft:rgba(15,118,110,.12);
+    --rose:#B42318;
+    --rose-soft:rgba(180,35,24,.10);
+    --shadow:0 1px 2px rgba(16,33,43,.05),0 14px 32px -16px rgba(16,33,43,.18);
+    color-scheme:light;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Noto Sans","Segoe UI",ui-rounded,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 18px 64px;
+    min-height:100vh;
+  }
+
+  .sentence-case{ text-transform:lowercase; }
+  .sentence-case::first-letter{ text-transform:uppercase; }
+
+  /* ---------- Top bar ---------- */
+  header.topbar{
+    position:sticky; top:0; z-index:20;
+    background:color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+    padding:14px 0 10px;
+    margin:0 -18px 22px;
+  }
+  .topbar-inner{
+    max-width:760px; margin:0 auto; padding:0 18px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .wordmark{ display:flex; flex-direction:column; gap:1px; }
+  .wordmark-top{ display:flex; align-items:baseline; gap:8px; }
+  .wordmark .mark{ font-weight:800; font-size:21px; color:var(--gold); letter-spacing:-.01em; }
+  .wordmark .sub{
+    font-size:13px; color:var(--muted); letter-spacing:.02em; font-weight:600;
+    background:none; border:0; padding:0; cursor:pointer; font-family:inherit; text-align:left;
+  }
+  .wordmark .sub:hover{ color:var(--gold-cite); }
+  .header-ayat-wrap{
+    max-width:760px; margin:0 auto;
+    padding:14px 18px 24px;
+    text-align:center;
+  }
+  .header-ayat{
+    font-family:"Scheherazade New","Traditional Arabic",serif;
+    direction:rtl; unicode-bidi:isolate;
+    text-align:center;
+    color:var(--gold);
+    font-size:1.35rem;
+    font-weight:700;
+    line-height:1.8;
+  }
+  .header-ayat-cite{
+    text-align:center;
+    font-size:0.75rem;
+    color:var(--muted);
+    font-weight:600;
+    margin-top:0.3rem;
+    letter-spacing:.01em;
+  }
+  .streakchip{
+    display:flex; align-items:center; gap:6px;
+    background:var(--gold-soft); color:var(--gold-cite);
+    border:1px solid rgba(212,175,55,.3);
+    border-radius:100px; padding:6px 12px 6px 10px;
+    font-size:13px; font-weight:700; letter-spacing:.01em;
+  }
+  .streakchip svg{width:14px;height:14px;}
+
+  nav.tabs{
+    display:flex; gap:4px; margin-top:14px;
+    background:var(--surface-2); border:1px solid var(--border);
+    border-radius:100px; padding:4px;
+  }
+  nav.tabs button{
+    flex:1; border:0; background:transparent; color:var(--muted);
+    font-family:inherit; font-size:14px; font-weight:700;
+    padding:9px 6px; border-radius:100px; cursor:pointer;
+    letter-spacing:.01em;
+    transition:background .18s ease, color .18s ease;
+  }
+  nav.tabs button.active{ background:var(--gold); color:var(--gold-ink); }
+  nav.tabs button:not(.active):hover{ color:var(--ink); }
+  nav.tabs button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
+    outline:2px solid var(--gold); outline-offset:2px;
+  }
+
+  main{ }
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---------- shared bits ---------- */
+  .eyebrow{
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+    font-weight:700;
+  }
+  h1,h2,h3{ font-weight:800; text-wrap:balance; margin:0; letter-spacing:-.01em; }
+  .empty{ color:var(--muted); font-size:14px; padding:40px 0; text-align:center; }
+
+  .divider{ height:1px; background:var(--border); margin:16px 0; border:0; }
+
+  .arabic-text{
+    font-family:"Scheherazade New","Traditional Arabic",serif;
+    direction:rtl; text-align:right; unicode-bidi:isolate;
+    font-size:25px; line-height:2.05; color:var(--ink);
+  }
+
+  /* ---------- Status badges ---------- */
+  .badge{
+    display:inline-flex; align-items:center; font-size:11px; font-weight:700;
+    letter-spacing:.05em; text-transform:uppercase;
+    border-radius:100px; padding:5px 11px; border:1px solid transparent;
+  }
+  .badge-neutral{ background:rgba(148,163,184,.12); color:var(--muted); border-color:rgba(148,163,184,.22); }
+  .badge-gold{ background:var(--gold-soft); color:var(--gold-cite); border-color:rgba(212,175,55,.32); }
+  .badge-emerald{ background:var(--emerald-soft); color:var(--emerald); border-color:rgba(52,211,153,.32); }
+
+  /* ---------- Study (Kaji) ---------- */
+  .study-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px; gap:10px; flex-wrap:wrap;
+  }
+  .study-head h2{ font-size:20px; }
+  .duecount{ font-size:13px; color:var(--muted); }
+  .duecount b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+
+  .folio{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-top:4px solid var(--gold);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:32px 28px 28px;
+    min-height:360px;
+    display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .folio-top{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px;
+  }
+  .rangepill{ font-weight:800; font-size:14px; color:var(--gold-cite); }
+  .folio-title{
+    font-size:24px; line-height:1.3; margin-bottom:2px; color:var(--ink);
+  }
+  .folio-hint{
+    color:var(--muted); font-size:14px; margin-top:auto; padding-top:18px;
+  }
+  .folio-arabic-wrap{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:12px;
+    padding:20px 20px; margin-bottom:16px;
+  }
+  .folio-text{
+    font-size:16px; line-height:1.65; color:var(--muted);
+  }
+  .surah-ref{
+    font-size:12px; color:var(--muted); margin-top:10px; font-weight:600;
+  }
+  .folio-text-label{
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700;
+    margin-bottom:6px;
+  }
+  .extra-block{ margin-top:16px; }
+  .extra-block + .extra-block{ margin-top:14px; }
+  .extra-label{
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700;
+    margin-bottom:6px;
+  }
+  .kata-kunci{ font-size:14px; color:var(--ink); line-height:1.6; margin:0 0 4px; }
+  .kata-kunci:last-child{ margin-bottom:0; }
+  .catitan-text{ font-size:13px; color:var(--muted); line-height:1.65; margin:0 0 8px; }
+  .catitan-text:last-child{ margin-bottom:0; }
+
+  .revealbtn{
+    align-self:flex-start; margin-top:20px;
+    background:var(--gold); color:var(--gold-ink);
+    border:0; border-radius:10px; padding:12px 22px;
+    font-family:inherit; font-weight:700; font-size:15px;
+    cursor:pointer;
+  }
+  .revealbtn:hover{ filter:brightness(1.08); }
+
+  .gradebar{
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:20px;
+  }
+  .gradebtn{
+    border-radius:10px; padding:12px 8px; border:1px solid var(--border);
+    background:var(--surface-2); cursor:pointer; text-align:center;
+    font-family:inherit;
+  }
+  .gradebtn .g-label{ display:block; font-weight:800; font-size:14px; color:var(--ink); }
+  .gradebtn .g-sub{ display:block; font-size:11px; color:var(--muted); margin-top:2px; }
+  .gradebtn.again:hover{ background:var(--rose-soft); border-color:var(--rose); }
+  .gradebtn.again:hover .g-label{ color:var(--rose); }
+  .gradebtn.good:hover{ background:var(--gold-soft); border-color:var(--gold); }
+  .gradebtn.good:hover .g-label{ color:var(--gold-cite); }
+  .gradebtn.easy:hover{ background:var(--emerald-soft); border-color:var(--emerald); }
+  .gradebtn.easy:hover .g-label{ color:var(--emerald); }
+
+  .studydone{ text-align:center; padding:50px 20px; }
+  .studydone .big{ font-size:40px; color:var(--emerald); }
+
+  /* ---------- Browse (Senarai) ---------- */
+  .searchrow{ position:relative; margin-bottom:16px; }
+  .searchrow svg{
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    width:16px; height:16px; color:var(--muted); pointer-events:none;
+  }
+  .searchrow input[type="search"]{
+    width:100%; padding:12px 14px 12px 40px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface); color:var(--ink);
+    font-family:inherit; font-size:15px;
+  }
+  .searchrow input[type="search"]::placeholder{ color:var(--muted); }
+  .listcount{ font-size:12px; color:var(--muted); margin-bottom:10px; }
+
+  .browse-mode{
+    display:flex; gap:4px; margin-bottom:12px;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:100px; padding:4px;
+  }
+  .browse-mode button{
+    flex:1; border:0; background:transparent; color:var(--muted); cursor:pointer;
+    font-family:inherit; font-size:13px; font-weight:700; padding:8px 6px; border-radius:100px;
+  }
+  .browse-mode button.active{ background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--gold); }
+  .group-note{ font-size:12px; color:var(--muted); margin:-4px 0 12px; line-height:1.5; }
+  .group-picker{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 14px; }
+  .group-picker button{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--surface); border:1px solid var(--border); border-radius:100px;
+    padding:3px 12px; min-height:34px; cursor:pointer;
+    font-family:inherit; font-size:12px; font-weight:700; color:var(--ink);
+  }
+  .group-picker button:hover{ border-color:var(--gold); }
+  .group-picker button.active{ border-color:var(--gold); background:var(--gold-soft); }
+  .group-picker .gp-no{ color:var(--muted); font-size:11px; }
+  .group-picker .gp-ar{
+    font-family:"Scheherazade New","Traditional Arabic",serif; direction:rtl;
+    font-size:18px; line-height:1.3; color:var(--gold-cite);
+  }
+  .grouphead{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap-reverse;
+    margin:18px 0 8px; padding-top:12px; border-top:2px solid var(--gold);
+  }
+  .card-list .grouphead:first-child{ margin-top:0; }
+  .grouphead .gh-label{ font-size:12px; font-weight:700; color:var(--muted); }
+  .grouphead .gh-label b{ color:var(--gold-cite); }
+  .grouphead .gh-ar{
+    font-family:"Scheherazade New","Traditional Arabic",serif; direction:rtl;
+    font-size:26px; line-height:1.4; color:var(--gold-cite); margin-left:auto;
+  }
+  .card-list{ display:flex; flex-direction:column; gap:8px; }
+  .listcard{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:14px 15px; cursor:pointer; display:flex; flex-direction:column; gap:5px;
+  }
+  .listcard:hover{ border-color:var(--gold); }
+  .listcard .lc-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .listcard .lc-no{ font-weight:800; color:var(--gold-cite); font-size:13px; }
+  .listcard .lc-title{ font-weight:800; font-size:15px; }
+  .listcard .lc-arabic{
+    font-family:"Scheherazade New","Traditional Arabic",serif; direction:rtl; text-align:right;
+    font-size:16px; color:var(--muted);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .listcard .lc-surah{ font-size:12px; color:var(--muted); }
+
+  .detailoverlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.6);
+    display:none; align-items:flex-end; justify-content:center; z-index:50;
+  }
+  .detailoverlay.active{ display:flex; }
+  .detailsheet{
+    background:var(--surface); border-radius:18px 18px 0 0;
+    max-width:760px; width:100%; padding:26px 24px 30px;
+    max-height:82vh; overflow-y:auto;
+    border-top:1px solid var(--border);
+  }
+  .detailsheet .closebtn{
+    float:right; background:var(--surface-2); border:1px solid var(--border);
+    border-radius:100px; width:30px; height:30px; cursor:pointer; color:var(--muted);
+    font-size:16px; line-height:1;
+  }
+
+  /* ---------- Name modal ---------- */
+  .nameoverlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.65);
+    display:none; align-items:center; justify-content:center; z-index:60; padding:20px;
+  }
+  .nameoverlay.active{ display:flex; }
+  .namecard{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:28px 26px; max-width:360px; width:100%; text-align:center;
+  }
+  .namecard h3{ font-size:19px; margin-bottom:6px; }
+  .namecard p{ color:var(--muted); font-size:13px; margin:0 0 18px; line-height:1.5; }
+  .namecard input{
+    width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:15px;
+    margin-bottom:12px; text-align:center;
+  }
+  .namecard .namebtn{
+    width:100%; background:var(--gold); color:var(--gold-ink); border:0; border-radius:10px;
+    padding:12px; font-family:inherit; font-weight:800; font-size:15px; cursor:pointer;
+  }
+  .namecard .nameskip{
+    display:block; margin-top:10px; background:none; border:0; color:var(--muted);
+    font-family:inherit; font-size:12px; cursor:pointer; text-decoration:underline;
+  }
+  .namecard .proto-note{
+    margin:14px 0 0; font-size:10px; color:var(--muted); opacity:.7;
+  }
+  .namecard{ max-height:calc(100vh - 40px); overflow-y:auto; }
+
+  /* ---------- Study range (Kaji/Kuiz) ---------- */
+  .rangesetup{ text-align:left; margin:2px 0 16px; padding-top:14px; border-top:1px solid var(--border); }
+  .range-label{
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700;
+    margin-bottom:8px;
+  }
+  .range-presets{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px; }
+  .range-presets button{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--ink);
+    border-radius:10px; padding:8px 4px; font-family:inherit; font-size:13px; font-weight:800;
+    line-height:1.3; cursor:pointer;
+  }
+  .range-presets button span{ display:block; font-size:11px; font-weight:600; color:var(--muted); }
+  .range-presets button.active{ border-color:var(--gold); background:var(--gold-soft); }
+  .range-custom{ display:flex; align-items:center; gap:8px; }
+  .range-custom label{
+    flex:1; display:flex; align-items:center; gap:6px;
+    font-size:12px; color:var(--muted); font-weight:700;
+  }
+  .namecard .range-custom input{ margin:0; padding:9px 6px; min-width:0; }
+  .namecard .range-hint{ font-size:11px; margin:8px 0 0; }
+  .namecard .range-hint.error{ color:var(--rose); font-weight:700; }
+
+  .rangechip{
+    display:inline-flex; align-items:center; gap:6px; margin:0 0 14px;
+    background:var(--surface-2); border:1px solid var(--border); color:var(--muted);
+    border-radius:100px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:700;
+    cursor:pointer;
+  }
+  .rangechip b{ color:var(--ink); }
+  .rangechip .rc-edit{ color:var(--gold-cite); }
+  .rangechip:hover{ border-color:var(--gold); }
+
+  /* ---------- Quiz (Kuiz) ---------- */
+  .quizmeta{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .quizscore{ font-size:13px; color:var(--muted); }
+  .quizscore b{ color:var(--gold-cite); font-variant-numeric:tabular-nums; }
+  .quizq{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:26px 24px; margin-bottom:16px;
+  }
+  .quizq .eyebrow{ margin-bottom:12px; }
+  .quizq .qtext{ font-size:18px; line-height:1.5; font-weight:700; }
+  .quiz-reveal{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:12px;
+    padding:16px 18px; margin-top:14px;
+  }
+  .quiz-reveal .folio-text-label{ margin-bottom:6px; }
+  .quiz-reveal .folio-text{ font-size:15px; }
+  .quizoptions{ display:flex; flex-direction:column; gap:10px; }
+  .qopt{
+    text-align:left; padding:14px 16px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface); cursor:pointer; font-family:inherit; font-size:15px;
+    color:var(--ink);
+  }
+  .qopt.qopt-arabic{
+    font-family:"Scheherazade New","Traditional Arabic",serif; direction:rtl; text-align:right; font-size:19px; line-height:1.8;
+  }
+  .qopt:hover{ border-color:var(--gold); }
+  .qopt.correct{ background:var(--emerald-soft); border-color:var(--emerald); color:var(--emerald); font-weight:800; }
+  .qopt.wrong{ background:var(--rose-soft); border-color:var(--rose); color:var(--rose); font-weight:800; }
+  .qopt[disabled]{ cursor:default; }
+  .quiznext{
+    margin-top:14px; background:var(--gold); color:var(--gold-ink); border:0;
+    border-radius:10px; padding:11px 20px; font-family:inherit; font-weight:700; font-size:15px;
+    cursor:pointer;
+  }
+
+  /* ---------- Progress ---------- */
+  .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px; }
+  .stat-tile{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:16px 14px; text-align:center;
+  }
+  .stat-tile .num{ font-size:29px; font-weight:800; color:var(--gold-cite); font-variant-numeric:tabular-nums; }
+  .stat-tile .lbl{ font-size:11px; color:var(--muted); letter-spacing:.05em; text-transform:uppercase; margin-top:4px; font-weight:700; }
+
+  .boxdist{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 20px 18px; margin-bottom:18px;
+  }
+  .boxdist h3{ font-size:15px; margin-bottom:14px; }
+  .boxbar{ display:flex; height:14px; border-radius:100px; overflow:hidden; border:1px solid var(--border); }
+  .boxbar span{ height:100%; }
+  .boxlegend{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:12px; font-size:12px; color:var(--muted); }
+  .boxlegend .dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+
+  .resetzone{
+    border:1px dashed var(--border); border-radius:var(--radius); padding:16px 18px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .resetzone p{ margin:0; font-size:13px; color:var(--muted); max-width:40ch; }
+  .resetbtn{
+    background:var(--rose-soft); color:var(--rose); border:1px solid var(--rose);
+    border-radius:10px; padding:9px 16px; font-family:inherit; font-weight:800; font-size:13px;
+    cursor:pointer; white-space:nowrap;
+  }
+
+  footer.credit{
+    text-align:center; color:var(--muted); font-size:12px; margin-top:36px; line-height:1.7;
+  }
+  .feedback-link{ color:var(--gold-cite); font-weight:600; }
+  .credit-divider{ border:0; border-top:1px solid var(--border); width:220px; max-width:60%; margin:14px auto; }
+
+  /* ---------- Mission banner (countdown + daily goals) ---------- */
+  .missionbar{
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:12px 10px; margin-bottom:20px;
+  }
+  .missionbar .mi{ text-align:center; padding:0 4px; }
+  .missionbar .mi + .mi{ border-left:1px solid var(--border); }
+  .missionbar .mi-num{ font-size:19px; font-weight:800; color:var(--gold-cite); font-variant-numeric:tabular-nums; line-height:1.1; }
+  .missionbar .mi-num.mi-done{ color:var(--emerald); }
+  .missionbar .mi-lbl{ font-size:10px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; font-weight:700; margin-top:3px; }
+  .missionbar .mi-track{
+    height:4px; border-radius:100px; background:var(--surface-2); margin-top:7px; overflow:hidden;
+  }
+  .missionbar .mi-track span{ display:block; height:100%; background:var(--gold); border-radius:100px; }
+  .missionbar .mi-track span.mi-fill-done{ background:var(--emerald); }
+
+  .kaji-goal-done{
+    text-align:center; padding:44px 20px;
+  }
+  .kaji-goal-done .big{ font-size:36px; color:var(--emerald); }
+  .kaji-goal-done h3{ font-size:19px; margin:12px 0 6px; }
+  .kaji-goal-done p{ color:var(--muted); font-size:13px; line-height:1.6; max-width:36ch; margin:0 auto; }
+  .kaji-extra-btn{
+    margin-top:18px; background:var(--surface-2); color:var(--muted); border:1px solid var(--border);
+    border-radius:10px; padding:10px 18px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;
+  }
+  .kaji-extra-btn:hover{ color:var(--ink); border-color:var(--gold); }
+
+  /* ---------- Theme toggle ---------- */
+  .header-actions{ display:flex; align-items:center; gap:8px; }
+  .themebtn{
+    display:flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:100px; flex:none;
+    background:var(--surface-2); border:1px solid var(--border); color:var(--muted);
+    cursor:pointer;
+  }
+  .themebtn:hover{ color:var(--ink); border-color:var(--gold); }
+  .themebtn svg{ width:16px; height:16px; }
+
+  /* ---------- Light theme structural overrides ---------- */
+  body[data-theme="light"] .wordmark .mark{ color:var(--navy); }
+  body[data-theme="light"] .header-ayat{ color:var(--gold-cite); }
+  body[data-theme="light"] .streakchip{ color:var(--coral-deep); border-color:rgba(255,127,80,.35); }
+  body[data-theme="light"] nav.tabs button.active{ background:var(--navy); color:var(--on-navy); }
+  body[data-theme="light"] .badge-neutral{ background:rgba(110,117,117,.12); border-color:rgba(110,117,117,.25); }
+  body[data-theme="light"] .badge-gold{ color:var(--coral-deep); border-color:rgba(255,127,80,.35); }
+  body[data-theme="light"] .badge-emerald{ border-color:rgba(15,118,110,.3); }
+  body[data-theme="light"] .rangepill{ color:var(--coral-deep); }
+  body[data-theme="light"] .folio-arabic-wrap{ background:#FDF9F1; border-color:rgba(245,230,202,.9); }
+  body[data-theme="light"] .revealbtn{ background:var(--coral-btn); color:#FFFFFF; }
+  body[data-theme="light"] .revealbtn:hover{ filter:none; }
+  body[data-theme="light"] .revealbtn:hover, body[data-theme="light"] .quiznext:hover, body[data-theme="light"] .namecard .namebtn:hover,
+  body[data-theme="light"] .revealbtn:active, body[data-theme="light"] .quiznext:active, body[data-theme="light"] .namecard .namebtn:active{ background:var(--navy); color:var(--on-navy); }
+  body[data-theme="light"] .listcard .lc-no{ color:var(--coral-deep); }
+  body[data-theme="light"] .detailoverlay{ background:rgba(16,33,43,.45); }
+  body[data-theme="light"] .nameoverlay{ background:rgba(16,33,43,.5); }
+  body[data-theme="light"] .namecard .namebtn{ background:var(--coral-btn); color:#FFFFFF; font-weight:700; }
+  body[data-theme="light"] .quiznext{ background:var(--coral-btn); color:#FFFFFF; }
+  body[data-theme="light"] .missionbar .mi:first-child .mi-num{ color:var(--coral-deep); }
+  body[data-theme="light"] .missionbar .mi-track{ background:var(--gold-soft); }
+
+  @media (max-width:480px){
+    .stat-row{ grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .folio{ padding:24px 18px 22px; }
+    .folio-title{ font-size:21px; }
+    .arabic-text{ font-size:22px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;700&display=swap">
+
+
+<div class="app">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="wordmark">
+        <div class="wordmark-top">
+          <span class="mark">Al-Fathun Nawa: Falsafah 1-200</span>
+        </div>
+        <button class="sub" id="greetBtn" type="button">Jilid 7</button>
+      </div>
+      <div class="header-actions">
+        <button class="themebtn" id="themeToggle" type="button" aria-label="Tukar tema terang/gelap" title="Tukar tema terang/gelap"></button>
+        <div class="streakchip" id="streakChip">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 0 1-12 0c0-4 3-5 3-8 0-1.5-.5-3-2-4 2 0 4.5 1 5 4z"/></svg>
+          <span id="streakVal">0 hari</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-ayat-wrap">
+      <div class="header-ayat" lang="ar" dir="rtl">ٱلرَّحْمَٰنُ ﴿١﴾ عَلَّمَ ٱلْقُرْءَانَ ﴿٢﴾</div>
+      <div class="header-ayat-cite">(Surah Ar-Rahman, 55:1-2)</div>
+    </div>
+    <div class="topbar-inner">
+      <nav class="tabs" style="width:100%;" role="tablist">
+        <button data-view="study" class="active" role="tab">Kaji</button>
+        <button data-view="browse" role="tab">Senarai</button>
+        <button data-view="quiz" role="tab">Kuiz</button>
+        <button data-view="progress" role="tab">Progres</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="missionbar" id="missionBar"></div>
+
+  <main>
+    <!-- STUDY -->
+    <section class="view active" id="view-study">
+      <div class="study-head">
+        <h2>Ulang kaji</h2>
+        <div class="duecount"><b id="dueNum">0</b>/<span id="dueGoal">20</span> falsafah dikaji hari ini</div>
+      </div>
+      <button class="rangechip" type="button"></button>
+      <div id="studyStage"></div>
+    </section>
+
+    <!-- BROWSE -->
+    <section class="view" id="view-browse">
+      <div class="browse-mode" role="tablist" aria-label="Paparan senarai">
+        <button type="button" data-mode="all" class="active" role="tab">Semua falsafah</button>
+        <button type="button" data-mode="groups" role="tab">Kumpulan permulaan ayat</button>
+      </div>
+      <p class="group-note" id="groupNote" hidden>Falsafah 101&ndash;200 dikumpulkan mengikut perkataan pembukaan ayat yang sama, supaya mudah dihafal. Falsafah tanpa persamaan permulaan tidak dipaparkan.</p>
+      <div class="group-picker" id="groupPicker" hidden aria-label="Pilih kumpulan"></div>
+      <div class="searchrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="searchInput" placeholder="Cari nombor, tajuk, surah, kata kunci atau sebutan ayat (cth: wahuwa ma'akum)&hellip;">
+      </div>
+      <div class="listcount" id="listCount"></div>
+      <div class="card-list" id="cardList"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="view" id="view-quiz">
+      <div class="quizmeta">
+        <h2 style="font-size:20px;">Kuiz ingatan</h2>
+        <div class="quizscore">Skor sesi ini: <b id="quizScore">0</b>/<span id="quizTotal">0</span></div>
+      </div>
+      <button class="rangechip" type="button"></button>
+      <div id="quizStage"></div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="view" id="view-progress">
+      <h2 style="font-size:20px;margin-bottom:12px;">Kemajuan hafazan</h2>
+      <button class="rangechip" type="button"></button>
+      <div class="stat-row">
+        <div class="stat-tile"><div class="num" id="statMastered">0</div><div class="lbl">Dikuasai</div></div>
+        <div class="stat-tile"><div class="num" id="statDue">0</div><div class="lbl">Perlu kaji</div></div>
+        <div class="stat-tile"><div class="num" id="statPct">0%</div><div class="lbl">Keseluruhan</div></div>
+      </div>
+      <div class="boxdist">
+        <h3>Taburan tahap ingatan</h3>
+        <div class="boxbar" id="boxBar"></div>
+        <div class="boxlegend" id="boxLegend"></div>
+      </div>
+      <div class="resetzone">
+        <p>Kosongkan semua rekod ulang kaji bagi semua falsafah dan mulakan semula. Tindakan ini tidak boleh dibatalkan.</p>
+        <button class="resetbtn" id="resetBtn">Set semula progres</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="credit">
+    <span class="feedback-link">Author of Al-Fathun Nawa: Philosopher D&rsquo;Outreach Professor Dr. HALO-N</span><br>
+    Made for Students of Advanced Diploma in Al-Quranic Philosophy,<br>
+    Institut Falsafah Al-Quran, in collaboration with Yayasan Gual Periok and World Philosphical Forum (WPF) Malaysia<br>
+    <hr class="credit-divider">
+    <span class="feedback-link">Created by Afiq Rashdi</span> &middot; September 2026<br>
+    Prototype-phase testing<br>
+    <span class="feedback-link">Any feedback would be greatly appreciated &mdash; please feel free to contact me directly</span>
+  </footer>
+</div>
+
+<div class="detailoverlay" id="detailOverlay">
+  <div class="detailsheet" id="detailSheet"></div>
+</div>
+
+<div class="nameoverlay" id="nameOverlay">
+  <div class="namecard">
+    <h3>Salam Sejahtera &amp; Selamat Datang</h3>
+    <p>Sila nyatakan nama atau panggilan anda untuk mula menggunakan pembantu hafalan ini dalam lembaran pengajian Falsafah Al-Quran.</p>
+    <input type="text" id="nameInput" placeholder="Nama / Gelaran Rasmi" maxlength="40">
+    <div class="rangesetup">
+      <div class="range-label">Julat falsafah untuk Kaji &amp; Kuiz</div>
+      <div class="range-presets" id="rangePresets">
+        <button type="button" data-from="1" data-to="100">Tahun 1<span>1&ndash;100</span></button>
+        <button type="button" data-from="101" data-to="200">Tahun 2<span>101&ndash;200</span></button>
+        <button type="button" data-from="1" data-to="200">Semua<span>1&ndash;200</span></button>
+      </div>
+      <div class="range-custom">
+        <label>Dari <input type="number" id="rangeFrom" min="1" max="200" inputmode="numeric"></label>
+        <label>Hingga <input type="number" id="rangeTo" min="1" max="200" inputmode="numeric"></label>
+      </div>
+      <p class="range-hint" id="rangeHint"></p>
+    </div>
+    <button class="namebtn" id="nameSaveBtn">Mulakan Sesi Pengajian</button>
+    <button class="nameskip" id="nameSkipBtn">Langkau Fasa Ini</button>
+    <p class="proto-note">(Prototype testing phase)</p>
+  </div>
+</div>
+
+<script id="falsafah-data" type="application/json">__DATA_JSON__</script>
+<script>
+(function(){
+  "use strict";
+  var DATA = JSON.parse(document.getElementById('falsafah-data').textContent);
+  // Kaji, Kuiz and Progres use the student's chosen range; Senarai always lists everything.
+  var RANGE_KEY = 'falsafah200_range_v1';
+  var RANGE_PRESETS = [
+    { name:'Tahun 1', from:1, to:100 },
+    { name:'Tahun 2', from:101, to:200 },
+    { name:'Semua', from:1, to:200 }
+  ];
+  function poolFor(from, to){
+    return DATA.filter(function(e){ return e.noEnd >= from && e.noStart <= to; });
+  }
+  function isValidRange(from, to){
+    return Number.isInteger(from) && Number.isInteger(to) && from >= 1 && to <= 200 && from <= to;
+  }
+  var studyRange = { from:1, to:200 };
+  var rangeSaved = false;
+  try{
+    var savedRange = JSON.parse(localStorage.getItem(RANGE_KEY) || 'null');
+    if(savedRange && isValidRange(savedRange.from, savedRange.to) && poolFor(savedRange.from, savedRange.to).length){
+      studyRange = { from:savedRange.from, to:savedRange.to };
+      rangeSaved = true;
+    }
+  }catch(e){}
+  var STUDY_POOL = poolFor(studyRange.from, studyRange.to);
+  var LS_KEY = 'falsafah200_srs_v1';
+  var STREAK_KEY = 'falsafah200_streak_v1';
+  var NAME_KEY = 'falsafah200_username_v1';
+  var THEME_KEY = 'falsafah200_theme_v1';
+
+  var BOX_INTERVALS = [0,1,3,7,16,35]; // days until due, index = box
+  var BOX_COLORS = ['#64748B','#B08A2E','#D4AF37','#FBBF24','#5EC29A','#34D399'];
+  function getBoxColors(){ return BOX_COLORS; }
+  var BOX_LABELS = ['Baru','Belajar','Semakan','Kukuh','Mahir','Dikuasai'];
+  var BOX_BADGE_CLASS = ['badge-neutral','badge-gold','badge-gold','badge-gold','badge-emerald','badge-emerald'];
+
+  var DEADLINE = new Date('2026-10-13T00:00:00');
+  var DAILY_KAJI_GOAL = 20;
+  var DAILY_KUIZ_GOAL = 20;
+  var DAILY_KEY = 'falsafah200_daily_v1';
+  var allowExtraKaji = false; // in-memory only: lets a student opt past today's cap without persisting the override
+
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function addDays(dateStr, n){
+    var d = new Date(dateStr+'T00:00:00');
+    d.setDate(d.getDate()+n);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+
+  function loadDaily(){
+    var fresh = { date: todayStr(), kajiIds: [], kuizCount: 0 };
+    try{
+      var raw = localStorage.getItem(DAILY_KEY);
+      if(raw){
+        var st = JSON.parse(raw);
+        if(st.date === fresh.date) return st;
+      }
+    }catch(e){}
+    return fresh;
+  }
+  function saveDaily(st){ try{ localStorage.setItem(DAILY_KEY, JSON.stringify(st)); }catch(e){} }
+  // Loaded once and mutated in place from here on (mirrors `srs` below) so the
+  // running session stays correct even in a context where localStorage writes
+  // are blocked (e.g. a sandboxed preview) - re-reading from storage on every
+  // call would otherwise silently discard same-session progress.
+  var daily = loadDaily();
+  function rolloverDailyIfNeeded(){
+    var t = todayStr();
+    if(daily.date !== t){ daily = { date: t, kajiIds: [], kuizCount: 0 }; }
+  }
+
+  function markKajiDoneToday(id){
+    rolloverDailyIfNeeded();
+    if(daily.kajiIds.indexOf(id) === -1) daily.kajiIds.push(id);
+    saveDaily(daily);
+  }
+  function markKuizAnsweredToday(){
+    rolloverDailyIfNeeded();
+    daily.kuizCount = (daily.kuizCount||0) + 1;
+    saveDaily(daily);
+  }
+
+  function kajiGoal(){ return Math.min(DAILY_KAJI_GOAL, STUDY_POOL.length); }
+
+  function renderMissionBar(){
+    rolloverDailyIfNeeded();
+    var msLeft = DEADLINE.getTime() - Date.now();
+    var daysLeft = Math.ceil(msLeft / 86400000);
+    var dayLabel = daysLeft > 0 ? daysLeft : 0;
+    var dayNote = daysLeft > 0 ? 'hari lagi' : (daysLeft === 0 ? 'hari ini!' : 'tamat tempoh');
+
+    var goal = kajiGoal();
+    var kajiDone = Math.min(daily.kajiIds.length, goal);
+    var kuizDone = Math.min(daily.kuizCount||0, DAILY_KUIZ_GOAL);
+    var kajiPct = Math.round(kajiDone/goal*100);
+    var kuizPct = Math.round(kuizDone/DAILY_KUIZ_GOAL*100);
+
+    document.getElementById('missionBar').innerHTML =
+      '<div class="mi">' +
+        '<div class="mi-num">'+dayLabel+'</div>' +
+        '<div class="mi-lbl">'+dayNote+' &middot; 13 Okt</div>' +
+      '</div>' +
+      '<div class="mi">' +
+        '<div class="mi-num'+(kajiDone>=goal?' mi-done':'')+'">'+kajiDone+'/'+goal+'</div>' +
+        '<div class="mi-lbl">Kaji hari ini</div>' +
+        '<div class="mi-track"><span class="'+(kajiDone>=goal?'mi-fill-done':'')+'" style="width:'+kajiPct+'%;"></span></div>' +
+      '</div>' +
+      '<div class="mi">' +
+        '<div class="mi-num'+(kuizDone>=DAILY_KUIZ_GOAL?' mi-done':'')+'">'+kuizDone+'/'+DAILY_KUIZ_GOAL+'</div>' +
+        '<div class="mi-lbl">Kuiz hari ini</div>' +
+        '<div class="mi-track"><span class="'+(kuizDone>=DAILY_KUIZ_GOAL?'mi-fill-done':'')+'" style="width:'+kuizPct+'%;"></span></div>' +
+      '</div>';
+
+    var dn = document.getElementById('dueNum');
+    if(dn) dn.textContent = kajiDone;
+    var dg = document.getElementById('dueGoal');
+    if(dg) dg.textContent = goal;
+  }
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(LS_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return {};
+  }
+  function saveState(state){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var srs = loadState();
+
+  function getCard(id){
+    if(!srs[id]) srs[id] = { box:0, due: todayStr(), seen:0, correct:0 };
+    return srs[id];
+  }
+
+  function isDue(id){
+    var c = getCard(id);
+    return c.due <= todayStr();
+  }
+
+  function grade(id, result){
+    // result: 0 = again, 1 = good, 2 = easy
+    var c = getCard(id);
+    c.seen = (c.seen||0)+1;
+    if(result===0){
+      c.box = 0;
+      c.due = todayStr();
+    } else {
+      var step = result===2 ? 2 : 1;
+      c.box = Math.min(BOX_INTERVALS.length-1, c.box+step);
+      c.due = addDays(todayStr(), BOX_INTERVALS[c.box]);
+      c.correct = (c.correct||0)+1;
+    }
+    saveState(srs);
+    bumpStreak();
+  }
+
+  function bumpStreak(){
+    try{
+      var raw = localStorage.getItem(STREAK_KEY);
+      var st = raw ? JSON.parse(raw) : {count:0,last:null};
+      var t = todayStr();
+      if(st.last === t){ /* already counted today */ }
+      else if(st.last === addDays(t,-1)){ st.count += 1; st.last = t; }
+      else { st.count = 1; st.last = t; }
+      localStorage.setItem(STREAK_KEY, JSON.stringify(st));
+      renderStreak();
+    }catch(e){}
+  }
+  function renderStreak(){
+    try{
+      var raw = localStorage.getItem(STREAK_KEY);
+      var st = raw ? JSON.parse(raw) : {count:0,last:null};
+      var active = st.last === todayStr() || st.last === addDays(todayStr(),-1);
+      document.getElementById('streakVal').textContent = (active? st.count : 0) + ' hari';
+    }catch(e){
+      document.getElementById('streakVal').textContent = '0 hari';
+    }
+  }
+
+  /* ---------------- THEME ---------------- */
+  var theme = 'dark';
+  try{ var savedTheme = localStorage.getItem(THEME_KEY); if(savedTheme==='light'||savedTheme==='dark') theme = savedTheme; }catch(e){}
+  var SUN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+  var MOON_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  function applyTheme(){
+    document.body.setAttribute('data-theme', theme);
+    var btn = document.getElementById('themeToggle');
+    if(btn) btn.innerHTML = theme === 'light' ? MOON_ICON : SUN_ICON;
+  }
+  function toggleTheme(){
+    theme = theme === 'light' ? 'dark' : 'light';
+    try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+    applyTheme();
+    if(document.getElementById('view-progress').classList.contains('active')) renderProgress();
+  }
+  document.getElementById('themeToggle').onclick = toggleTheme;
+
+  /* ---------------- NAME / GREETING ---------------- */
+  function getName(){ try{ return localStorage.getItem(NAME_KEY) || ''; }catch(e){ return ''; } }
+  function setName(n){ try{ localStorage.setItem(NAME_KEY, n); }catch(e){} }
+  function renderGreeting(){
+    var n = getName();
+    document.getElementById('greetBtn').textContent = n ? ('Assalamualaikum, ' + n) : 'Jilid 7';
+  }
+  var RANGE_HINT = 'Atau tetapkan julat sendiri, cth. 101&ndash;130. Senarai tetap memaparkan semua falsafah.';
+  function presetFor(from, to){
+    return RANGE_PRESETS.filter(function(p){ return p.from === from && p.to === to; })[0] || null;
+  }
+  function rangeText(){
+    var p = presetFor(studyRange.from, studyRange.to);
+    return 'Falsafah ' + studyRange.from + '&ndash;' + studyRange.to + (p ? ' &middot; ' + p.name : '');
+  }
+  function renderRangeChips(){
+    document.querySelectorAll('.rangechip').forEach(function(chip){
+      chip.innerHTML = 'Julat: <b>' + rangeText() + '</b> <span class="rc-edit">&middot; Tukar</span>';
+    });
+  }
+  function readRangeInputs(){
+    return {
+      from: parseInt(document.getElementById('rangeFrom').value, 10),
+      to: parseInt(document.getElementById('rangeTo').value, 10)
+    };
+  }
+  function syncPresetButtons(){
+    var r = readRangeInputs();
+    document.querySelectorAll('#rangePresets button').forEach(function(b){
+      b.classList.toggle('active', +b.getAttribute('data-from') === r.from && +b.getAttribute('data-to') === r.to);
+    });
+  }
+  function setRangeHint(html, isError){
+    var h = document.getElementById('rangeHint');
+    h.innerHTML = html;
+    h.classList.toggle('error', !!isError);
+  }
+  function setStudyRange(from, to){
+    studyRange = { from:from, to:to };
+    STUDY_POOL = poolFor(from, to);
+    rangeSaved = true;
+    try{ localStorage.setItem(RANGE_KEY, JSON.stringify(studyRange)); }catch(e){}
+    allowExtraKaji = false;
+    renderRangeChips();
+    renderStudy();
+    renderProgress();
+    quizCurrent = null;
+    if(document.getElementById('view-quiz').classList.contains('active')) newQuiz();
+  }
+  document.querySelectorAll('#rangePresets button').forEach(function(b){
+    b.onclick = function(){
+      document.getElementById('rangeFrom').value = b.getAttribute('data-from');
+      document.getElementById('rangeTo').value = b.getAttribute('data-to');
+      syncPresetButtons();
+      setRangeHint(RANGE_HINT, false);
+    };
+  });
+  ['rangeFrom','rangeTo'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){ syncPresetButtons(); setRangeHint(RANGE_HINT, false); });
+  });
+
+  function openNameModal(){
+    document.getElementById('nameOverlay').classList.add('active');
+    document.getElementById('nameInput').value = getName();
+    document.getElementById('rangeFrom').value = studyRange.from;
+    document.getElementById('rangeTo').value = studyRange.to;
+    syncPresetButtons();
+    setRangeHint(RANGE_HINT, false);
+    document.getElementById('nameInput').focus();
+  }
+  function closeNameModal(){ document.getElementById('nameOverlay').classList.remove('active'); }
+  document.getElementById('greetBtn').onclick = openNameModal;
+  document.querySelectorAll('.rangechip').forEach(function(chip){ chip.onclick = openNameModal; });
+  document.getElementById('nameSaveBtn').onclick = function(){
+    var r = readRangeInputs();
+    if(!isValidRange(r.from, r.to)){
+      setRangeHint('Julat tidak sah. Masukkan nombor 1&ndash;200, dengan &ldquo;Dari&rdquo; tidak melebihi &ldquo;Hingga&rdquo;.', true);
+      return;
+    }
+    if(!poolFor(r.from, r.to).length){
+      setRangeHint('Tiada falsafah dalam julat ini. Sila pilih julat lain.', true);
+      return;
+    }
+    var v = document.getElementById('nameInput').value.trim();
+    if(v) setName(v);
+    renderGreeting();
+    if(r.from !== studyRange.from || r.to !== studyRange.to || !rangeSaved) setStudyRange(r.from, r.to);
+    closeNameModal();
+  };
+  document.getElementById('nameSkipBtn').onclick = closeNameModal;
+  document.getElementById('nameInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') document.getElementById('nameSaveBtn').click();
+  });
+
+  /* ---------------- STUDY VIEW ---------------- */
+  var currentCardId = null;
+  var revealed = false;
+
+  // The permutation covers every entry; dueQueue narrows it to the chosen range,
+  // so any range still gets a random order that visits each falsafah once.
+  var ORDER_KEY = 'falsafah200_order_v3';
+  function loadStudyOrder(){
+    try{
+      var raw = localStorage.getItem(ORDER_KEY);
+      if(raw){
+        var arr = JSON.parse(raw);
+        if(Array.isArray(arr) && arr.length === DATA.length) return arr;
+      }
+    }catch(e){}
+    var ids = DATA.map(function(e){ return e.id; });
+    shuffle(ids);
+    try{ localStorage.setItem(ORDER_KEY, JSON.stringify(ids)); }catch(e){}
+    return ids;
+  }
+  var studyOrder = loadStudyOrder();
+  var studyOrderIndex = {};
+  studyOrder.forEach(function(id, i){ studyOrderIndex[id] = i; });
+
+  function dueQueue(){
+    return STUDY_POOL.filter(function(e){ return isDue(e.id); })
+               .sort(function(a,b){
+                 var boxA = getCard(a.id).box, boxB = getCard(b.id).box;
+                 if(boxA !== boxB) return boxA - boxB;
+                 return studyOrderIndex[a.id] - studyOrderIndex[b.id];
+               });
+  }
+
+  function renderStudy(){
+    renderMissionBar();
+    rolloverDailyIfNeeded();
+    var stage = document.getElementById('studyStage');
+
+    if(daily.kajiIds.length >= kajiGoal() && !allowExtraKaji){
+      stage.innerHTML =
+        '<div class="folio"><div class="kaji-goal-done">' +
+        '<div class="big">&#127942;</div>' +
+        '<h3>Sasaran hari ini selesai!</h3>' +
+        '<p>Anda telah mengkaji ' + daily.kajiIds.length + ' falsafah hari ini. Datang semula esok untuk teruskan, atau kaji tambahan sekarang jika anda rasa mahu terus.</p>' +
+        '<button class="kaji-extra-btn" id="extraKajiBtn">Kaji tambahan hari ini</button>' +
+        '</div></div>';
+      var extraBtn = document.getElementById('extraKajiBtn');
+      if(extraBtn) extraBtn.onclick = function(){ allowExtraKaji = true; renderStudy(); };
+      currentCardId = null;
+      return;
+    }
+
+    var queue = dueQueue().filter(function(e){ return daily.kajiIds.indexOf(e.id) === -1; });
+
+    if(queue.length===0){
+      stage.innerHTML =
+        '<div class="folio"><div class="studydone">' +
+        '<div class="big">&#10003;</div>' +
+        '<p style="margin-top:10px;color:var(--muted);">Tiada falsafah tertunggak buat masa ini.<br>Kembali esok untuk ulang kaji seterusnya, atau jelajah Senarai.</p>' +
+        '</div></div>';
+      currentCardId = null;
+      return;
+    }
+
+    var entry = queue[0];
+    currentCardId = entry.id;
+    revealed = false;
+    var box = getCard(entry.id).box;
+
+    stage.innerHTML =
+      '<div class="folio">' +
+        '<div class="folio-top">' +
+          '<span class="rangepill">' + entry.rangeLabel + '</span>' +
+          '<span class="badge ' + BOX_BADGE_CLASS[box] + '">' + BOX_LABELS[box] + '</span>' +
+        '</div>' +
+        '<div id="folioBody"></div>' +
+      '</div>';
+
+    renderFolioBody(entry);
+  }
+
+  function renderFolioBody(entry){
+    var el = document.getElementById('folioBody');
+    if(!revealed){
+      el.innerHTML =
+        '<h3 class="folio-title sentence-case">' + escapeHtml(entry.title.toLowerCase()) + '</h3>' +
+        '<p class="folio-hint">Cuba ingat &amp; lafazkan ayat ini serta maksudnya sebelum menekan Dedah.</p>' +
+        '<button class="revealbtn" id="revealBtn">Dedah ayat &amp; maksud</button>';
+      document.getElementById('revealBtn').onclick = function(){ revealed = true; renderFolioBody(entry); };
+    } else {
+      el.innerHTML =
+        '<h3 class="folio-title sentence-case">' + escapeHtml(entry.title.toLowerCase()) + '</h3>' +
+        '<hr class="divider">' +
+        '<div class="folio-arabic-wrap"><p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p></div>' +
+        '<div class="folio-text-label">Maksud</div>' +
+        '<p class="folio-text">' + escapeHtml(entry.text) + '</p>' +
+        '<p class="surah-ref">' + escapeHtml(entry.surahDisplay) + '</p>' +
+        renderExtras(entry) +
+        '<div class="gradebar">' +
+          '<button class="gradebtn again" data-g="0"><span class="g-label">Belum ingat</span><span class="g-sub">Ulang hari ini</span></button>' +
+          '<button class="gradebtn good" data-g="1"><span class="g-label">Ingat</span><span class="g-sub">+' + BOX_INTERVALS[Math.min(BOX_INTERVALS.length-1,getCard(entry.id).box+1)] + ' hari</span></button>' +
+          '<button class="gradebtn easy" data-g="2"><span class="g-label">Mudah</span><span class="g-sub">+' + BOX_INTERVALS[Math.min(BOX_INTERVALS.length-1,getCard(entry.id).box+2)] + ' hari</span></button>' +
+        '</div>';
+      var btns = el.querySelectorAll('.gradebtn');
+      btns.forEach(function(b){
+        b.onclick = function(){
+          grade(entry.id, parseInt(b.getAttribute('data-g'),10));
+          markKajiDoneToday(entry.id);
+          renderStudy();
+          renderProgress();
+        };
+      });
+    }
+  }
+
+  /* ---------------- BROWSE VIEW ---------------- */
+  // Collapses common romanisation variants (dz/dh/z, sy/sh, ts/th, q/k, doubled
+  // letters, al-/ar- assimilation) so a loosely typed pronunciation still matches.
+  function normLatin(s){
+    s = String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]/g,'');
+    s = s.replace(/kh/g,'k').replace(/gh/g,'g').replace(/s[hy]/g,'s').replace(/t[hs]/g,'s').replace(/d[hz]/g,'z').replace(/zh/g,'z');
+    s = s.replace(/q/g,'k').replace(/d/g,'z').replace(/e/g,'i').replace(/o/g,'u');
+    s = s.replace(/ay(?![aiu])/g,'ai').replace(/aw(?![aiu])/g,'au').replace(/iy(?![aiu])/g,'i').replace(/uw(?![aiu])/g,'u');
+    s = s.replace(/al(?=[tszrnl])/g,'a');
+    return s.replace(/(.)\1+/g,'$1');
+  }
+  // t/h merged so a pausal ta marbuta ("rahmah") matches the connected form ("rahmatan").
+  function skeleton(n){ return n.replace(/t/g,'h').replace(/[aiu]/g,'').replace(/(.)\1+/g,'$1'); }
+  DATA.forEach(function(e){
+    e._tn = normLatin(e.translit || '');
+    e._ts = skeleton(e._tn);
+  });
+
+  // Falsafah 101-200 grouped by shared opening words of the ayat (curated list;
+  // falsafah without a shared opening are left out of the grouped view).
+  var AYAT_GROUPS = [{"ar": "يَا أَيُّهَا", "name": "Yaa ayyuhal ladzina aamanu (7), ditambah yaa ayyuhan naas dan yaa ayyuhal insan", "nos": [121, 139, 161, 174, 182, 187, 196, 175, 176]}, {"ar": "قُلْ", "name": "Qul", "nos": [102, 165, 105, 128, 138, 170, 195]}, {"ar": "إِنَّ", "name": "Inna", "nos": [112, 164, 189, 192, 184]}, {"ar": "لَقَدْ", "name": "Laqad", "nos": [118, 186, 193]}, {"ar": "وَلَقَدْ", "name": "Wa laqad", "nos": [124, 173, 178, 199]}, {"ar": "وَمَا", "name": "Wa ma", "nos": [133, 137, 148]}, {"ar": "وَقَالَ", "name": "Wa qala", "nos": [104, 145]}, {"ar": "قَالَ", "name": "Qala", "nos": [114, 183]}, {"ar": "وَمِنْهُم مَّن", "name": "Wa minhum man", "nos": [110, 111]}, {"ar": "وَٱلَّذِينَ", "name": "Walladzina", "nos": [116, 119]}, {"ar": "ثُمَّ جَعَلْنَـٰكَ", "name": "Thumma ja'alna", "nos": [126, 156]}, {"ar": "مَن", "name": "Man", "nos": [135, 177]}, {"ar": "وَقُلْ", "name": "Wa qul", "nos": [143, 153]}, {"ar": "وَإِذَا", "name": "Wa idza", "nos": [147, 185]}, {"ar": "إِنَّمَا ٱلْمُؤْمِنُونَ", "name": "Innamal mu'minun", "nos": [157, 188]}, {"ar": "وَمَن", "name": "Wa man", "nos": [163, 200]}];
+  AYAT_GROUPS.forEach(function(g){
+    g.entries = g.nos.map(function(n){
+      return DATA.find(function(e){ return e.noStart <= n && n <= e.noEnd; });
+    });
+  });
+  var browseMode = 'all';
+  var selectedGroup = -1;
+
+  function renderGroupPicker(){
+    var picker = document.getElementById('groupPicker');
+    picker.innerHTML = '<button type="button" data-g="-1">Semua kumpulan</button>' +
+      AYAT_GROUPS.map(function(g, gi){
+        return '<button type="button" data-g="'+gi+'" title="Kumpulan '+(gi+1)+' · '+escapeHtml(g.name)+'">' +
+          '<span class="gp-no">'+(gi+1)+'</span><span class="gp-ar" lang="ar" dir="rtl">'+escapeHtml(g.ar)+'</span></button>';
+      }).join('');
+    picker.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('active', +b.getAttribute('data-g') === selectedGroup);
+      b.onclick = function(){
+        selectedGroup = +b.getAttribute('data-g');
+        picker.querySelectorAll('button').forEach(function(x){ x.classList.toggle('active', x === b); });
+        renderBrowse(document.getElementById('searchInput').value);
+      };
+    });
+  }
+
+  function browseMatcher(filter){
+    var qn = normLatin(filter), qs = skeleton(qn);
+    return function(e){
+      if(!filter) return true;
+      return (
+        String(e.noStart).indexOf(filter)===0 ||
+        String(e.noEnd).indexOf(filter)===0 ||
+        e.title.toLowerCase().indexOf(filter)>=0 ||
+        e.text.toLowerCase().indexOf(filter)>=0 ||
+        e.surahName.toLowerCase().indexOf(filter)>=0 ||
+        (e.kataKunci||[]).join(' ').toLowerCase().indexOf(filter)>=0 ||
+        (qn.length>=3 && e._tn.indexOf(qn)>=0) ||
+        (qs.length>=4 && e._ts.indexOf(qs)>=0)
+      );
+    };
+  }
+
+  function listCardHtml(e){
+    var box = getCard(e.id).box;
+    return '<div class="listcard" data-id="'+e.id+'">' +
+      '<div class="lc-top"><span class="lc-no">'+e.rangeLabel+'</span><span class="badge '+BOX_BADGE_CLASS[box]+'">'+BOX_LABELS[box]+'</span></div>' +
+      '<div class="lc-title sentence-case">'+escapeHtml(e.title.toLowerCase())+'</div>' +
+      '<div class="lc-arabic" lang="ar" dir="rtl">'+escapeHtml(e.arabic)+'</div>' +
+      '<div class="lc-surah">'+escapeHtml(e.surahDisplay)+'</div>' +
+    '</div>';
+  }
+
+  function renderBrowse(filter){
+    filter = (filter||'').trim().toLowerCase();
+    var match = browseMatcher(filter);
+    var wrap = document.getElementById('cardList');
+    var html = '', shown = 0;
+
+    if(browseMode === 'groups'){
+      var groupsShown = 0, totalGrouped = 0;
+      AYAT_GROUPS.forEach(function(g, gi){
+        if(selectedGroup >= 0 && gi !== selectedGroup) return;
+        totalGrouped += g.entries.length;
+        var hits = g.entries.filter(match);
+        if(!hits.length) return;
+        groupsShown++;
+        shown += hits.length;
+        html += '<div class="grouphead">' +
+          '<span class="gh-label"><b>Kumpulan ' + (gi+1) + '</b> &middot; ' + escapeHtml(g.name) + ' &middot; ' + g.entries.length + ' falsafah</span>' +
+          '<span class="gh-ar" lang="ar" dir="rtl">' + escapeHtml(g.ar) + '</span>' +
+        '</div>' + hits.map(listCardHtml).join('');
+      });
+      document.getElementById('listCount').textContent = filter
+        ? shown + ' falsafah dalam ' + groupsShown + ' kumpulan'
+        : (selectedGroup >= 0 ? 'Kumpulan ' + (selectedGroup+1) : AYAT_GROUPS.length + ' kumpulan') + ' · ' + totalGrouped + ' falsafah';
+    } else {
+      var list = DATA.filter(match);
+      shown = list.length;
+      html = list.map(listCardHtml).join('');
+      document.getElementById('listCount').textContent = list.length + ' daripada ' + DATA.length + ' falsafah';
+    }
+
+    if(!shown){
+      wrap.innerHTML = '<div class="empty">Tiada padanan ditemui.</div>';
+      return;
+    }
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('.listcard').forEach(function(card){
+      card.onclick = function(){ openDetail(parseInt(card.getAttribute('data-id'),10)); };
+    });
+  }
+
+  document.querySelectorAll('.browse-mode button').forEach(function(btn){
+    btn.onclick = function(){
+      browseMode = btn.getAttribute('data-mode');
+      document.querySelectorAll('.browse-mode button').forEach(function(b){ b.classList.toggle('active', b === btn); });
+      document.getElementById('groupNote').hidden = browseMode !== 'groups';
+      document.getElementById('groupPicker').hidden = browseMode !== 'groups';
+      renderBrowse(document.getElementById('searchInput').value);
+    };
+  });
+
+  function openDetail(id){
+    var entry = DATA.find(function(e){ return e.id===id; });
+    if(!entry) return;
+    var box = getCard(id).box;
+    document.getElementById('detailSheet').innerHTML =
+      '<button class="closebtn" id="closeDetail">&times;</button>' +
+      '<span class="rangepill">'+entry.rangeLabel+'</span> ' +
+      '<span class="badge '+BOX_BADGE_CLASS[box]+'">'+BOX_LABELS[box]+'</span>' +
+      '<h3 class="folio-title sentence-case" style="margin-top:14px;">'+escapeHtml(entry.title.toLowerCase())+'</h3>' +
+      '<hr class="divider">' +
+      '<div class="folio-arabic-wrap"><p class="arabic-text" lang="ar" dir="rtl">'+escapeHtml(entry.arabic)+'</p></div>' +
+      '<div class="folio-text-label">Maksud</div>' +
+      '<p class="folio-text">'+escapeHtml(entry.text)+'</p>' +
+      '<div class="lc-surah" style="margin-top:14px;">'+escapeHtml(entry.surahDisplay)+'</div>' +
+      renderExtras(entry);
+    document.getElementById('detailOverlay').classList.add('active');
+    document.getElementById('closeDetail').onclick = closeDetail;
+  }
+  function closeDetail(){ document.getElementById('detailOverlay').classList.remove('active'); }
+  document.getElementById('detailOverlay').addEventListener('click', function(e){
+    if(e.target === this) closeDetail();
+  });
+
+  /* ---------------- QUIZ VIEW ---------------- */
+  var quizScore = 0, quizTotal = 0, quizCurrent = null;
+
+  // Exclude by VALUE, not just id: several falsafah share an identical title,
+  // or, rarely, an identical ayat (the source book itself repeats an ayat
+  // across two consecutive falsafah numbers). Guard both directions - a
+  // distractor must differ from the correct answer AND from every other
+  // distractor already picked - otherwise the same label could appear twice
+  // in one question, or a duplicate of the correct answer could render as if
+  // it were a second correct option.
+  // Distractors come from the chosen range first; a very small range is topped
+  // up from the full list so every question still has four options.
+  function pickDistractors(correct, key, n){
+    var seenVals = {};
+    seenVals[correct[key]] = true;
+    var out = [];
+    [STUDY_POOL, DATA].forEach(function(source){
+      var pool = source.filter(function(e){ return e.id!==correct.id && e[key]; });
+      while(out.length < n && pool.length){
+        var idx = Math.floor(Math.random()*pool.length);
+        var cand = pool.splice(idx,1)[0];
+        if(seenVals[cand[key]]) continue;
+        seenVals[cand[key]] = true;
+        out.push(cand);
+      }
+    });
+    return out;
+  }
+
+  function newQuiz(){
+    var entry = STUDY_POOL[Math.floor(Math.random()*STUDY_POOL.length)];
+    var mode = Math.random() < 0.5 ? 'title-from-arabic' : 'arabic-from-title';
+    quizCurrent = { entry: entry, mode: mode };
+    var stage = document.getElementById('quizStage');
+
+    if(mode === 'title-from-arabic'){
+      var d1 = pickDistractors(entry, 'title', 3);
+      var opts1 = shuffle(d1.concat([entry]).map(function(e){ return e.title; }));
+      stage.innerHTML =
+        '<div class="quizq"><div class="eyebrow">'+entry.rangeLabel+'</div>' +
+        '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p></div>' +
+        '<div class="eyebrow" style="margin-bottom:10px;">Apakah tajuk falsafah bagi ayat ini?</div>' +
+        '<div class="quizoptions" id="quizOpts"></div>';
+      renderOptions(opts1, entry.title, false, true);
+
+    } else {
+      var d2 = pickDistractors(entry, 'arabic', 3);
+      var opts2 = shuffle(d2.concat([entry]).map(function(e){ return e.arabic; }));
+      stage.innerHTML =
+        '<div class="quizq"><div class="eyebrow">'+entry.rangeLabel+'</div>' +
+        '<p class="qtext sentence-case">' + escapeHtml(entry.title.toLowerCase()) + '</p></div>' +
+        '<div class="eyebrow" style="margin-bottom:10px;">Pilih ayat yang sepadan dengan falsafah ini.</div>' +
+        '<div class="quizoptions" id="quizOpts"></div>';
+      renderOptions(opts2, entry.arabic, true, false);
+    }
+  }
+
+  function renderOptions(options, correctVal, isArabic, titleSentenceCase){
+    var wrap = document.getElementById('quizOpts');
+    wrap.innerHTML = options.map(function(opt){
+      var cls = 'qopt' + (isArabic ? ' qopt-arabic' : (titleSentenceCase ? ' sentence-case' : ''));
+      var attrs = isArabic ? ' lang="ar" dir="rtl"' : '';
+      var label = titleSentenceCase ? opt.toLowerCase() : opt;
+      return '<button class="'+cls+'" data-val="'+escapeAttr(opt)+'"'+attrs+'>'+escapeHtml(label)+'</button>';
+    }).join('');
+    wrap.querySelectorAll('.qopt').forEach(function(btn){
+      btn.onclick = function(){
+        var chosen = btn.getAttribute('data-val');
+        wrap.querySelectorAll('.qopt').forEach(function(b){
+          b.disabled = true;
+          if(b.getAttribute('data-val') === correctVal) b.classList.add('correct');
+          else if(b === btn) b.classList.add('wrong');
+        });
+        quizTotal++;
+        if(chosen === correctVal) quizScore++;
+        markKuizAnsweredToday();
+        renderMissionBar();
+        document.getElementById('quizScore').textContent = quizScore;
+        document.getElementById('quizTotal').textContent = quizTotal;
+
+        var reveal = document.createElement('div');
+        reveal.className = 'quiz-reveal';
+        reveal.innerHTML =
+          '<div class="folio-text-label">Maksud</div>' +
+          '<p class="folio-text">' + escapeHtml(quizCurrent.entry.text) + '</p>' +
+          '<p class="surah-ref">' + escapeHtml(quizCurrent.entry.surahDisplay) + '</p>';
+        document.getElementById('quizStage').appendChild(reveal);
+
+        var next = document.createElement('button');
+        next.className = 'quiznext';
+        next.textContent = 'Soalan seterusnya';
+        next.onclick = newQuiz;
+        document.getElementById('quizStage').appendChild(next);
+      };
+    });
+  }
+
+  function shuffle(arr){
+    for(var i=arr.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = arr[i]; arr[i]=arr[j]; arr[j]=t;
+    }
+    return arr;
+  }
+
+  /* ---------------- PROGRESS VIEW ---------------- */
+  function renderProgress(){
+    var counts = [0,0,0,0,0,0];
+    var mastered = 0, due = 0;
+    STUDY_POOL.forEach(function(e){
+      var c = getCard(e.id);
+      counts[c.box]++;
+      if(c.box>=4) mastered++;
+      if(isDue(e.id)) due++;
+    });
+    document.getElementById('statMastered').textContent = mastered;
+    document.getElementById('statDue').textContent = due;
+    document.getElementById('statPct').textContent = Math.round(mastered/STUDY_POOL.length*100)+'%';
+
+    var boxColors = getBoxColors();
+    var bar = document.getElementById('boxBar');
+    bar.innerHTML = counts.map(function(n,i){
+      var pct = (n/STUDY_POOL.length*100);
+      if(pct<=0) return '';
+      return '<span style="width:'+pct+'%;background:'+boxColors[i]+';" title="'+BOX_LABELS[i]+': '+n+'"></span>';
+    }).join('');
+
+    var legend = document.getElementById('boxLegend');
+    legend.innerHTML = BOX_LABELS.map(function(lbl,i){
+      return '<span><span class="dot" style="background:'+boxColors[i]+';"></span>'+lbl+' &middot; '+counts[i]+'</span>';
+    }).join('');
+  }
+
+  document.getElementById('resetBtn').onclick = function(){
+    if(confirm('Set semula SEMUA progres ulang kaji? Tindakan ini tidak boleh dibatalkan.')){
+      srs = {};
+      saveState(srs);
+      renderStudy();
+      renderBrowse(document.getElementById('searchInput').value);
+      renderProgress();
+    }
+  };
+
+  /* ---------------- NAV ---------------- */
+  document.querySelectorAll('nav.tabs button').forEach(function(btn){
+    btn.onclick = function(){
+      document.querySelectorAll('nav.tabs button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var view = btn.getAttribute('data-view');
+      document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+      document.getElementById('view-'+view).classList.add('active');
+      if(view==='browse') renderBrowse(document.getElementById('searchInput').value);
+      if(view==='quiz' && !quizCurrent) newQuiz();
+      if(view==='progress') renderProgress();
+    };
+  });
+
+  document.getElementById('searchInput').addEventListener('input', function(e){
+    renderBrowse(e.target.value);
+  });
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function escapeAttr(s){ return escapeHtml(s); }
+
+  function renderExtras(entry){
+    var html = '<hr class="divider">';
+    if(entry.kataKunci && entry.kataKunci.length){
+      html += '<div class="extra-block"><div class="extra-label">Kata kunci falsafah</div>' +
+        entry.kataKunci.map(function(k){ return '<p class="kata-kunci">' + escapeHtml(k) + '</p>'; }).join('') +
+        '</div>';
+    }
+    if(entry.catitan && entry.catitan.length){
+      html += '<div class="extra-block"><div class="extra-label">Catitan kaedah pembuka mulut</div>' +
+        entry.catitan.map(function(c){
+          return splitCatitanLines(c).map(function(line){
+            return '<p class="catitan-text">' + escapeHtml(line) + '</p>';
+          }).join('');
+        }).join('') +
+        '</div>';
+    }
+    return html;
+  }
+
+  var CATITAN_ORDINAL_RE = /(?=\b(?:Satu|Dua|Tiga|Empat|Lima|Enam|Tujuh):)/;
+  function splitCatitanLines(text){
+    return text.split(CATITAN_ORDINAL_RE).map(function(s){ return s.trim(); }).filter(Boolean);
+  }
+
+  /* ---------------- INIT ---------------- */
+  applyTheme();
+  renderGreeting();
+  renderRangeChips();
+  renderGroupPicker();
+  renderStreak();
+  renderStudy();
+  renderProgress();
+  if(!getName() || !rangeSaved){
+    setTimeout(openNameModal, 400);
+  }
+})();
+</script>
