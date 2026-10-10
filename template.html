@@ -437,35 +437,123 @@
     cursor:pointer;
   }
 
-  /* ---------- Progress ---------- */
-  .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px; }
-  .stat-tile{
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-    padding:16px 14px; text-align:center;
+  /* ---------- Notes (Nota) ---------- */
+  .notes-switch{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:18px; }
+  .notes-switch button{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px; color:var(--muted);
+    font-family:inherit; font-size:13px; font-weight:800; line-height:1.3; padding:10px 8px; cursor:pointer;
   }
-  .stat-tile .num{ font-size:29px; font-weight:800; color:var(--gold-cite); font-variant-numeric:tabular-nums; }
-  .stat-tile .lbl{ font-size:11px; color:var(--muted); letter-spacing:.05em; text-transform:uppercase; margin-top:4px; font-weight:700; }
+  .notes-switch button:hover{ border-color:var(--gold); color:var(--ink); }
+  .notes-switch button.active{ background:var(--gold-soft); border-color:var(--gold); color:var(--ink); }
 
-  .boxdist{
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-    padding:20px 20px 18px; margin-bottom:18px;
+  .nhero{
+    background:var(--surface); border:1px solid var(--border); border-top:4px solid var(--gold);
+    border-radius:var(--radius); padding:24px 22px; text-align:center; margin-bottom:14px;
   }
-  .boxdist h3{ font-size:15px; margin-bottom:14px; }
-  .boxbar{ display:flex; height:14px; border-radius:100px; overflow:hidden; border:1px solid var(--border); }
-  .boxbar span{ height:100%; }
-  .boxlegend{ display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:12px; font-size:12px; color:var(--muted); }
-  .boxlegend .dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  .nhero h2{ font-size:28px; color:var(--gold-cite); text-transform:uppercase; letter-spacing:.02em; }
+  .nhero .nh-sub{
+    display:inline-block; margin-top:8px; padding:4px 14px; border-radius:100px;
+    background:var(--gold-soft); color:var(--ink); font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+  }
+  .nhero .nh-tag{ margin:12px 0 0; font-size:15px; font-weight:700; line-height:1.45; }
+  .nhero .nh-meta{ margin:8px 0 0; font-size:13px; color:var(--muted); line-height:1.6; }
+  .npara{ font-size:15px; line-height:1.7; color:var(--muted); margin:0 0 10px; }
+  .nref{ font-size:12px; color:var(--muted); font-style:italic; margin:4px 0 0; }
 
-  .resetzone{
-    border:1px dashed var(--border); border-radius:var(--radius); padding:16px 18px;
-    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  .nkey{
+    background:var(--surface-2); border:1px solid var(--border); border-left:4px solid var(--gold);
+    border-radius:12px; padding:16px 18px; margin-bottom:18px;
   }
-  .resetzone p{ margin:0; font-size:13px; color:var(--muted); max-width:40ch; }
-  .resetbtn{
-    background:var(--rose-soft); color:var(--rose); border:1px solid var(--rose);
-    border-radius:10px; padding:9px 16px; font-family:inherit; font-weight:800; font-size:13px;
-    cursor:pointer; white-space:nowrap;
+  .nkey .nk-label{ font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--gold-cite); margin-bottom:6px; }
+  .nkey .nk-q{ font-size:18px; font-weight:800; line-height:1.4; margin:0 0 6px; }
+  .nkey .nk-text{ font-size:14px; color:var(--muted); line-height:1.6; margin:0; }
+  .nkey .nk-pills{ display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+  .nkey .nk-pills span{ font-size:12px; font-weight:700; padding:5px 12px; border-radius:100px; background:var(--surface); border:1px solid var(--border); }
+
+  .nhead{
+    display:flex; align-items:center; gap:10px; margin:22px 0 10px;
+    font-size:13px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--gold-cite);
   }
+  .nhead::before, .nhead::after{ content:""; flex:1; height:1px; background:var(--border); }
+
+  .ngrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .ngrid.compact{ grid-template-columns:repeat(3,1fr); }
+  .ncard{
+    border:1px solid color-mix(in srgb, var(--acc) 35%, var(--border));
+    background:color-mix(in srgb, var(--acc) 7%, var(--surface));
+    border-radius:14px; padding:14px 15px; display:flex; flex-direction:column; gap:6px;
+  }
+  .ncard-head{ display:flex; align-items:flex-start; gap:10px; }
+  .ncard-no{
+    flex:none; width:30px; height:30px; border-radius:50%; background:var(--acc); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px;
+  }
+  .ncard h4{ margin:0; font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:.02em; line-height:1.3; }
+  .ncard-tag{ font-size:13px; font-weight:800; color:var(--acc); margin-top:2px; }
+  .ncard-desc{ font-size:14px; line-height:1.55; margin:0; color:var(--ink); }
+  .ncard-contoh{
+    font-size:13px; padding:6px 10px; border-radius:8px; margin-top:auto;
+    background:color-mix(in srgb, var(--acc) 12%, transparent); color:var(--ink);
+  }
+  .ndetails summary, .nsec summary{ cursor:pointer; font-weight:700; color:var(--gold-cite); list-style:none; }
+  .ndetails summary::-webkit-details-marker, .nsec summary::-webkit-details-marker{ display:none; }
+  .ndetails summary{ font-size:12px; margin-top:2px; }
+  .ndetails summary::after, .nsec summary::after{ content:" \25BE"; }
+  .ndetails[open] summary::after, .nsec[open] summary::after{ content:" \25B4"; }
+  .ndetails[open]{ border-top:1px dashed var(--border); padding-top:8px; }
+  .ndetails .npara{ font-size:14px; color:var(--ink); }
+  .ngroup-note{ font-size:13px; margin:10px 0 0; padding:10px 14px; border-radius:10px; background:var(--rose-soft); color:var(--ink); }
+
+  .nsteps{ display:flex; flex-wrap:wrap; gap:8px; list-style:none; margin:0; padding:0; counter-reset:nstep; }
+  .nsteps li{
+    counter-increment:nstep; flex:1 1 120px; display:flex; align-items:center; gap:8px;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px;
+    font-size:14px; font-weight:700;
+  }
+  .nsteps li::before{
+    content:counter(nstep); flex:none; width:24px; height:24px; border-radius:50%;
+    background:var(--gold); color:var(--gold-ink); font-size:12px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nnote{ font-size:13px; color:var(--muted); margin:8px 0 0; }
+
+  .nlist{ list-style:none; margin:0; padding:0; counter-reset:nlist; display:flex; flex-direction:column; gap:6px; }
+  .nlist li{
+    counter-increment:nlist; display:flex; gap:10px; align-items:flex-start;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:9px 12px; font-size:14px;
+  }
+  .nlist li::before{
+    content:counter(nlist); flex:none; width:22px; height:22px; border-radius:50%;
+    background:var(--rose); color:#fff; font-size:12px; font-weight:800;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .nexample{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .nexample .ne-title{ font-weight:800; margin:0 0 6px; }
+  .nexample .ne-line{ font-size:14px; line-height:1.6; margin:0 0 4px; }
+  .nexample table{ width:100%; border-collapse:collapse; font-size:14px; }
+  .nexample td{ padding:7px 8px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .nexample td:first-child{ font-weight:800; white-space:nowrap; color:var(--gold-cite); }
+
+  .nchips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .nchips span{
+    font-size:13px; font-weight:800; padding:6px 12px; border-radius:100px;
+    background:color-mix(in srgb, var(--acc) 14%, var(--surface)); border:1px solid color-mix(in srgb, var(--acc) 40%, var(--border));
+  }
+  .nchips.flow span:not(:last-child)::after{ content:" \2192"; color:var(--muted); }
+
+  .nnotes{ background:var(--gold-soft); border-radius:12px; padding:12px 16px 12px 34px; margin:0; font-size:14px; line-height:1.6; }
+  .nnotes li{ margin:2px 0; }
+
+  .nsec{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 16px; margin-bottom:8px; }
+  .nsec summary{ font-size:15px; color:var(--ink); }
+  .nsec[open] summary{ margin-bottom:10px; color:var(--gold-cite); }
+
+  .nfoot{
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:18px; padding:12px 16px;
+    border-radius:12px; background:var(--surface-2); font-size:13px; color:var(--muted);
+  }
+  .nfoot b{ color:var(--ink); }
 
   footer.credit{
     text-align:center; color:var(--muted); font-size:12px; margin-top:36px; line-height:1.7;
@@ -587,9 +675,19 @@
     .quiz-reveal .folio-text{ font-size:17px; }
     .quiznext{ font-size:16px; padding:13px 22px; }
 
-    .stat-row{ gap:8px; }
-    .stat-tile .lbl{ font-size:12px; }
-    .boxlegend, .resetzone p{ font-size:14px; }
+    .notes-switch{ grid-template-columns:1fr 1fr; }
+    .notes-switch button{ font-size:14px; padding:12px 8px; }
+    .nhero{ padding:20px 16px; }
+    .nhero h2{ font-size:24px; }
+    .npara{ font-size:16px; }
+    .nkey .nk-q{ font-size:19px; }
+    .nkey .nk-text, .ncard-desc, .nsteps li, .nlist li, .nexample .ne-line, .nexample table, .nnotes{ font-size:15px; }
+    .ngrid, .ngrid.compact{ grid-template-columns:1fr; }
+    .ncard h4{ font-size:16px; }
+    .ncard-tag, .ncard-contoh{ font-size:14px; }
+    .ndetails summary{ font-size:14px; }
+    .ndetails .npara{ font-size:15px; }
+    .nsec summary{ font-size:16px; }
     footer.credit{ font-size:13px; }
   }
 
@@ -623,7 +721,7 @@
         <button data-view="study" class="active" role="tab">Kaji</button>
         <button data-view="browse" role="tab">Senarai</button>
         <button data-view="quiz" role="tab">Kuiz</button>
-        <button data-view="progress" role="tab">Progres</button>
+        <button data-view="notes" role="tab">Nota</button>
       </nav>
     </div>
   </header>
@@ -667,24 +765,10 @@
       <div id="quizStage"></div>
     </section>
 
-    <!-- PROGRESS -->
-    <section class="view" id="view-progress">
-      <h2 style="font-size:20px;margin-bottom:12px;">Kemajuan hafazan</h2>
-      <button class="rangechip" type="button"></button>
-      <div class="stat-row">
-        <div class="stat-tile"><div class="num" id="statMastered">0</div><div class="lbl">Dikuasai</div></div>
-        <div class="stat-tile"><div class="num" id="statDue">0</div><div class="lbl">Perlu kaji</div></div>
-        <div class="stat-tile"><div class="num" id="statPct">0%</div><div class="lbl">Keseluruhan</div></div>
-      </div>
-      <div class="boxdist">
-        <h3>Taburan tahap ingatan</h3>
-        <div class="boxbar" id="boxBar"></div>
-        <div class="boxlegend" id="boxLegend"></div>
-      </div>
-      <div class="resetzone">
-        <p>Kosongkan semua rekod ulang kaji bagi semua falsafah dan mulakan semula. Tindakan ini tidak boleh dibatalkan.</p>
-        <button class="resetbtn" id="resetBtn">Set semula progres</button>
-      </div>
+    <!-- NOTES -->
+    <section class="view" id="view-notes">
+      <div class="notes-switch" id="notesSwitch" role="tablist" aria-label="Pilih topik nota"></div>
+      <div id="notesStage"></div>
     </section>
   </main>
 
@@ -732,11 +816,12 @@
 </div>
 
 <script id="falsafah-data" type="application/json">__DATA_JSON__</script>
+<script id="notes-data" type="application/json">__NOTES_JSON__</script>
 <script>
 (function(){
   "use strict";
   var DATA = JSON.parse(document.getElementById('falsafah-data').textContent);
-  // Kaji, Kuiz and Progres use the student's chosen range; Senarai always lists everything.
+  // Kaji and Kuiz use the student's chosen range; Senarai always lists everything.
   var RANGE_KEY = 'falsafah200_range_v1';
   var RANGE_PRESETS = [
     { name:'Tahun 1', from:1, to:100 },
@@ -764,8 +849,6 @@
   var THEME_KEY = 'falsafah200_theme_v1';
 
   var BOX_INTERVALS = [0,1,3,7,16,35]; // days until due, index = box
-  var BOX_COLORS = ['#64748B','#B08A2E','#D4AF37','#FBBF24','#5EC29A','#34D399'];
-  function getBoxColors(){ return BOX_COLORS; }
   var BOX_LABELS = ['Baru','Belajar','Semakan','Kukuh','Mahir','Dikuasai'];
   var BOX_BADGE_CLASS = ['badge-neutral','badge-gold','badge-gold','badge-gold','badge-emerald','badge-emerald'];
 
@@ -916,7 +999,6 @@
     theme = theme === 'light' ? 'dark' : 'light';
     try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
     applyTheme();
-    if(document.getElementById('view-progress').classList.contains('active')) renderProgress();
   }
   document.getElementById('themeToggle').onclick = toggleTheme;
 
@@ -965,7 +1047,6 @@
     allowExtraKaji = false;
     renderRangeChips();
     renderStudy();
-    renderProgress();
     quizCurrent = null;
     if(document.getElementById('view-quiz').classList.contains('active')) newQuiz();
   }
@@ -1181,7 +1262,6 @@
         b.onclick = function(){
           recordKaji(entry.id, parseInt(b.getAttribute('data-g'),10));
           renderStudy();
-          renderProgress();
           window.scrollTo(0, 0);
         };
       });
@@ -1439,43 +1519,108 @@
     return arr;
   }
 
-  /* ---------------- PROGRESS VIEW ---------------- */
-  function renderProgress(){
-    var counts = [0,0,0,0,0,0];
-    var mastered = 0, due = 0;
-    STUDY_POOL.forEach(function(e){
-      var c = getCard(e.id);
-      counts[c.box]++;
-      if(c.box>=4) mastered++;
-      if(isDue(e.id)) due++;
+  /* ---------------- NOTES VIEW ---------------- */
+  var NOTES = JSON.parse(document.getElementById('notes-data').textContent);
+  var NOTE_KEY = 'falsafah200_notes_topic_v1';
+  var NOTE_ACCENTS = ['#2FA37E','#E07A5F','#3B82C4','#C9972B','#D9534F','#8E6CC9','#1F9E9A','#5B7FE0','#B8792A','#C2588B'];
+  var noteTopic = NOTES.topics[0].id;
+  try{
+    var savedTopic = localStorage.getItem(NOTE_KEY);
+    if(NOTES.topics.some(function(t){ return t.id === savedTopic; })) noteTopic = savedTopic;
+  }catch(e){}
+
+  function paras(list, cls){
+    return (list||[]).map(function(p){ return '<p class="'+(cls||'npara')+'">'+escapeHtml(p)+'</p>'; }).join('');
+  }
+  function refs(list){ return paras(list, 'nref'); }
+  function noteDetails(d, label){
+    if(!d || !d.paras || !d.paras.length) return '';
+    return '<details class="ndetails"><summary>' + (label || 'Huraian penuh') + '</summary>' + paras(d.paras) + refs(d.refs) + '</details>';
+  }
+  function noteCard(it, i){
+    return '<article class="ncard" style="--acc:'+NOTE_ACCENTS[i % NOTE_ACCENTS.length]+'">' +
+      '<div class="ncard-head"><span class="ncard-no">'+escapeHtml(String(it.no))+'</span>' +
+        '<div><h4>'+escapeHtml(it.name)+'</h4><div class="ncard-tag">'+escapeHtml(it.tag)+'</div></div></div>' +
+      (it.desc ? '<p class="ncard-desc">'+escapeHtml(it.desc)+'</p>' : '') +
+      (it.contoh ? '<div class="ncard-contoh"><b>Contoh:</b> '+escapeHtml(it.contoh)+'</div>' : '') +
+      noteDetails(it.details) +
+    '</article>';
+  }
+  function noteHead(text){ return '<h3 class="nhead">'+escapeHtml(text)+'</h3>'; }
+
+  function renderNoteTopic(t){
+    var h = '';
+    h += '<header class="nhero"><h2>'+escapeHtml(t.title)+'</h2><div class="nh-sub">Nota Ringkas Exam</div>' +
+      '<p class="nh-tag">'+escapeHtml(t.lead.tagline)+'</p>' +
+      '<p class="nh-meta">' + (t.istilah ? escapeHtml(t.istilah) + '<br>' : '') + escapeHtml(t.basis) + '</p></header>';
+
+    var k = t.key;
+    h += '<div class="nkey"><div class="nk-label">'+escapeHtml(k.label || 'Soalan kunci')+'</div>' +
+      (k.q ? '<p class="nk-q">&ldquo;'+escapeHtml(k.q)+'&rdquo;</p>' : '') +
+      (k.pills ? '<div class="nk-pills">'+k.pills.map(function(p){ return '<span>'+escapeHtml(p)+'</span>'; }).join('')+'</div>' : '') +
+      '<p class="nk-text">'+escapeHtml(k.text)+'</p></div>';
+
+    var cardIndex = 0;
+    t.groups.forEach(function(g){
+      h += noteHead(g.heading) + '<div class="ngrid'+(g.compact ? ' compact' : '')+'">' +
+        g.items.map(function(it){ return noteCard(it, cardIndex++); }).join('') + '</div>';
+      if(g.details) h += '<div class="nsec" style="margin-top:10px;">' + noteDetails(g.details, 'Huraian penuh istilah') + '</div>';
+      if(g.note) h += '<p class="ngroup-note">'+escapeHtml(g.note)+'</p>';
     });
-    document.getElementById('statMastered').textContent = mastered;
-    document.getElementById('statDue').textContent = due;
-    document.getElementById('statPct').textContent = Math.round(mastered/STUDY_POOL.length*100)+'%';
 
-    var boxColors = getBoxColors();
-    var bar = document.getElementById('boxBar');
-    bar.innerHTML = counts.map(function(n,i){
-      var pct = (n/STUDY_POOL.length*100);
-      if(pct<=0) return '';
-      return '<span style="width:'+pct+'%;background:'+boxColors[i]+';" title="'+BOX_LABELS[i]+': '+n+'"></span>';
+    if(t.steps){
+      h += noteHead(t.steps.heading) + '<ol class="nsteps">' + t.steps.items.map(function(s){ return '<li>'+escapeHtml(s)+'</li>'; }).join('') + '</ol>' +
+        (t.steps.note ? '<p class="nnote">'+escapeHtml(t.steps.note)+'</p>' : '');
+    }
+    (t.lists || []).forEach(function(l){
+      h += noteHead(l.heading) + '<ol class="nlist">' + l.items.map(function(s){ return '<li>'+escapeHtml(s)+'</li>'; }).join('') + '</ol>' +
+        (l.note ? '<p class="nnote">'+escapeHtml(l.note)+'</p>' : '');
+    });
+    if(t.example){
+      var ex = t.example;
+      h += noteHead(ex.heading) + '<div class="nexample">' +
+        (ex.title ? '<p class="ne-title">'+escapeHtml(ex.title)+'</p>' : '') +
+        (ex.lines || []).map(function(l){ return '<p class="ne-line">'+escapeHtml(l)+'</p>'; }).join('') +
+        (ex.rows ? '<table>' + ex.rows.map(function(r){ return '<tr><td>'+escapeHtml(r[0])+'</td><td>'+escapeHtml(r[1])+'</td></tr>'; }).join('') + '</table>' : '') +
+        (ex.note ? '<p class="nnote">'+escapeHtml(ex.note)+'</p>' : '') + '</div>';
+    }
+    if(t.formula){
+      h += noteHead(t.formula.heading) + '<div class="nchips'+(t.formula.flow ? ' flow' : '')+'">' +
+        t.formula.chips.map(function(c, i){ return '<span style="--acc:'+NOTE_ACCENTS[i % NOTE_ACCENTS.length]+'">'+escapeHtml(c)+'</span>'; }).join('') + '</div>';
+    }
+    if(t.notes){
+      h += noteHead(t.notes.heading) + '<ul class="nnotes">' + t.notes.items.map(function(n){ return '<li>'+escapeHtml(n)+'</li>'; }).join('') + '</ul>';
+    }
+
+    h += noteHead('Huraian penuh');
+    var intro = { heading: 'Pengenalan', paras: t.lead.paras, refs: t.lead.refs };
+    h += [intro].concat(t.sections).map(function(sec){
+      return '<details class="nsec"><summary>'+escapeHtml(sec.heading)+'</summary>' + paras(sec.paras) + refs(sec.refs) + '</details>';
     }).join('');
 
-    var legend = document.getElementById('boxLegend');
-    legend.innerHTML = BOX_LABELS.map(function(lbl,i){
-      return '<span><span class="dot" style="background:'+boxColors[i]+';"></span>'+lbl+' &middot; '+counts[i]+'</span>';
-    }).join('');
+    h += '<div class="nfoot"><span><b>Rujukan:</b> '+escapeHtml(t.ref)+'</span><span>Disediakan oleh: <b>'+escapeHtml(NOTES.preparedBy)+'</b></span></div>';
+    return h;
   }
 
-  document.getElementById('resetBtn').onclick = function(){
-    if(confirm('Set semula SEMUA progres ulang kaji? Tindakan ini tidak boleh dibatalkan.')){
-      srs = {};
-      saveState(srs);
-      renderStudy();
-      renderBrowse(document.getElementById('searchInput').value);
-      renderProgress();
-    }
-  };
+  function renderNotes(){
+    var sw = document.getElementById('notesSwitch');
+    sw.innerHTML = NOTES.topics.map(function(t){
+      return '<button type="button" role="tab" data-topic="'+t.id+'" class="'+(t.id === noteTopic ? 'active' : '')+'">'+escapeHtml(t.short)+'</button>';
+    }).join('');
+    sw.querySelectorAll('button').forEach(function(b){
+      b.onclick = function(){
+        noteTopic = b.getAttribute('data-topic');
+        try{ localStorage.setItem(NOTE_KEY, noteTopic); }catch(e){}
+        renderNotes();
+        var top = document.getElementById('view-notes').getBoundingClientRect().top + window.scrollY;
+        var hdr = document.querySelector('header.topbar');
+        var offset = getComputedStyle(hdr).position === 'sticky' ? hdr.getBoundingClientRect().height + 8 : 8;
+        window.scrollTo(0, Math.max(0, top - offset));
+      };
+    });
+    var topic = NOTES.topics.filter(function(t){ return t.id === noteTopic; })[0];
+    document.getElementById('notesStage').innerHTML = renderNoteTopic(topic);
+  }
 
   /* ---------------- NAV ---------------- */
   document.querySelectorAll('nav.tabs button').forEach(function(btn){
@@ -1487,7 +1632,7 @@
       document.getElementById('view-'+view).classList.add('active');
       if(view==='browse') renderBrowse(document.getElementById('searchInput').value);
       if(view==='quiz' && !quizCurrent) newQuiz();
-      if(view==='progress') renderProgress();
+      if(view==='notes') renderNotes();
     };
   });
 
@@ -1532,7 +1677,6 @@
   renderRangeChips();
   renderGroupPicker();
   renderStudy();
-  renderProgress();
   if(!getName() || !rangeSaved){
     setTimeout(openNameModal, 400);
   }
