@@ -3,9 +3,9 @@
  "topics": [
   {
    "id": "khitab",
-   "short": "Khitab Hilalul Wasil",
-   "title": "Khitab Hilalul Wasil",
-   "istilah": "Istilah karya: Khitab Hilaalul Washil",
+   "short": "Khitab Hilaalul Washil",
+   "title": "Khitab Hilaalul Washil",
+   "istilah": "Ejaan nota kelas: Khitab Hilalul Wasil",
    "basis": "Berdasarkan kerangka Al Fathun Nawa · Jilid 9",
    "lead": {
     "tagline": "Memahami ayat melalui hubungan antara kalimah dan ayat",
@@ -271,13 +271,14 @@
      ]
     }
    ],
-   "ref": "Jilid 9, ms. 175–231 dan 242–244"
+   "ref": "Jilid 9, ms. 175–231 dan 242–244",
+   "classShort": "Khitab Hilalul Wasil"
   },
   {
    "id": "syariah",
-   "short": "Syariah Khofiah",
-   "title": "Syariah Khofiah",
-   "istilah": "Istilah karya: Syariat Khafiah",
+   "short": "Syariat Khafiah",
+   "title": "Syariat Khafiah",
+   "istilah": "Ejaan nota kelas: Syariah Khofiah",
    "basis": "Berdasarkan kerangka Al Fathun Nawa · Jilid 6 dan 9",
    "lead": {
     "tagline": "Memahami petunjuk ayat dan membentuk amalan kehidupan",
@@ -566,12 +567,13 @@
      "refs": []
     }
    ],
-   "ref": "J6, ms. 712–714, 799–1140; J9, ms. 356–358, 609–610"
+   "ref": "J6, ms. 712–714, 799–1140; J9, ms. 356–358, 609–610",
+   "classShort": "Syariah Khofiah"
   },
   {
    "id": "tawil",
-   "short": "Ta’wilul Ma’ani",
-   "title": "Ta’wilul Ma’ani",
+   "short": "Ta’wiilul Ma’ani",
+   "title": "Ta’wiilul Ma’ani",
    "basis": "Berdasarkan kerangka Al Fathun Nawa · Jilid 6 dan 9",
    "lead": {
     "tagline": "Memahami perkara yang hendak disampaikan oleh ayat",
@@ -865,7 +867,9 @@
      "refs": []
     }
    ],
-   "ref": "J6, ms. 632–705; J9, ms. 301–302, 598–601, 865–869"
+   "ref": "J6, ms. 632–705; J9, ms. 301–302, 598–601, 865–869",
+   "classShort": "Ta’wilul Ma’ani",
+   "istilah": "Ejaan nota kelas: Ta’wilul Ma’ani"
   },
   {
    "id": "asbab",

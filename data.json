@@ -2,6 +2,48 @@
   {
     "id": 1,
     "noStart": 1,
+    "noEnd": 1,
+    "title": "ZIKIR DAN INGAT TUHAN",
+    "text": "Orang-orang mengingati Allah ketika berdiri, ketika duduk dan ketika berbaring; Dan mereka memikirkan pada kejadian langit dan bumi. Lalu berkata: Ya Tuhan kami: tidaklah sekali kali Engkau jadikannya (sesuatu itu sia-sia). Maha Suci Engkau peliharalah kami dari azab neraka.",
+    "surahNumber": 3,
+    "surahName": "Al Imran",
+    "ayahRange": "191",
+    "surahDisplay": "Surah 3: Al Imran, Ayat 191",
+    "rangeLabel": "Falsafah 1",
+    "arabic": "ٱلَّذِینَ یَذۡكُرُونَ ٱللَّهَ قِیَـٰمࣰا وَقُعُودࣰا وَعَلَىٰ جُنُوبِهِمۡ وَیَتَفَكَّرُونَ فِی خَلۡقِ ٱلسَّمَـٰوَ ٰتِ وَٱلۡأَرۡضِ رَبَّنَا مَا خَلَقۡتَ هَـٰذَا بَـٰطِلࣰا سُبۡحَـٰنَكَ فَقِنَا عَذَابَ ٱلنَّارِ",
+    "kataKunci": [
+      "Ingat . Tuhan . Berfikir . Kejadian . Tanda . Ketuhanan"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Beribadat itu dimana-mana. Dua: Berzikir itu dua. Sebut nama Tuhan. Berfikir kejadian Tuhan. Tiga: Cari furqan kelebihan kehidupan. Empat: Sumber kejadian menghindar kesusahan - Sejahtera dalam bertuhan."
+    ],
+    "translit": "alladziina yadzkuruuna llaha qiyaaman waqu'uudan wa'alaa junuubihim wayatafakkaruuna fii khalqi ssamaawaati wal'ardhi rabbanaa maa khalaqta haadzaa baatilan subhaanaka faqinaa 'adzaaba nnaari",
+    "catitanShared": "1–3"
+  },
+  {
+    "id": 2,
+    "noStart": 2,
+    "noEnd": 2,
+    "title": "ZIKIR DAN INGAT TUHAN",
+    "text": "Orang-orang mengingati Allah ketika berdiri, ketika duduk dan ketika berbaring; Dan mereka memikirkan pada kejadian langit dan bumi. Lalu berkata: Ya Tuhan kami: tidaklah sekali kali Engkau jadikannya (sesuatu itu sia-sia). Maha Suci Engkau peliharalah kami dari azab neraka.",
+    "surahNumber": 3,
+    "surahName": "Al Imran",
+    "ayahRange": "191",
+    "surahDisplay": "Surah 3: Al Imran, Ayat 191",
+    "rangeLabel": "Falsafah 2",
+    "arabic": "ٱلَّذِینَ یَذۡكُرُونَ ٱللَّهَ قِیَـٰمࣰا وَقُعُودࣰا وَعَلَىٰ جُنُوبِهِمۡ وَیَتَفَكَّرُونَ فِی خَلۡقِ ٱلسَّمَـٰوَ ٰتِ وَٱلۡأَرۡضِ رَبَّنَا مَا خَلَقۡتَ هَـٰذَا بَـٰطِلࣰا سُبۡحَـٰنَكَ فَقِنَا عَذَابَ ٱلنَّارِ",
+    "kataKunci": [
+      "Kerja . Seharian . Ibadat . Kepada . Tuhan"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Beribadat itu dimana-mana. Dua: Berzikir itu dua. Sebut nama Tuhan. Berfikir kejadian Tuhan. Tiga: Cari furqan kelebihan kehidupan. Empat: Sumber kejadian menghindar kesusahan - Sejahtera dalam bertuhan."
+    ],
+    "translit": "alladziina yadzkuruuna llaha qiyaaman waqu'uudan wa'alaa junuubihim wayatafakkaruuna fii khalqi ssamaawaati wal'ardhi rabbanaa maa khalaqta haadzaa baatilan subhaanaka faqinaa 'adzaaba nnaari",
+    "catitanShared": "1–3"
+  },
+  {
+    "id": 3,
+    "noStart": 3,
     "noEnd": 3,
     "title": "ZIKIR DAN INGAT TUHAN",
     "text": "Orang-orang mengingati Allah ketika berdiri, ketika duduk dan ketika berbaring; Dan mereka memikirkan pada kejadian langit dan bumi. Lalu berkata: Ya Tuhan kami: tidaklah sekali kali Engkau jadikannya (sesuatu itu sia-sia). Maha Suci Engkau peliharalah kami dari azab neraka.",
@@ -9,21 +51,104 @@
     "surahName": "Al Imran",
     "ayahRange": "191",
     "surahDisplay": "Surah 3: Al Imran, Ayat 191",
-    "rangeLabel": "Falsafah 1-3",
+    "rangeLabel": "Falsafah 3",
     "arabic": "ٱلَّذِینَ یَذۡكُرُونَ ٱللَّهَ قِیَـٰمࣰا وَقُعُودࣰا وَعَلَىٰ جُنُوبِهِمۡ وَیَتَفَكَّرُونَ فِی خَلۡقِ ٱلسَّمَـٰوَ ٰتِ وَٱلۡأَرۡضِ رَبَّنَا مَا خَلَقۡتَ هَـٰذَا بَـٰطِلࣰا سُبۡحَـٰنَكَ فَقِنَا عَذَابَ ٱلنَّارِ",
     "kataKunci": [
-      "Ingat . Tuhan . Berfikir . Kejadian . Tanda . Ketuhanan",
-      "Kerja . Seharian . Ibadat . Kepada . Tuhan",
       "Pandang . Tengok . Biar . Nampak .Tuhan."
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Beribadat itu dimana-mana. Dua: Berzikir itu dua. Sebut nama Tuhan. Berfikir kejadian Tuhan. Tiga: Cari furqan kelebihan kehidupan. Empat: Sumber kejadian menghindar kesusahan - Sejahtera dalam bertuhan."
     ],
-    "translit": "alladziina yadzkuruuna llaha qiyaaman waqu'uudan wa'alaa junuubihim wayatafakkaruuna fii khalqi ssamaawaati wal'ardhi rabbanaa maa khalaqta haadzaa baatilan subhaanaka faqinaa 'adzaaba nnaari"
+    "translit": "alladziina yadzkuruuna llaha qiyaaman waqu'uudan wa'alaa junuubihim wayatafakkaruuna fii khalqi ssamaawaati wal'ardhi rabbanaa maa khalaqta haadzaa baatilan subhaanaka faqinaa 'adzaaba nnaari",
+    "catitanShared": "1–3"
   },
   {
-    "id": 2,
+    "id": 4,
     "noStart": 4,
+    "noEnd": 4,
+    "title": "BERKEHENDAK KEHIDUPAN DUNIA",
+    "text": "Barang siapa yang mengkehendakki kehidupannya (yang lebih baik) di dunia dan (memperolehi) perhiasannya (harta, kekayaan, kejayaan dan kemajuan). Maka Kami sempurnakan pekerjaannya di dunia. Sedangkan mereka tidaklah dirugikan.",
+    "surahNumber": 11,
+    "surahName": "Hud",
+    "ayahRange": "15",
+    "surahDisplay": "Surah 11: Hud, Ayat 15",
+    "rangeLabel": "Falsafah 4",
+    "arabic": "مَن كَانَ یُرِیدُ ٱلۡحَیَوٰةَ ٱلدُّنۡیَا وَزِینَتَهَا نُوَفِّ إِلَیۡهِمۡ أَعۡمَـٰلَهُمۡ فِیهَا وَهُمۡ فِیهَا لَا یُبۡخَسُونَ",
+    "kataKunci": [
+      "Kehendak . Kehidupan . Direstui . Tuhan . Dunia . Pengkalan . Pelaburan"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Persoalan kehendak dan menimbulkan kehendak. Dua: Berkehendak pada kehidupan dunia. Tiga: Berkehendak memajukan diri dengan perhiasan dunia. Empat: Berkehendak kepada dunia tidak dirugikan. Lima: Berkehendakkan dunia di wajah pelaburan kehidupan.- Barulah dunia terlihat berguna."
+    ],
+    "translit": "man kaana yuriidu lhayawaata ddunyaa waziinatahaa nuwaffi 'ilayhim 'a'maalahum fiihaa wahum fiihaa laa yubkhasuuna",
+    "catitanShared": "4–8"
+  },
+  {
+    "id": 5,
+    "noStart": 5,
+    "noEnd": 5,
+    "title": "BERKEHENDAK KEHIDUPAN DUNIA",
+    "text": "Barang siapa yang mengkehendakki kehidupannya (yang lebih baik) di dunia dan (memperolehi) perhiasannya (harta, kekayaan, kejayaan dan kemajuan). Maka Kami sempurnakan pekerjaannya di dunia. Sedangkan mereka tidaklah dirugikan.",
+    "surahNumber": 11,
+    "surahName": "Hud",
+    "ayahRange": "15",
+    "surahDisplay": "Surah 11: Hud, Ayat 15",
+    "rangeLabel": "Falsafah 5",
+    "arabic": "مَن كَانَ یُرِیدُ ٱلۡحَیَوٰةَ ٱلدُّنۡیَا وَزِینَتَهَا نُوَفِّ إِلَیۡهِمۡ أَعۡمَـٰلَهُمۡ فِیهَا وَهُمۡ فِیهَا لَا یُبۡخَسُونَ",
+    "kataKunci": [
+      "Mencari . Kehidupan . Bukan . Kerugian"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Persoalan kehendak dan menimbulkan kehendak. Dua: Berkehendak pada kehidupan dunia. Tiga: Berkehendak memajukan diri dengan perhiasan dunia. Empat: Berkehendak kepada dunia tidak dirugikan. Lima: Berkehendakkan dunia di wajah pelaburan kehidupan.- Barulah dunia terlihat berguna."
+    ],
+    "translit": "man kaana yuriidu lhayawaata ddunyaa waziinatahaa nuwaffi 'ilayhim 'a'maalahum fiihaa wahum fiihaa laa yubkhasuuna",
+    "catitanShared": "4–8"
+  },
+  {
+    "id": 6,
+    "noStart": 6,
+    "noEnd": 6,
+    "title": "BERKEHENDAK KEHIDUPAN DUNIA",
+    "text": "Barang siapa yang mengkehendakki kehidupannya (yang lebih baik) di dunia dan (memperolehi) perhiasannya (harta, kekayaan, kejayaan dan kemajuan). Maka Kami sempurnakan pekerjaannya di dunia. Sedangkan mereka tidaklah dirugikan.",
+    "surahNumber": 11,
+    "surahName": "Hud",
+    "ayahRange": "15",
+    "surahDisplay": "Surah 11: Hud, Ayat 15",
+    "rangeLabel": "Falsafah 6",
+    "arabic": "مَن كَانَ یُرِیدُ ٱلۡحَیَوٰةَ ٱلدُّنۡیَا وَزِینَتَهَا نُوَفِّ إِلَیۡهِمۡ أَعۡمَـٰلَهُمۡ فِیهَا وَهُمۡ فِیهَا لَا یُبۡخَسُونَ",
+    "kataKunci": [
+      "Dunia . Tempat . Penerokaan . Kehidupan"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Persoalan kehendak dan menimbulkan kehendak. Dua: Berkehendak pada kehidupan dunia. Tiga: Berkehendak memajukan diri dengan perhiasan dunia. Empat: Berkehendak kepada dunia tidak dirugikan. Lima: Berkehendakkan dunia di wajah pelaburan kehidupan.- Barulah dunia terlihat berguna."
+    ],
+    "translit": "man kaana yuriidu lhayawaata ddunyaa waziinatahaa nuwaffi 'ilayhim 'a'maalahum fiihaa wahum fiihaa laa yubkhasuuna",
+    "catitanShared": "4–8"
+  },
+  {
+    "id": 7,
+    "noStart": 7,
+    "noEnd": 7,
+    "title": "BERKEHENDAK KEHIDUPAN DUNIA",
+    "text": "Barang siapa yang mengkehendakki kehidupannya (yang lebih baik) di dunia dan (memperolehi) perhiasannya (harta, kekayaan, kejayaan dan kemajuan). Maka Kami sempurnakan pekerjaannya di dunia. Sedangkan mereka tidaklah dirugikan.",
+    "surahNumber": 11,
+    "surahName": "Hud",
+    "ayahRange": "15",
+    "surahDisplay": "Surah 11: Hud, Ayat 15",
+    "rangeLabel": "Falsafah 7",
+    "arabic": "مَن كَانَ یُرِیدُ ٱلۡحَیَوٰةَ ٱلدُّنۡیَا وَزِینَتَهَا نُوَفِّ إِلَیۡهِمۡ أَعۡمَـٰلَهُمۡ فِیهَا وَهُمۡ فِیهَا لَا یُبۡخَسُونَ",
+    "kataKunci": [
+      "Mengabai . Dunia . Satu . Kerugian"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Persoalan kehendak dan menimbulkan kehendak. Dua: Berkehendak pada kehidupan dunia. Tiga: Berkehendak memajukan diri dengan perhiasan dunia. Empat: Berkehendak kepada dunia tidak dirugikan. Lima: Berkehendakkan dunia di wajah pelaburan kehidupan.- Barulah dunia terlihat berguna."
+    ],
+    "translit": "man kaana yuriidu lhayawaata ddunyaa waziinatahaa nuwaffi 'ilayhim 'a'maalahum fiihaa wahum fiihaa laa yubkhasuuna",
+    "catitanShared": "4–8"
+  },
+  {
+    "id": 8,
+    "noStart": 8,
     "noEnd": 8,
     "title": "BERKEHENDAK KEHIDUPAN DUNIA",
     "text": "Barang siapa yang mengkehendakki kehidupannya (yang lebih baik) di dunia dan (memperolehi) perhiasannya (harta, kekayaan, kejayaan dan kemajuan). Maka Kami sempurnakan pekerjaannya di dunia. Sedangkan mereka tidaklah dirugikan.",
@@ -31,23 +156,62 @@
     "surahName": "Hud",
     "ayahRange": "15",
     "surahDisplay": "Surah 11: Hud, Ayat 15",
-    "rangeLabel": "Falsafah 4-8",
+    "rangeLabel": "Falsafah 8",
     "arabic": "مَن كَانَ یُرِیدُ ٱلۡحَیَوٰةَ ٱلدُّنۡیَا وَزِینَتَهَا نُوَفِّ إِلَیۡهِمۡ أَعۡمَـٰلَهُمۡ فِیهَا وَهُمۡ فِیهَا لَا یُبۡخَسُونَ",
     "kataKunci": [
-      "Kehendak . Kehidupan . Direstui . Tuhan . Dunia . Pengkalan . Pelaburan",
-      "Mencari . Kehidupan . Bukan . Kerugian",
-      "Dunia . Tempat . Penerokaan . Kehidupan",
-      "Mengabai . Dunia . Satu . Kerugian",
       "Dunia . Ruang . Penjana . Kehidupan"
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Persoalan kehendak dan menimbulkan kehendak. Dua: Berkehendak pada kehidupan dunia. Tiga: Berkehendak memajukan diri dengan perhiasan dunia. Empat: Berkehendak kepada dunia tidak dirugikan. Lima: Berkehendakkan dunia di wajah pelaburan kehidupan.- Barulah dunia terlihat berguna."
     ],
-    "translit": "man kaana yuriidu lhayawaata ddunyaa waziinatahaa nuwaffi 'ilayhim 'a'maalahum fiihaa wahum fiihaa laa yubkhasuuna"
+    "translit": "man kaana yuriidu lhayawaata ddunyaa waziinatahaa nuwaffi 'ilayhim 'a'maalahum fiihaa wahum fiihaa laa yubkhasuuna",
+    "catitanShared": "4–8"
   },
   {
-    "id": 3,
+    "id": 9,
     "noStart": 9,
+    "noEnd": 9,
+    "title": "ALLAH ANGKAT DARJAT SESEORANG",
+    "text": "Allah meninggikan orang-orang beriman dikalangan kamu dan orang-orang berilmu beberapa darjat.",
+    "surahNumber": 58,
+    "surahName": "Al Mujaadalah",
+    "ayahRange": "11",
+    "surahDisplay": "Surah 58: Al Mujaadalah, Ayat 11",
+    "rangeLabel": "Falsafah 9",
+    "arabic": "یَرۡفَعِ ٱللَّهُ ٱلَّذِینَ ءَامَنُوا۟ مِنكُمۡ وَٱلَّذِینَ أُوتُوا۟ ٱلۡعِلۡمَ دَرَجَـٰتࣲۚ",
+    "kataKunci": [
+      "Iman . Ilmu . Punca . Darjat"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Persoalan mempertingkatkan hidup. Dua: Mempertingkatkan darjat kehidupan. Tiga: Mempertingkatkan darjat dengan iman. Empat: Mempertingkat darjat dengan ilmu. - Barulah diri berdarjat."
+    ],
+    "translit": "yarfa'i llahu lladziina 'aamanuu minkum walladziina 'uutuu l'ilma darajaatin",
+    "catitanShared": "9–11"
+  },
+  {
+    "id": 10,
+    "noStart": 10,
+    "noEnd": 10,
+    "title": "ALLAH ANGKAT DARJAT SESEORANG",
+    "text": "Allah meninggikan orang-orang beriman dikalangan kamu dan orang-orang berilmu beberapa darjat.",
+    "surahNumber": 58,
+    "surahName": "Al Mujaadalah",
+    "ayahRange": "11",
+    "surahDisplay": "Surah 58: Al Mujaadalah, Ayat 11",
+    "rangeLabel": "Falsafah 10",
+    "arabic": "یَرۡفَعِ ٱللَّهُ ٱلَّذِینَ ءَامَنُوا۟ مِنكُمۡ وَٱلَّذِینَ أُوتُوا۟ ٱلۡعِلۡمَ دَرَجَـٰتࣲۚ",
+    "kataKunci": [
+      "Darjat . Kebistarian . Iman . Ilmu ."
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Persoalan mempertingkatkan hidup. Dua: Mempertingkatkan darjat kehidupan. Tiga: Mempertingkatkan darjat dengan iman. Empat: Mempertingkat darjat dengan ilmu. - Barulah diri berdarjat."
+    ],
+    "translit": "yarfa'i llahu lladziina 'aamanuu minkum walladziina 'uutuu l'ilma darajaatin",
+    "catitanShared": "9–11"
+  },
+  {
+    "id": 11,
+    "noStart": 11,
     "noEnd": 11,
     "title": "ALLAH ANGKAT DARJAT SESEORANG",
     "text": "Allah meninggikan orang-orang beriman dikalangan kamu dan orang-orang berilmu beberapa darjat.",
@@ -55,20 +219,19 @@
     "surahName": "Al Mujaadalah",
     "ayahRange": "11",
     "surahDisplay": "Surah 58: Al Mujaadalah, Ayat 11",
-    "rangeLabel": "Falsafah 9-11",
+    "rangeLabel": "Falsafah 11",
     "arabic": "یَرۡفَعِ ٱللَّهُ ٱلَّذِینَ ءَامَنُوا۟ مِنكُمۡ وَٱلَّذِینَ أُوتُوا۟ ٱلۡعِلۡمَ دَرَجَـٰتࣲۚ",
     "kataKunci": [
-      "Iman . Ilmu . Punca . Darjat",
-      "Darjat . Kebistarian . Iman . Ilmu .",
       "Kemuliaan . Berpunca . Dari . Dua . Iman . Ilmu"
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Persoalan mempertingkatkan hidup. Dua: Mempertingkatkan darjat kehidupan. Tiga: Mempertingkatkan darjat dengan iman. Empat: Mempertingkat darjat dengan ilmu. - Barulah diri berdarjat."
     ],
-    "translit": "yarfa'i llahu lladziina 'aamanuu minkum walladziina 'uutuu l'ilma darajaatin"
+    "translit": "yarfa'i llahu lladziina 'aamanuu minkum walladziina 'uutuu l'ilma darajaatin",
+    "catitanShared": "9–11"
   },
   {
-    "id": 4,
+    "id": 12,
     "noStart": 12,
     "noEnd": 12,
     "title": "ORANG ALIM ADA LAGI YANG LEBIH ALIM",
@@ -88,7 +251,7 @@
     "translit": "narfa'u darajaatin mman nnasyaa'u wafawqa kulli dzii 'ilmin 'aliimun"
   },
   {
-    "id": 5,
+    "id": 13,
     "noStart": 13,
     "noEnd": 13,
     "title": "ALLAH SEBAIK BAIK PEMELIHARA",
@@ -108,7 +271,7 @@
     "translit": "fallahu khayrun haafizan wahuwa 'arhamu rraahimiina"
   },
   {
-    "id": 6,
+    "id": 14,
     "noStart": 14,
     "noEnd": 14,
     "title": "TUHAN LANGIT DAN BUMI",
@@ -128,7 +291,7 @@
     "translit": "'inna 'ilaahakum lawaahidun rrabbu ssamaawaati wal'ardhi wamaa baynahumaa warabbu lmasyaariqi"
   },
   {
-    "id": 7,
+    "id": 15,
     "noStart": 15,
     "noEnd": 15,
     "title": "SEJAHTERA PADA TIGA MASA",
@@ -148,8 +311,50 @@
     "translit": "wasalaamun 'alayhi yawma wulida wayawma yamuutu wayawma yub'atsu hayyan"
   },
   {
-    "id": 8,
+    "id": 16,
     "noStart": 16,
+    "noEnd": 16,
+    "title": "PERTOLONGAN ALLAH ITU UNTUK KEGEMBIRAAN DAN TENANG HATI",
+    "text": "Tiadalah Allah memberi pertolongan itu melainkan untuk kegembiraan bagi mu dan supaya tenteram hati mu dan tiadalah pertolongan itu melainkan dari sisi Allah Yang Maha Perkasa lagi Maha Bijaksana",
+    "surahNumber": 3,
+    "surahName": "Ali 'Imran",
+    "ayahRange": "126",
+    "surahDisplay": "Surah 3: Ali 'Imran, Ayat 126",
+    "rangeLabel": "Falsafah 16",
+    "arabic": "وَمَا جَعَلَهُ ٱللَّهُ إِلَّا بُشۡرَىٰ لَكُمۡ وَلِتَطۡمَىِٕنَّ قُلُوبُكُم بِهِۦۗ وَمَا ٱلنَّصۡرُ إِلَّا مِنۡ عِندِ ٱللَّهِ ٱلۡعَزِیزِ ٱلۡحَكِیمِ",
+    "kataKunci": [
+      "Pertolongan . kegembiraan . ketenangan"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka tiga (3) perkara kena masuk dalam kepala: Satu: Konsep pertolongan. Dua: Pertolongan itu kegembiraan. Tiga: Pertolongan itu ketenangan. Empat: Jika kedua-duanya hilang - bukan pertolongan."
+    ],
+    "translit": "wamaa ja'alahu llahu 'illaa busyraa lakum walitatma'inna quluubukum bihii wamaa nnasru 'illaa min 'indi llahi l'aziizi lhakiimi",
+    "catitanShared": "16–18"
+  },
+  {
+    "id": 17,
+    "noStart": 17,
+    "noEnd": 17,
+    "title": "PERTOLONGAN ALLAH ITU UNTUK KEGEMBIRAAN DAN TENANG HATI",
+    "text": "Tiadalah Allah memberi pertolongan itu melainkan untuk kegembiraan bagi mu dan supaya tenteram hati mu dan tiadalah pertolongan itu melainkan dari sisi Allah Yang Maha Perkasa lagi Maha Bijaksana",
+    "surahNumber": 3,
+    "surahName": "Ali 'Imran",
+    "ayahRange": "126",
+    "surahDisplay": "Surah 3: Ali 'Imran, Ayat 126",
+    "rangeLabel": "Falsafah 17",
+    "arabic": "وَمَا جَعَلَهُ ٱللَّهُ إِلَّا بُشۡرَىٰ لَكُمۡ وَلِتَطۡمَىِٕنَّ قُلُوبُكُم بِهِۦۗ وَمَا ٱلنَّصۡرُ إِلَّا مِنۡ عِندِ ٱللَّهِ ٱلۡعَزِیزِ ٱلۡحَكِیمِ",
+    "kataKunci": [
+      "Pertolongan . Harta . Kehidupan"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka tiga (3) perkara kena masuk dalam kepala: Satu: Konsep pertolongan. Dua: Pertolongan itu kegembiraan. Tiga: Pertolongan itu ketenangan. Empat: Jika kedua-duanya hilang - bukan pertolongan."
+    ],
+    "translit": "wamaa ja'alahu llahu 'illaa busyraa lakum walitatma'inna quluubukum bihii wamaa nnasru 'illaa min 'indi llahi l'aziizi lhakiimi",
+    "catitanShared": "16–18"
+  },
+  {
+    "id": 18,
+    "noStart": 18,
     "noEnd": 18,
     "title": "PERTOLONGAN ALLAH ITU UNTUK KEGEMBIRAAN DAN TENANG HATI",
     "text": "Tiadalah Allah memberi pertolongan itu melainkan untuk kegembiraan bagi mu dan supaya tenteram hati mu dan tiadalah pertolongan itu melainkan dari sisi Allah Yang Maha Perkasa lagi Maha Bijaksana",
@@ -157,20 +362,19 @@
     "surahName": "Ali 'Imran",
     "ayahRange": "126",
     "surahDisplay": "Surah 3: Ali 'Imran, Ayat 126",
-    "rangeLabel": "Falsafah 16-18",
+    "rangeLabel": "Falsafah 18",
     "arabic": "وَمَا جَعَلَهُ ٱللَّهُ إِلَّا بُشۡرَىٰ لَكُمۡ وَلِتَطۡمَىِٕنَّ قُلُوبُكُم بِهِۦۗ وَمَا ٱلنَّصۡرُ إِلَّا مِنۡ عِندِ ٱللَّهِ ٱلۡعَزِیزِ ٱلۡحَكِیمِ",
     "kataKunci": [
-      "Pertolongan . kegembiraan . ketenangan",
-      "Pertolongan . Harta . Kehidupan",
       "Mengenali . Tuhan . Kerana . Pertolongan"
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka tiga (3) perkara kena masuk dalam kepala: Satu: Konsep pertolongan. Dua: Pertolongan itu kegembiraan. Tiga: Pertolongan itu ketenangan. Empat: Jika kedua-duanya hilang - bukan pertolongan."
     ],
-    "translit": "wamaa ja'alahu llahu 'illaa busyraa lakum walitatma'inna quluubukum bihii wamaa nnasru 'illaa min 'indi llahi l'aziizi lhakiimi"
+    "translit": "wamaa ja'alahu llahu 'illaa busyraa lakum walitatma'inna quluubukum bihii wamaa nnasru 'illaa min 'indi llahi l'aziizi lhakiimi",
+    "catitanShared": "16–18"
   },
   {
-    "id": 9,
+    "id": 19,
     "noStart": 19,
     "noEnd": 19,
     "title": "JALAN REZEKI",
@@ -190,8 +394,29 @@
     "translit": "'am tas'aluhum kharjan fakharaaju rabbika khayrun wahuwa khayru rraaziqiina"
   },
   {
-    "id": 10,
+    "id": 20,
     "noStart": 20,
+    "noEnd": 20,
+    "title": "MASUK CARA BAIK KELUAR CARA BAIK",
+    "text": "Katakanlah. Ya Tuhanku masukkanlah aku di tempat yang benar dan keluarkanlah aku dari tempat yang benar dan berikanlah untuk ku disisi Engkau kuasa yang menolong.",
+    "surahNumber": 17,
+    "surahName": "Al Israak",
+    "ayahRange": "80",
+    "surahDisplay": "Surah 17: Al Israak, Ayat 80",
+    "rangeLabel": "Falsafah 20",
+    "arabic": "وَقُل رَّبِّ أَدۡخِلۡنِی مُدۡخَلَ صِدۡقࣲ وَأَخۡرِجۡنِی مُخۡرَجَ صِدۡقࣲ وَٱجۡعَل لِّی مِن لَّدُنكَ سُلۡطَـٰنࣰا نَّصِیرࣰا",
+    "kataKunci": [
+      "Masuk . Disambut . Keluar . Diiring . Berjaya"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Persoalan mempermudahkan urusan. Dua: Mudah ketika masuk berurusan. Tiga: Mudah ketika keluar dari berurusan. Empat: Mudah mendapat pertolongan dari pihak berkuasa. – Baru kerja berjaya."
+    ],
+    "translit": "waqu rrabbi 'adkhilnii mudkhala sidqin wa'akhrijnii mukhraja sidqin waj'a llii min lladunka sultaanan nnasiiran",
+    "catitanShared": "20–21"
+  },
+  {
+    "id": 21,
+    "noStart": 21,
     "noEnd": 21,
     "title": "MASUK CARA BAIK KELUAR CARA BAIK",
     "text": "Katakanlah. Ya Tuhanku masukkanlah aku di tempat yang benar dan keluarkanlah aku dari tempat yang benar dan berikanlah untuk ku disisi Engkau kuasa yang menolong.",
@@ -199,20 +424,41 @@
     "surahName": "Al Israak",
     "ayahRange": "80",
     "surahDisplay": "Surah 17: Al Israak, Ayat 80",
-    "rangeLabel": "Falsafah 20-21",
+    "rangeLabel": "Falsafah 21",
     "arabic": "وَقُل رَّبِّ أَدۡخِلۡنِی مُدۡخَلَ صِدۡقࣲ وَأَخۡرِجۡنِی مُخۡرَجَ صِدۡقࣲ وَٱجۡعَل لِّی مِن لَّدُنكَ سُلۡطَـٰنࣰا نَّصِیرࣰا",
     "kataKunci": [
-      "Masuk . Disambut . Keluar . Diiring . Berjaya",
       "Kejayaan . Bergantung . Kepada . Pertolongan . Layanan . Amat-amat . Diperlukan"
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Persoalan mempermudahkan urusan. Dua: Mudah ketika masuk berurusan. Tiga: Mudah ketika keluar dari berurusan. Empat: Mudah mendapat pertolongan dari pihak berkuasa. – Baru kerja berjaya."
     ],
-    "translit": "waqu rrabbi 'adkhilnii mudkhala sidqin wa'akhrijnii mukhraja sidqin waj'a llii min lladunka sultaanan nnasiiran"
+    "translit": "waqu rrabbi 'adkhilnii mudkhala sidqin wa'akhrijnii mukhraja sidqin waj'a llii min lladunka sultaanan nnasiiran",
+    "catitanShared": "20–21"
   },
   {
-    "id": 11,
+    "id": 22,
     "noStart": 22,
+    "noEnd": 22,
+    "title": "ILHAM KASAR DAN TAQWA",
+    "text": "Lalu di ilhamkan (Allah) kepadanya ilham kasar dan ilham ketaqwaan. Maka beruntunglah bagi mereka yang membersihkan (jiwanya) dan rugilah bagi orang-orang yang mengotorkannya.",
+    "surahNumber": 91,
+    "surahName": "Asy Syams",
+    "ayahRange": "8-10",
+    "surahDisplay": "Surah 91: Asy Syams, Ayat 8-10",
+    "rangeLabel": "Falsafah 22",
+    "arabic": "فَأَلۡهَمَهَا فُجُورَهَا وَتَقۡوَىٰهَا قَدۡ أَفۡلَحَ مَن زَكَّىٰهَا وَقَدۡ خَابَ مَن دَسَّىٰهَا",
+    "kataKunci": [
+      "Ilham . Kehidupan . Dunia . Ilham . Kehidupan . Akhirat . Kesucian . Hati"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Ingat tentang pentingnya ilham. Dua: Ingat ilmu itu dua (2). Tiga: Ilham kasar untuk urusan dunia. Empat: Ilham taqwa untuk kehidupan bertuhan. – Barulah berguna pakai."
+    ],
+    "translit": "fa'alhamahaa fujuurahaa wataqwaahaa qad 'aflaha man zakkaahaa waqad khaaba man dassaahaa",
+    "catitanShared": "22–23"
+  },
+  {
+    "id": 23,
+    "noStart": 23,
     "noEnd": 23,
     "title": "ILHAM KASAR DAN TAQWA",
     "text": "Lalu di ilhamkan (Allah) kepadanya ilham kasar dan ilham ketaqwaan. Maka beruntunglah bagi mereka yang membersihkan (jiwanya) dan rugilah bagi orang-orang yang mengotorkannya.",
@@ -220,19 +466,19 @@
     "surahName": "Asy Syams",
     "ayahRange": "8-10",
     "surahDisplay": "Surah 91: Asy Syams, Ayat 8-10",
-    "rangeLabel": "Falsafah 22-23",
+    "rangeLabel": "Falsafah 23",
     "arabic": "فَأَلۡهَمَهَا فُجُورَهَا وَتَقۡوَىٰهَا قَدۡ أَفۡلَحَ مَن زَكَّىٰهَا وَقَدۡ خَابَ مَن دَسَّىٰهَا",
     "kataKunci": [
-      "Ilham . Kehidupan . Dunia . Ilham . Kehidupan . Akhirat . Kesucian . Hati",
       "Taraf . Kesucian . Hati . Membangkitkan . Rupa . Ilham . Diterima"
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Ingat tentang pentingnya ilham. Dua: Ingat ilmu itu dua (2). Tiga: Ilham kasar untuk urusan dunia. Empat: Ilham taqwa untuk kehidupan bertuhan. – Barulah berguna pakai."
     ],
-    "translit": "fa'alhamahaa fujuurahaa wataqwaahaa qad 'aflaha man zakkaahaa waqad khaaba man dassaahaa"
+    "translit": "fa'alhamahaa fujuurahaa wataqwaahaa qad 'aflaha man zakkaahaa waqad khaaba man dassaahaa",
+    "catitanShared": "22–23"
   },
   {
-    "id": 12,
+    "id": 24,
     "noStart": 24,
     "noEnd": 24,
     "title": "AIR NEGATIF (AIR PENAWAR)",
@@ -252,7 +498,7 @@
     "translit": "arkudh birijlika haadzaa mughtasalu baaridun wasyaraabun"
   },
   {
-    "id": 13,
+    "id": 25,
     "noStart": 25,
     "noEnd": 25,
     "title": "ALLAH MEMPERGANTIKAN SIANG & MALAM ( MATA MUSANG)",
@@ -272,7 +518,7 @@
     "translit": "yuqallibu llahu llayla wannahaara 'inna fii dzaalika la'ibratan lli'ulii l'absaari"
   },
   {
-    "id": 14,
+    "id": 26,
     "noStart": 26,
     "noEnd": 26,
     "title": "ORANG PILIHAN TERBAIK",
@@ -292,30 +538,69 @@
     "translit": "wadzkur 'ibaadanaa 'ibraahiima wa'ishaaqa waya'quuba 'ulii l'aydii wal'absaari 'innaa 'akhlasnaahum bikhaalisatin dzikraa ddaari wa'innahum 'indanaa lamina lmustafayna l'akhyaari"
   },
   {
-    "id": 15,
+    "id": 27,
     "noStart": 27,
-    "noEnd": 28,
-    "title": "RASUL ITU LELAKI/ TANYALAH PAKAR",
+    "noEnd": 27,
+    "title": "RASUL ITU LELAKI",
     "text": "Tiadalah Kami mengutuskan sebelum kamu (Muhammad) melainkan beberapa orang laki-laki yang Kami beri wahyu kepada mereka. Maka tanyakanlah olehmu kepada ahli zikri, jika kamu tidak mengetahui.",
     "surahNumber": 21,
     "surahName": "Al Anbiyaak",
     "ayahRange": "7",
     "surahDisplay": "Surah 21: Al Anbiyaak, Ayat 7",
-    "rangeLabel": "Falsafah 27-28",
+    "rangeLabel": "Falsafah 27",
     "arabic": "وَمَاۤ أَرۡسَلۡنَا قَبۡلَكَ إِلَّا رِجَالࣰا نُّوحِیۤ إِلَیۡهِمۡۖ فَسۡـَٔلُوۤا۟ أَهۡلَ ٱلذِّكۡرِ إِن كُنتُمۡ لَا تَعۡلَمُونَ",
     "kataKunci": [
-      "Jantan . Kejantanan . Sifat . Khalifah .",
-      "Pakar . Tempat . Bertanya . Kepakaran . Jalan. Penyelesaian"
+      "Jantan . Kejantanan . Sifat . Khalifah ."
     ],
     "catitan": [
-      "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Sifat jantan dipilih Tuhan. Dua: Jantan berkebolehan melakukan perubahan. Tiga: Bersikap hidup berpandukan wahyu Tuhan - Kitabullah. Empat: Bersedia menjadi tempat rujukan Lima: Rela menerima sebarang persoalan yang ditimbulkan – Di wajah bijaknya didikan Tuhan.",
-      "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Pasang sikap suka bertanya. Dua: Sifat jantan mengenal jahil. Tiga: Orang pandai dicari tanya. Empat: Korek tiga (3) barang berguna. Lima: Barulah hidup jadi orang - Tidak sesat selama-lama."
+      "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Sifat jantan dipilih Tuhan. Dua: Jantan berkebolehan melakukan perubahan. Tiga: Bersikap hidup berpandukan wahyu Tuhan - Kitabullah. Empat: Bersedia menjadi tempat rujukan Lima: Rela menerima sebarang persoalan yang ditimbulkan – Di wajah bijaknya didikan Tuhan."
     ],
     "translit": "wamaa 'arsalnaa qablaka 'illaa rijaalan nnuuhii 'ilayhim fas'aluu 'ahla dzdzikri 'in kuntum laa ta'lamuuna"
   },
   {
-    "id": 16,
+    "id": 28,
+    "noStart": 28,
+    "noEnd": 28,
+    "title": "TANYALAH PAKAR",
+    "text": "Bertanyalah kepada para Ahlizzikri. Jika kamu tidak mengetahui.",
+    "surahNumber": 16,
+    "surahName": "An Nahl",
+    "ayahRange": "43",
+    "surahDisplay": "Surah 16: An Nahl, Ayat 43",
+    "rangeLabel": "Falsafah 28",
+    "arabic": "فَسۡـَٔلُوۤا۟ أَهۡلَ ٱلذِّكۡرِ إِن كُنتُمۡ لَا تَعۡلَمُونَ",
+    "kataKunci": [
+      "Pakar . Tempat . Bertanya . Kepakaran . Jalan. Penyelesaian"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Pasang sikap suka bertanya. Dua: Sifat jantan mengenal jahil. Tiga: Orang pandai dicari tanya. Empat: Korek tiga (3) barang berguna. Lima: Barulah hidup jadi orang - Tidak sesat selama-lama."
+    ],
+    "translit": "fas'aluu 'ahla dzdzikri 'in kuntum laa ta'lamuuna"
+  },
+  {
+    "id": 29,
     "noStart": 29,
+    "noEnd": 29,
+    "title": "JALAN REZEKI",
+    "text": "Apakah engkau meminta upah kepada mereka (dalam menyampaikan dakwah). Maka upah (kharajan) dari Tuhan engkau itu lebih baik. Dialah sebaik-baik Pemberi rezeki.",
+    "surahNumber": 23,
+    "surahName": "Al Mukminuun",
+    "ayahRange": "72",
+    "surahDisplay": "Surah 23: Al Mukminuun, Ayat 72",
+    "rangeLabel": "Falsafah 29",
+    "arabic": "أَمۡ تَسۡـَٔلُهُمۡ خَرۡجࣰا فَخَرَاجُ رَبِّكَ خَیۡرࣱۖ وَهُوَ خَیۡرُ ٱلرَّ ٰزِقِینَ",
+    "kataKunci": [
+      "Rezeki . Sampul . Jahat . Upah . Tuhan . Terbaik"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Tahu istilah: Kharaja itu jalan rezeki. Dua: Kedatangan kharaja dari usaha. Tiga: Sedekah habuan bukannya kejantanan rezeki. Empat: pendapatan dari usaha itulah buah Kharaja - Baru diri maju berkaki sendiri."
+    ],
+    "translit": "'am tas'aluhum kharjan fakharaaju rabbika khayrun wahuwa khayru rraaziqiina",
+    "catitanShared": "29–30"
+  },
+  {
+    "id": 30,
+    "noStart": 30,
     "noEnd": 30,
     "title": "JALAN REZEKI",
     "text": "Apakah engkau meminta upah kepada mereka (dalam menyampaikan dakwah). Maka upah (kharajan) dari Tuhan engkau itu lebih baik. Dialah sebaik-baik Pemberi rezeki.",
@@ -323,19 +608,19 @@
     "surahName": "Al Mukminuun",
     "ayahRange": "72",
     "surahDisplay": "Surah 23: Al Mukminuun, Ayat 72",
-    "rangeLabel": "Falsafah 29-30",
+    "rangeLabel": "Falsafah 30",
     "arabic": "أَمۡ تَسۡـَٔلُهُمۡ خَرۡجࣰا فَخَرَاجُ رَبِّكَ خَیۡرࣱۖ وَهُوَ خَیۡرُ ٱلرَّ ٰزِقِینَ",
     "kataKunci": [
-      "Rezeki . Sampul . Jahat . Upah . Tuhan . Terbaik",
       "Rezeki . Terselindung . Perlu . dikeluarkan . Dengan . Kesenangan . Menjadi . Kenyataan"
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Tahu istilah: Kharaja itu jalan rezeki. Dua: Kedatangan kharaja dari usaha. Tiga: Sedekah habuan bukannya kejantanan rezeki. Empat: pendapatan dari usaha itulah buah Kharaja - Baru diri maju berkaki sendiri."
     ],
-    "translit": "'am tas'aluhum kharjan fakharaaju rabbika khayrun wahuwa khayru rraaziqiina"
+    "translit": "'am tas'aluhum kharjan fakharaaju rabbika khayrun wahuwa khayru rraaziqiina",
+    "catitanShared": "29–30"
   },
   {
-    "id": 17,
+    "id": 31,
     "noStart": 31,
     "noEnd": 31,
     "title": "ALLAH SEMPURNAKAN URUSANNYA",
@@ -355,7 +640,7 @@
     "translit": "wayarzuqhu min haytsu laa yahtasibu waman yatawakkal 'alaa llahi fahuwa hasbuhuu 'inna llaha baalighu 'amrihii qad ja'ala llahu likulli syay'in qadran"
   },
   {
-    "id": 18,
+    "id": 32,
     "noStart": 32,
     "noEnd": 32,
     "title": "BUAT KERJA SATU PERSATU, KEPADA TUHAN LETAK HARAPAN",
@@ -375,7 +660,7 @@
     "translit": "fa'idzaa faraghta fansab wa'ilaa rabbika farghab"
   },
   {
-    "id": 19,
+    "id": 33,
     "noStart": 33,
     "noEnd": 33,
     "title": "TUHAN DEKAT PERKENAN DOA HAMBA",
@@ -395,7 +680,7 @@
     "translit": "wa'idzaa sa'alaka 'ibaadii 'annii fa'innii qariibun 'ujiibu da'wata ddaa'i 'idzaa da'aani falyastajiibuu lii walyu'minuu bii la'allahum yarsyuduuna"
   },
   {
-    "id": 20,
+    "id": 34,
     "noStart": 34,
     "noEnd": 34,
     "title": "SETIAP SESUATU ADA JALAN ALLAH/ SEGALA URUSAN DISERAHKAN KEPADA ALLAH",
@@ -415,7 +700,7 @@
     "translit": "siraati llahi lladzii lahuu maa fii ssamaawaati wamaa fii l'ardhi 'alaa 'ilaa llahi tasiiru l'umuuru"
   },
   {
-    "id": 21,
+    "id": 35,
     "noStart": 35,
     "noEnd": 35,
     "title": "USAHA BERMACAM-MACAM",
@@ -435,7 +720,7 @@
     "translit": "'inna sa'yakum lasyattaa"
   },
   {
-    "id": 22,
+    "id": 36,
     "noStart": 36,
     "noEnd": 36,
     "title": "KESENANGAN YANG DISEMBUNYIKAN",
@@ -455,7 +740,7 @@
     "translit": "falaa ta'lamu nafsun mmaa 'ukhfiya lahum mmin qurrati 'a'yunin jazaa'a bimaa kaanuu ya'maluuna"
   },
   {
-    "id": 23,
+    "id": 37,
     "noStart": 37,
     "noEnd": 37,
     "title": "AMTHAL SUMBER FURQAN / AYAT NYAMUK",
@@ -475,7 +760,7 @@
     "translit": "'inna llaha laa yastahyii 'an yadhriba matsalan mmaa ba'uudhatan famaa fawqahaa fa'ammaa lladziina 'aamanuu faya'lamuuna 'annahu lhaqqu min rrabbihim wa'ammaa lladziina kafaruu fayaquuluuna maadzaa 'araada llahu bihaadzaa matsalan yudhillu bihii katsiiran wayahdii bihii katsiiran wamaa yudhillu bihii 'illaa lfaasiqiina"
   },
   {
-    "id": 24,
+    "id": 38,
     "noStart": 38,
     "noEnd": 38,
     "title": "ALLAH BERSAMA DENGAN KAMU",
@@ -495,7 +780,7 @@
     "translit": "wahuwa ma'akum 'ayna maa kuntum"
   },
   {
-    "id": 25,
+    "id": 39,
     "noStart": 39,
     "noEnd": 39,
     "title": "TUHAN ITU HAMPIR",
@@ -515,8 +800,29 @@
     "translit": "wanahnu 'aqrabu 'ilayhi min habli lwariidi"
   },
   {
-    "id": 26,
+    "id": 40,
     "noStart": 40,
+    "noEnd": 40,
+    "title": "HIDUP BAGAI HUJAN",
+    "text": "Tunjuklah kepada manusia bahawa hidup (kesenangan) di dunia ini adalah seumpama air yang Kami turunkan dari langit. Lalu bercampur dengan tumbuhan dibumi. Kemudian (air itu) dikeringkan. Lalu diterbang oleh angin. Demikianlah Allah itu Maha Kuasa ke atas sesuatu.",
+    "surahNumber": 18,
+    "surahName": "Al Kahfi",
+    "ayahRange": "45",
+    "surahDisplay": "Surah 18: Al Kahfi, Ayat 45",
+    "rangeLabel": "Falsafah 40",
+    "arabic": "وَٱضۡرِبۡ لَهُم مَّثَلَ ٱلۡحَیَوٰةِ ٱلدُّنۡیَا كَمَاۤءٍ أَنزَلۡنَـٰهُ مِنَ ٱلسَّمَاۤءِ فَٱخۡتَلَطَ بِهِۦ نَبَاتُ ٱلۡأَرۡضِ فَأَصۡبَحَ هَشِیمࣰا تَذۡرُوهُ ٱلرِّیَـٰحُۗ وَكَانَ ٱللَّهُ عَلَىٰ كُلِّ شَیۡءࣲ مُّقۡتَدِرًا",
+    "kataKunci": [
+      "Kehidupan . Kesenangan . Bagai . Basah . Keringnya. Hujan"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Tahu hidup seumpama air hujan. Dua: Tahu hidup (air hujan) boleh dimunafaatkan oleh muka bumi (masyarakat dan negeri). Tiga: Tahu hidup (air hujan) boleh menghidupkan muka bumi (majukan masyarakat). Empat: Tahu jika hidup (air hujan) ditiupkan dengan kejahatan (angin mengeringkan). Maka hilanglah makna kehidupan (air hujan) – Dimakna hidup itu kebaikan."
+    ],
+    "translit": "wadhrib lahum mmatsala lhayawaati ddunyaa kamaa'in 'anzalnaahu mina ssamaa'i fakhtalata bihii nabaatu l'ardhi fa'asbaha hasyiiman tadzruuhu rriyaahu wakaana llahu 'alaa kulli syay'in mmuqtadiran",
+    "catitanShared": "40–41"
+  },
+  {
+    "id": 41,
+    "noStart": 41,
     "noEnd": 41,
     "title": "HIDUP BAGAI HUJAN",
     "text": "Tunjuklah kepada manusia bahawa hidup (kesenangan) di dunia ini adalah seumpama air yang Kami turunkan dari langit. Lalu bercampur dengan tumbuhan dibumi. Kemudian (air itu) dikeringkan. Lalu diterbang oleh angin. Demikianlah Allah itu Maha Kuasa ke atas sesuatu.",
@@ -524,19 +830,19 @@
     "surahName": "Al Kahfi",
     "ayahRange": "45",
     "surahDisplay": "Surah 18: Al Kahfi, Ayat 45",
-    "rangeLabel": "Falsafah 40-41",
+    "rangeLabel": "Falsafah 41",
     "arabic": "وَٱضۡرِبۡ لَهُم مَّثَلَ ٱلۡحَیَوٰةِ ٱلدُّنۡیَا كَمَاۤءٍ أَنزَلۡنَـٰهُ مِنَ ٱلسَّمَاۤءِ فَٱخۡتَلَطَ بِهِۦ نَبَاتُ ٱلۡأَرۡضِ فَأَصۡبَحَ هَشِیمࣰا تَذۡرُوهُ ٱلرِّیَـٰحُۗ وَكَانَ ٱللَّهُ عَلَىٰ كُلِّ شَیۡءࣲ مُّقۡتَدِرًا",
     "kataKunci": [
-      "Kehidupan . Kesenangan . Bagai . Basah . Keringnya. Hujan",
       "Hidup . Bagai . Hujan . Punca . Kesenangan . Diuji . Kerenah . Dunia ."
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Tahu hidup seumpama air hujan. Dua: Tahu hidup (air hujan) boleh dimunafaatkan oleh muka bumi (masyarakat dan negeri). Tiga: Tahu hidup (air hujan) boleh menghidupkan muka bumi (majukan masyarakat). Empat: Tahu jika hidup (air hujan) ditiupkan dengan kejahatan (angin mengeringkan). Maka hilanglah makna kehidupan (air hujan) – Dimakna hidup itu kebaikan."
     ],
-    "translit": "wadhrib lahum mmatsala lhayawaati ddunyaa kamaa'in 'anzalnaahu mina ssamaa'i fakhtalata bihii nabaatu l'ardhi fa'asbaha hasyiiman tadzruuhu rriyaahu wakaana llahu 'alaa kulli syay'in mmuqtadiran"
+    "translit": "wadhrib lahum mmatsala lhayawaati ddunyaa kamaa'in 'anzalnaahu mina ssamaa'i fakhtalata bihii nabaatu l'ardhi fa'asbaha hasyiiman tadzruuhu rriyaahu wakaana llahu 'alaa kulli syay'in mmuqtadiran",
+    "catitanShared": "40–41"
   },
   {
-    "id": 27,
+    "id": 42,
     "noStart": 42,
     "noEnd": 42,
     "title": "SERULAH ALLAH DENGAN NAMA-NAMA YANG BAIK",
@@ -556,7 +862,7 @@
     "translit": "quli d'uu llaha 'awi d'uu rrahmaana 'ayyan mmaa tad'uu falahu l'asmaa'u lhusnaa"
   },
   {
-    "id": 28,
+    "id": 43,
     "noStart": 43,
     "noEnd": 43,
     "title": "ORANG BERIMAN DIBERI KASIH SAYANG",
@@ -576,7 +882,7 @@
     "translit": "'inna lladziina 'aamanuu wa'amiluu ssaalihaati sayaj'alu lahumu rrahmaanu wuddan"
   },
   {
-    "id": 29,
+    "id": 44,
     "noStart": 44,
     "noEnd": 44,
     "title": "DALAM HAK KAMU ADA HAK ORANG LAIN",
@@ -596,7 +902,7 @@
     "translit": "wafii 'amwaalihim haqqun llissaa'ili walmahruumi"
   },
   {
-    "id": 30,
+    "id": 45,
     "noStart": 45,
     "noEnd": 45,
     "title": "BERBAKTI KEPADA TUHAN HINGGA YAKIN",
@@ -616,7 +922,7 @@
     "translit": "wa'bud rabbaka hattaa ya'tiyaka lyaqiinu"
   },
   {
-    "id": 31,
+    "id": 46,
     "noStart": 46,
     "noEnd": 46,
     "title": "BAGI MANUSIA APA YANG DIUSAHAKAN",
@@ -636,7 +942,7 @@
     "translit": "wa'an llaysa lil'insaani 'illaa maa sa'aa wa'anna sa'yahuu sawfa yuraa tsumma yujzaahu ljazaa'a l'awfaa"
   },
   {
-    "id": 32,
+    "id": 47,
     "noStart": 47,
     "noEnd": 47,
     "title": "PERTOLONGAN ALLAH MANUSIA DATANG BERDUYUN",
@@ -656,7 +962,7 @@
     "translit": "'idzaa jaa'a nasru llahi walfathu"
   },
   {
-    "id": 33,
+    "id": 48,
     "noStart": 48,
     "noEnd": 48,
     "title": "PERTOLONGAN ALLAH MANUSIA DATANG BERDUYUN",
@@ -676,7 +982,7 @@
     "translit": "'idzaa jaa'a nasru llahi walfathu wara'ayta nnaasa yadkhuluuna fii diini llahi 'afwaajan"
   },
   {
-    "id": 34,
+    "id": 49,
     "noStart": 49,
     "noEnd": 49,
     "title": "PERTOLONGAN ALLAH MANUSIA DATANG BERDUYUN",
@@ -696,27 +1002,47 @@
     "translit": "'idzaa jaa'a nasru llahi walfathu wara'ayta nnaasa yadkhuluuna fii diini llahi 'afwaajan fasabbih bihamdi rabbika wastaghfirhu 'innahuu kaana tawwaabaa"
   },
   {
-    "id": 35,
+    "id": 50,
     "noStart": 50,
     "noEnd": 50,
     "title": "RUPA ORANG SENANG / SEJAHTERA",
-    "text": "Sesungguhnya orang-orang baik itu dalam kesenangan. Di atas tarafnya dilihat tinggi. Engkau boleh mengenalinya pada air mukanya kesenangan. Mereka minum minuman berjenama. Dari jenama yang terpilih (Kasturi). Maka berlumbalah pada yang hendak berlumba. Sehingga dihias dengan air mineral (tasnim). Yakni mata air yang diminum oleh golongan orang-orang besar (muqarrabun).",
+    "text": "Sesungguhnya orang-orang baik itu dalam kesenangan. Di atas tarafnya dilihat tinggi. Engkau boleh mengenalinya pada air muka mereka kesenangan.",
     "surahNumber": 83,
     "surahName": "Al Muthaffifin",
-    "ayahRange": "22-28",
-    "surahDisplay": "Surah 83: Al Muthaffifin, Ayat 22-28",
+    "ayahRange": "22-24",
+    "surahDisplay": "Surah 83: Al Muthaffifin, Ayat 22-24",
     "rangeLabel": "Falsafah 50",
-    "arabic": "إِنَّ ٱلۡأَبۡرَارَ لَفِی نَعِیمٍ عَلَى ٱلۡأَرَاۤىِٕكِ یَنظُرُونَ تَعۡرِفُ فِی وُجُوهِهِمۡ نَضۡرَةَ ٱلنَّعِیمِ یُسۡقَوۡنَ مِن رَّحِیقࣲ مَّخۡتُومٍ خِتَـٰمُهُۥ مِسۡكࣱۚ وَفِی ذَ ٰلِكَ فَلۡیَتَنَافَسِ ٱلۡمُتَنَـٰفِسُونَ وَمِزَاجُهُۥ مِن تَسۡنِیمٍ عَیۡنࣰا یَشۡرَبُ بِهَا ٱلۡمُقَرَّبُونَ",
+    "arabic": "إِنَّ ٱلۡأَبۡرَارَ لَفِی نَعِیمٍ عَلَى ٱلۡأَرَاۤىِٕكِ یَنظُرُونَ تَعۡرِفُ فِی وُجُوهِهِمۡ نَضۡرَةَ ٱلنَّعِیمِ",
     "kataKunci": [
       "Kesenangan. Dikenali . Di wajah . Mukanya"
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka lima (5) perkara kena masuk dalam kepala: Satu: Tahu erti kelebihan pencapaian diri. Dua: Tahu erti pencapaian itu kesenangan. Tiga: Tahu pencapaian diri ditanda dengan kesenangan dan diri berada di dalam kesenangan. Empat: Pencapaian diri ditanda dengan ketinggian darjat kehidupan dan dilihat tinggi mata ramai. Lima: Pencapaian diri ditanda dengan wajah air muka kesenangan. – Dilihat senang."
     ],
+    "translit": "'inna l'abraara lafii na'iimin 'alaa l'araa'iki yanzuruuna ta'rifu fii wujuuhihim nadhrata nna'iimi"
+  },
+  {
+    "id": 51,
+    "noStart": 51,
+    "noEnd": 51,
+    "title": "RUPA ORANG SENANG / SEJAHTERA",
+    "text": "Sesungguhnya orang-orang baik itu dalam kesenangan. Di atas tarafnya dilihat tinggi. Engkau boleh mengenalinya pada air mukanya kesenangan. Mereka minum minuman berjenama. Dari jenama yang terpilih (Kasturi). Maka berlumbalah pada yang hendak berlumba. Sehingga dihias dengan air mineral (tasnim). Yakni mata air yang diminum oleh golongan orang-orang besar (muqarrabun).",
+    "surahNumber": 83,
+    "surahName": "Al Muthaffifin",
+    "ayahRange": "22-28",
+    "surahDisplay": "Surah 83: Al Muthaffifin, Ayat 22-28",
+    "rangeLabel": "Falsafah 51",
+    "arabic": "إِنَّ ٱلۡأَبۡرَارَ لَفِی نَعِیمٍ عَلَى ٱلۡأَرَاۤىِٕكِ یَنظُرُونَ تَعۡرِفُ فِی وُجُوهِهِمۡ نَضۡرَةَ ٱلنَّعِیمِ یُسۡقَوۡنَ مِن رَّحِیقࣲ مَّخۡتُومٍ خِتَـٰمُهُۥ مِسۡكࣱۚ وَفِی ذَ ٰلِكَ فَلۡیَتَنَافَسِ ٱلۡمُتَنَـٰفِسُونَ وَمِزَاجُهُۥ مِن تَسۡنِیمٍ عَیۡنࣰا یَشۡرَبُ بِهَا ٱلۡمُقَرَّبُونَ",
+    "kataKunci": [
+      "Orang . Senang . Makan . Pakai . Mahal-mahal"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Tahu kelebihan diri terletak pada tanda senang dan kesenangan. Tanda tingginya darjat dan tanda kejernihan air muka. Dua: Persoalan kesenangan ditunjuk dengan watak penggunaan barang berjenama. Tiga: Tahu sifat berlumba sentiasa tertumbuh bagi orang berkelebihan. Empat: Kesenangan diwajahkan oleh orang berkelebihan menerusi cara amalan minumannya. – Kelas dan bermutu."
+    ],
     "translit": "'inna l'abraara lafii na'iimin 'alaa l'araa'iki yanzuruuna ta'rifu fii wujuuhihim nadhrata nna'iimi yusqawna min rrahiiqin mmakhtuumin khitaamuhuu miskun wafii dzaalika falyatanaafasi lmutanaafisuuna wamizaajuhuu min tasniimin 'aynan yasyrabu bihaa lmuqarrabuuna"
   },
   {
-    "id": 36,
+    "id": 52,
     "noStart": 52,
     "noEnd": 52,
     "title": "ORANG BERSELIMUT",
@@ -736,7 +1062,7 @@
     "translit": "yaa'ayyuhaa lmuddatstsiru qum fa'andzir"
   },
   {
-    "id": 37,
+    "id": 53,
     "noStart": 53,
     "noEnd": 53,
     "title": "ORANG BERSELIMUT",
@@ -756,7 +1082,7 @@
     "translit": "yaa'ayyuhaa lmuddatstsiru qum fa'andzir warabbaka fakabbir watsiyaabaka fatahhir warrujza fahjur walaa tamnun tastaktsiru walirabbika fasbir"
   },
   {
-    "id": 38,
+    "id": 54,
     "noStart": 54,
     "noEnd": 54,
     "title": "YANG AKHIR LEBIH BAIK DARI YANG AWAL",
@@ -776,7 +1102,7 @@
     "translit": "walal'aakhiratu khayrun llaka mina l'uulaa walasawfa yu'tiika rabbuka fatardhaa"
   },
   {
-    "id": 39,
+    "id": 55,
     "noStart": 55,
     "noEnd": 55,
     "title": "GAYA HIDUP DI SISI TUHAN",
@@ -796,7 +1122,7 @@
     "translit": "'inna ddiina 'inda llahi l'islaamu"
   },
   {
-    "id": 40,
+    "id": 56,
     "noStart": 56,
     "noEnd": 56,
     "title": "WASIAT IBRAHIM KEPADA ANAK CUCUNYA/JALAN HIDUP PILIHAN TUHAN",
@@ -816,7 +1142,7 @@
     "translit": "wawassaa bihaa 'ibraahiimu baniihi waya'quubu yaabaniyya 'inna llaha stafaa lakumu ddiina falaa tamuutunna 'illaa wa'antum mmuslimuuna"
   },
   {
-    "id": 41,
+    "id": 57,
     "noStart": 57,
     "noEnd": 57,
     "title": "CORAK WARNA KEHIDUPAN ALLAH",
@@ -836,7 +1162,7 @@
     "translit": "sibghata llahi waman 'ahsanu mina llahi sibghatan wanahnu lahuu 'aabiduuna"
   },
   {
-    "id": 42,
+    "id": 58,
     "noStart": 58,
     "noEnd": 58,
     "title": "KENAPA TIDAK TADABBUR AL QURAN",
@@ -856,7 +1182,7 @@
     "translit": "'afalaa yatadabbaruuna lqur'aana 'am 'alaa quluubin 'aqfaaluhaa"
   },
   {
-    "id": 43,
+    "id": 59,
     "noStart": 59,
     "noEnd": 59,
     "title": "KELUHAN NABI UMATNYA MENINGGALKAN AL QURAN",
@@ -876,7 +1202,7 @@
     "translit": "waqaala rrasuulu yaarabbi 'inna qawmii ttakhadzuu haadzaa lqur'aana mahjuuran"
   },
   {
-    "id": 44,
+    "id": 60,
     "noStart": 60,
     "noEnd": 60,
     "title": "MANUSIA DALAM KERUGIAN",
@@ -896,7 +1222,7 @@
     "translit": "wal'asri 'inna l'insaana lafii khusrin 'illaa lladziina 'aamanuu wa'amiluu ssaalihaati watawaasaw bilhaqqi watawaasaw bissabri"
   },
   {
-    "id": 45,
+    "id": 61,
     "noStart": 61,
     "noEnd": 61,
     "title": "MANUSIA DALAM KERUGIAN",
@@ -916,7 +1242,7 @@
     "translit": "wal'asri 'inna l'insaana lafii khusrin 'illaa lladziina 'aamanuu wa'amiluu ssaalihaati watawaasaw bilhaqqi watawaasaw bissabri"
   },
   {
-    "id": 46,
+    "id": 62,
     "noStart": 62,
     "noEnd": 62,
     "title": "BERLUMBA KE ARAH KEJAYAAN",
@@ -936,7 +1262,7 @@
     "translit": "wata'aawanuu 'alaa lbirri wattaqwaa walaa ta'aawanuu 'alaa l'itsmi wal'udwaani"
   },
   {
-    "id": 47,
+    "id": 63,
     "noStart": 63,
     "noEnd": 63,
     "title": "DALAM HAK KAMU ADA HAK ORANG",
@@ -956,7 +1282,7 @@
     "translit": "wafii 'amwaalihim haqqun llissaa'ili walmahruumi"
   },
   {
-    "id": 48,
+    "id": 64,
     "noStart": 64,
     "noEnd": 64,
     "title": "SEDEKAH BERSIH HATI",
@@ -976,7 +1302,7 @@
     "translit": "khudz min 'amwaalihim sadaqatan tutahhiruhum watuzakkiihim bihaa wasalli 'alayhim 'inna salawaataka sakanun llahum wallahu samii'un 'aliimun"
   },
   {
-    "id": 49,
+    "id": 65,
     "noStart": 65,
     "noEnd": 65,
     "title": "MEMBAHAGI RAHMAT TUHAN",
@@ -996,7 +1322,7 @@
     "translit": "'ahum yaqsimuuna rahmata rabbika nahnu qasamnaa baynahum mma'iisyatahum fii lhayawaati ddunyaa warafa'naa ba'dhahum fawqa ba'dhin darajaatin lliyattakhidza ba'dhuhum ba'dhan sukhriyyan warahmatu rabbika khayrun mmimmaa yajma'uuna"
   },
   {
-    "id": 50,
+    "id": 66,
     "noStart": 66,
     "noEnd": 66,
     "title": "LAUTAN JADI DAKWAT",
@@ -1016,7 +1342,7 @@
     "translit": "qu llaw kaana lbahru midaadan llikalimaati rabbii lanafida lbahru qabla 'an tanfada kalimaatu rabbii walaw ji'naa bimitslihii madadan"
   },
   {
-    "id": 51,
+    "id": 67,
     "noStart": 67,
     "noEnd": 67,
     "title": "KESENANGAN YANG DISEMBUNYIKAN",
@@ -1036,7 +1362,7 @@
     "translit": "falaa ta'lamu nafsun mmaa 'ukhfiya lahum mmin qurrati 'a'yunin jazaa'a bimaa kaanuu ya'maluuna"
   },
   {
-    "id": 52,
+    "id": 68,
     "noStart": 68,
     "noEnd": 68,
     "title": "SUKA SURUH ORANG LAIN BUAT BAIK DIRI TIDAK BUAT",
@@ -1056,7 +1382,7 @@
     "translit": "'ata'muruuna nnaasa bilbirri watansawna 'anfusakum wa'antum tatluuna lkitaaba 'afalaa ta'qiluuna"
   },
   {
-    "id": 53,
+    "id": 69,
     "noStart": 69,
     "noEnd": 69,
     "title": "BANYAK YANG BURUK MENARIK HATI",
@@ -1076,7 +1402,7 @@
     "translit": "qu llaa yastawii lkhabiitsu wattayyibu walaw 'a'jabaka katsratu lkhabiitsi fattaquu llaha yaa'ulii l'albaabi la'allakum tuflihuuna"
   },
   {
-    "id": 54,
+    "id": 70,
     "noStart": 70,
     "noEnd": 70,
     "title": "JANGAN CAMPUR HAK DENGAN YANG BATIL",
@@ -1096,7 +1422,7 @@
     "translit": "walaa talbisuu lhaqqa bilbaatili wataktumuu lhaqqa wa'antum ta'lamuuna"
   },
   {
-    "id": 55,
+    "id": 71,
     "noStart": 71,
     "noEnd": 71,
     "title": "SELISIH PENDAPAT / INVENTION BAHARU DIPERDEBAT",
@@ -1116,7 +1442,7 @@
     "translit": "'amma yatasaa'aluuna 'ani nnaba'i l'aziimi lladzii hum fiihi mukhtalifuuna kallaa saya'lamuuna tsumma kallaa saya'lamuuna"
   },
   {
-    "id": 56,
+    "id": 72,
     "noStart": 72,
     "noEnd": 72,
     "title": "TIDAK SEMUA PERKARA YANG DIBENCI ITU BURUK",
@@ -1136,8 +1462,29 @@
     "translit": "wa'asaa 'an takrahuu syay'an wahuwa khayrun llakum wa'asaa 'an tuhibbuu syay'an wahuwa syarrun llakum wallahu ya'lamu wa'antum laa ta'lamuuna"
   },
   {
-    "id": 57,
+    "id": 73,
     "noStart": 73,
+    "noEnd": 73,
+    "title": "NEGERI YANG SUBUR DAN TIDAK SUBUR",
+    "text": "Negeri yang baik keluar tumbuh-tumbuhannya dengan izin Tuhannya. Negeri yang buruk tidak keluar tumbuh-tumbuhannya, melainkan dengan bersusah payah. Demikianlah Kami terangkan ayat-ayat itu bagi kaum yag bersyukur.",
+    "surahNumber": 7,
+    "surahName": "Al A'raaf",
+    "ayahRange": "58",
+    "surahDisplay": "Surah 7: Al A'raaf, Ayat 58",
+    "rangeLabel": "Falsafah 73",
+    "arabic": "وَٱلۡبَلَدُ ٱلطَّیِّبُ یَخۡرُجُ نَبَاتُهُۥ بِإِذۡنِ رَبِّهِۦۖ وَٱلَّذِی خَبُثَ لَا یَخۡرُجُ إِلَّا نَكِدࣰاۚ كَذَ ٰلِكَ نُصَرِّفُ ٱلۡـَٔایَـٰتِ لِقَوۡمࣲ یَشۡكُرُونَ",
+    "kataKunci": [
+      "Kehijauan . Tumbuh-tumbuhan . Tanda . Kesuburan . Negeri"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Ingatlah bahawa kehijauan itu tanda kesuburan. Dua: Ingatlah bahawa negeri yang baik itu dihias dengan tumbuh-tumbuhan. Tiga: Ingatlah negeri yang buruk tidak dihiasi dengan kehijauan pokok-pokok padanya. Empat: Ingatlah bahawa kehijauan adalah isyarat semangat rakyat untuk maju dengan menyuburkan negeri di wajah kehijauan ekonomi."
+    ],
+    "translit": "walbaladu ttayyibu yakhruju nabaatuhuu bi'idzni rabbihii walladzii khabutsa laa yakhruju 'illaa nakidan kadzaalika nusarrifu l'aayaati liqawmin yasykuruuna",
+    "catitanShared": "73–74"
+  },
+  {
+    "id": 74,
+    "noStart": 74,
     "noEnd": 74,
     "title": "NEGERI YANG SUBUR DAN TIDAK SUBUR",
     "text": "Negeri yang baik keluar tumbuh-tumbuhannya dengan izin Tuhannya. Negeri yang buruk tidak keluar tumbuh-tumbuhannya, melainkan dengan bersusah payah. Demikianlah Kami terangkan ayat-ayat itu bagi kaum yag bersyukur.",
@@ -1145,19 +1492,19 @@
     "surahName": "Al A'raaf",
     "ayahRange": "58",
     "surahDisplay": "Surah 7: Al A'raaf, Ayat 58",
-    "rangeLabel": "Falsafah 73-74",
+    "rangeLabel": "Falsafah 74",
     "arabic": "وَٱلۡبَلَدُ ٱلطَّیِّبُ یَخۡرُجُ نَبَاتُهُۥ بِإِذۡنِ رَبِّهِۦۖ وَٱلَّذِی خَبُثَ لَا یَخۡرُجُ إِلَّا نَكِدࣰاۚ كَذَ ٰلِكَ نُصَرِّفُ ٱلۡـَٔایَـٰتِ لِقَوۡمࣲ یَشۡكُرُونَ",
     "kataKunci": [
-      "Kehijauan . Tumbuh-tumbuhan . Tanda . Kesuburan . Negeri",
       "Kehijauan . Tumbuhan . Tanda . Warna . Negeri"
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Ingatlah bahawa kehijauan itu tanda kesuburan. Dua: Ingatlah bahawa negeri yang baik itu dihias dengan tumbuh-tumbuhan. Tiga: Ingatlah negeri yang buruk tidak dihiasi dengan kehijauan pokok-pokok padanya. Empat: Ingatlah bahawa kehijauan adalah isyarat semangat rakyat untuk maju dengan menyuburkan negeri di wajah kehijauan ekonomi."
     ],
-    "translit": "walbaladu ttayyibu yakhruju nabaatuhuu bi'idzni rabbihii walladzii khabutsa laa yakhruju 'illaa nakidan kadzaalika nusarrifu l'aayaati liqawmin yasykuruuna"
+    "translit": "walbaladu ttayyibu yakhruju nabaatuhuu bi'idzni rabbihii walladzii khabutsa laa yakhruju 'illaa nakidan kadzaalika nusarrifu l'aayaati liqawmin yasykuruuna",
+    "catitanShared": "73–74"
   },
   {
-    "id": 58,
+    "id": 75,
     "noStart": 75,
     "noEnd": 75,
     "title": "JANGAN SOMBONG DAN BERPALING MUKA",
@@ -1177,7 +1524,7 @@
     "translit": "walaa tusa''ir khaddaka linnaasi walaa tamsyi fii l'ardhi marahan 'inna llaha laa yuhibbu kulla mukhtaalin fakhuurin"
   },
   {
-    "id": 59,
+    "id": 76,
     "noStart": 76,
     "noEnd": 76,
     "title": "SETIAP SESUATU ITU ADA JALAN ALLAH",
@@ -1197,7 +1544,7 @@
     "translit": "siraati llahi lladzii lahuu maa fii ssamaawaati wamaa fii l'ardhi 'alaa 'ilaa llahi tasiiru l'umuuru"
   },
   {
-    "id": 60,
+    "id": 77,
     "noStart": 77,
     "noEnd": 77,
     "title": "PESANAN TERIMA KASIH KEPADA IBUBAPA",
@@ -1217,7 +1564,7 @@
     "translit": "wawassaynaa l'insaana biwaalidayhi hamalathu 'ummuhuu wahnan 'alaa wahnin wafisaaluhuu fii 'aamayni 'ani sykur lii waliwaalidayka 'ilayya lmasiiru"
   },
   {
-    "id": 61,
+    "id": 78,
     "noStart": 78,
     "noEnd": 78,
     "title": "ALLAH TIDAK MENGUBAH NASIB SESEORANG",
@@ -1237,7 +1584,7 @@
     "translit": "'inna llaha laa yughayyiru maa biqawmin hattaa yughayyiruu maa bi'anfusihim"
   },
   {
-    "id": 62,
+    "id": 79,
     "noStart": 79,
     "noEnd": 79,
     "title": "ALLAH SEBAIK BAIK PERANCANG",
@@ -1257,7 +1604,7 @@
     "translit": "wamakaruu wamakara llahu wallahu khayru lmaakiriina"
   },
   {
-    "id": 63,
+    "id": 80,
     "noStart": 80,
     "noEnd": 80,
     "title": "MINTA TOLONG BERSAMA SABAR DAN SOLAT",
@@ -1277,7 +1624,7 @@
     "translit": "yaa'ayyuhaa lladziina 'aamanuu sta'iinuu bissabri wassalawaati 'inna llaha ma'a ssaabiriina"
   },
   {
-    "id": 64,
+    "id": 81,
     "noStart": 81,
     "noEnd": 81,
     "title": "BERTAWAKAL SETELAH BULAT AZAM",
@@ -1297,7 +1644,7 @@
     "translit": "fa'idzaa 'azamta fatawakkal 'alaa llahi 'inna llaha yuhibbu lmutawakkiliina"
   },
   {
-    "id": 65,
+    "id": 82,
     "noStart": 82,
     "noEnd": 82,
     "title": "BERJALAN DI MUKA BUMI",
@@ -1317,7 +1664,7 @@
     "translit": "'afalam yasiiruu fii l'ardhi fatakuuna lahum quluubun ya'qiluuna bihaa 'aw 'aadzaanun yasma'uuna bihaa fa'innahaa laa ta'maa l'absaaru walaakin ta'maa lquluubu llatii fii ssuduuri"
   },
   {
-    "id": 66,
+    "id": 83,
     "noStart": 83,
     "noEnd": 83,
     "title": "PERSOALAN ROH",
@@ -1337,7 +1684,7 @@
     "translit": "wayas'aluunaka 'ani rruuhi quli rruuhu min 'amri rabbii wamaa 'uutiitum mmina l'ilmi 'illaa qaliilan"
   },
   {
-    "id": 67,
+    "id": 84,
     "noStart": 84,
     "noEnd": 84,
     "title": "MENGUTUS RASUL DENGAN PETUNJUK",
@@ -1357,7 +1704,7 @@
     "translit": "huwa lladzii 'arsala rasuulahuu bilhudaa wadiini lhaqqi liyuzhirahuu 'alaa ddiini kullihii wakafaa billahi syahiidan"
   },
   {
-    "id": 68,
+    "id": 85,
     "noStart": 85,
     "noEnd": 85,
     "title": "JANGAN FAHAM AL QURAN SEKERAT KERAT",
@@ -1377,7 +1724,7 @@
     "translit": "fata'aalaa llahu lmaliku lhaqqu walaa ta'jal bilqur'aani min qabli 'an yuqdhaa 'ilayka wahyuhuu waqu rrabbi zidnii 'ilman"
   },
   {
-    "id": 69,
+    "id": 86,
     "noStart": 86,
     "noEnd": 86,
     "title": "KISAH ITU IBRAH/PENGAJARAN",
@@ -1397,7 +1744,7 @@
     "translit": "laqad kaana fii qasasihim 'ibratun lli'ulii l'albaabi maa kaana hadiitsan yuftaraa walaakin tasdiiqa lladzii bayna yadayhi watafsiila kulli syay'in wahudan warahmatan lliqawmin yu'minuuna"
   },
   {
-    "id": 70,
+    "id": 87,
     "noStart": 87,
     "noEnd": 87,
     "title": "TUHAN KURNIAKAN RAHMAT",
@@ -1417,7 +1764,7 @@
     "translit": "wawahabnaa lahum mmin rrahmatinaa waja'alnaa lahum lisaana sidqin 'aliyyan"
   },
   {
-    "id": 71,
+    "id": 88,
     "noStart": 88,
     "noEnd": 88,
     "title": "DOA KEBAIKAN DUNIA & AKHIRAT",
@@ -1437,7 +1784,7 @@
     "translit": "waminhum mman yaquulu rabbanaa 'aatinaa fii ddunyaa hasanatan wafii l'aakhirati hasanatan waqinaa 'adzaaba nnaari 'ulaa'ika lahum nasiibun mmimmaa kasabuu wallahu sarii'u lhisaabi"
   },
   {
-    "id": 72,
+    "id": 89,
     "noStart": 89,
     "noEnd": 89,
     "title": "SETIAP YANG GHAIB TERMAKTUB DALAM KITAB",
@@ -1457,7 +1804,7 @@
     "translit": "wamaa min ghaa'ibatin fii ssamaa'i wal'ardhi 'illaa fii kitaabin mmubiinin"
   },
   {
-    "id": 73,
+    "id": 90,
     "noStart": 90,
     "noEnd": 90,
     "title": "SETIAP SESUATU ITU ADA FORMULA",
@@ -1477,7 +1824,7 @@
     "translit": "'innaa kulla syay'in khalaqnaahu biqadarin wamaa 'amrunaa 'illaa waahidatun kalamhi bilbasari"
   },
   {
-    "id": 74,
+    "id": 91,
     "noStart": 91,
     "noEnd": 91,
     "title": "BETUL CARANYA HUJAN TURUN LEBAT",
@@ -1497,7 +1844,7 @@
     "translit": "wa'allawi staqaamuu 'alaa ttariiqati la'asqaynaahum mmaa'an ghadaqan"
   },
   {
-    "id": 75,
+    "id": 92,
     "noStart": 92,
     "noEnd": 92,
     "title": "HIDUP BERAGAMA BERPUAK PUAK",
@@ -1517,7 +1864,7 @@
     "translit": "mina lladziina farraquu diinahum wakaanuu syiya'an kullu hizbi bimaa ladayhim farihuuna"
   },
   {
-    "id": 76,
+    "id": 93,
     "noStart": 93,
     "noEnd": 93,
     "title": "MENYEBAR HADITH PALSU",
@@ -1537,7 +1884,7 @@
     "translit": "wamina nnaasi man yasytarii lahwa lhadiitsi liyudhilla 'an sabiili llahi bighayri 'ilmin wayattakhidzahaa huzuwan 'ulaa'ika lahum 'adzaabun mmuhiinun"
   },
   {
-    "id": 77,
+    "id": 94,
     "noStart": 94,
     "noEnd": 94,
     "title": "ALLAH BELI DIRI MUKMIN & HARTA MUKMIN DENGAN SYURGA",
@@ -1557,7 +1904,7 @@
     "translit": "'inna llaha sytaraa mina lmu'miniina 'anfusahum wa'amwaalahum bi'anna lahumu ljannata"
   },
   {
-    "id": 78,
+    "id": 95,
     "noStart": 95,
     "noEnd": 95,
     "title": "MINTA TERGOLONG DALAM KUMPULAN PENGASHLIH",
@@ -1577,7 +1924,7 @@
     "translit": "rabbi hab lii hukman wa'alhiqnii bissaalihiina waj'a llii lisaana sidqin fii l'aakhiriina waj'alnii min waratsati jannati nna'iimi"
   },
   {
-    "id": 79,
+    "id": 96,
     "noStart": 96,
     "noEnd": 96,
     "title": "HARTA DAN ANAK MEMBERI FAEDAH KEPADA YANG BERHATI SUCI",
@@ -1597,7 +1944,7 @@
     "translit": "yawma laa yanfa'u maalun walaa banuuna 'illaa man 'ataa llaha biqalbin saliimin wa'uzlifati ljannatu lilmuttaqiina"
   },
   {
-    "id": 80,
+    "id": 97,
     "noStart": 97,
     "noEnd": 97,
     "title": "PENENTUAN JODOH RUMAH TANGGA",
@@ -1617,7 +1964,7 @@
     "translit": "wamin 'aayaatihii 'an khalaqa lakum mmin 'anfusikum 'azwaajan llitaskunuu 'ilayhaa waja'ala baynakum mmawaddatan warahmatan 'inna fii dzaalika la'aayaatin lliqawmin yatafakkaruuna"
   },
   {
-    "id": 81,
+    "id": 98,
     "noStart": 98,
     "noEnd": 98,
     "title": "JANGAN SOMBONG DAN BERPALING MUKA",
@@ -1637,8 +1984,28 @@
     "translit": "walaa tusa''ir khaddaka linnaasi walaa tamsyi fii l'ardhi marahan 'inna llaha laa yuhibbu kulla mukhtaalin fakhuurin waqsid fii masyyika waghdhudh min sawtika 'inna 'ankara l'aswaati lasawtu lhamiiri"
   },
   {
-    "id": 82,
+    "id": 99,
     "noStart": 99,
+    "noEnd": 99,
+    "title": "SETIAP YANG MELATA DISEDIAKAN REZEKI",
+    "text": "Tidak ada sesuatu yang melata di bumi melainkan ke atas Allah dan Dia mengetahui tempat kediamannya dan tempat menyimpannya. Segala-gala tersebut itu dalam kitab yang nyata.",
+    "surahNumber": 11,
+    "surahName": "Hud",
+    "ayahRange": "6",
+    "surahDisplay": "Surah 11: Hud, Ayat 6",
+    "rangeLabel": "Falsafah 99",
+    "arabic": "۞ وَمَا مِن دَاۤبَّةࣲ فِی ٱلۡأَرۡضِ إِلَّا عَلَى ٱللَّهِ رِزۡقُهَا وَیَعۡلَمُ مُسۡتَقَرَّهَا وَمُسۡتَوۡدَعَهَاۚ كُلࣱّ فِی كِتَـٰبࣲ مُّبِینࣲ",
+    "kataKunci": [
+      "Setiap . suatu . melata . di bumi . Ke atas . Allah . Rezekinya."
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka tiga (3) perkara kena masuk dalam kepala: Satu: Ingatlah rezeki itu dari Allah untuk setiap sesuatu di alam maya. Dua: Ingatlah bahawa setiap punca rezeki itu ada tempat lokasinya serta ada tempat persembunyiannya. Tiga: Ingatlah bahawa setiap punca rezeki bersama tempat lokasinya dan tempat persembunyiannya dinyatakan oleh Al Quran di wajah terbuka peluang pencarian furqan kehidupan."
+    ],
+    "translit": "wamaa min daabbatin fii l'ardhi 'illaa 'alaa llahi rizquhaa waya'lamu mustaqarrahaa wamustawda'ahaa kullun fii kitaabin mmubiinin"
+  },
+  {
+    "id": 100,
+    "noStart": 100,
     "noEnd": 100,
     "title": "SETIAP YANG MELATA DISEDIAKAN REZEKI",
     "text": "Tidak ada sesuatu yang melata di bumi melainkan ke atas Allah dan Dia mengetahui tempat kediamannya dan tempat menyimpannya. Segala-gala tersebut itu dalam kitab yang nyata.",
@@ -1646,20 +2013,18 @@
     "surahName": "Hud",
     "ayahRange": "6",
     "surahDisplay": "Surah 11: Hud, Ayat 6",
-    "rangeLabel": "Falsafah 99-100",
+    "rangeLabel": "Falsafah 100",
     "arabic": "۞ وَمَا مِن دَاۤبَّةࣲ فِی ٱلۡأَرۡضِ إِلَّا عَلَى ٱللَّهِ رِزۡقُهَا وَیَعۡلَمُ مُسۡتَقَرَّهَا وَمُسۡتَوۡدَعَهَاۚ كُلࣱّ فِی كِتَـٰبࣲ مُّبِینࣲ",
     "kataKunci": [
-      "Setiap . suatu . melata . di bumi . Ke atas . Allah . Rezekinya.",
       "Setiap . suatu . melata . di bumi . punca . rezeki . Allah"
     ],
     "catitan": [
-      "Bila baca saja ayat ini, maka tiga (3) perkara kena masuk dalam kepala: Satu: Ingatlah rezeki itu dari Allah untuk setiap sesuatu di alam maya. Dua: Ingatlah bahawa setiap punca rezeki itu ada tempat lokasinya serta ada tempat persembunyiannya. Tiga: Ingatlah bahawa setiap punca rezeki bersama tempat lokasinya dan tempat persembunyiannya dinyatakan oleh Al Quran di wajah terbuka peluang pencarian furqan kehidupan.",
       "Bila baca saja ayat ini, maka empat (4) perkara kena masuk dalam kepala: Satu: Ingatlah rezeki itu dari Allah untuk setiap sesuatu di alam maya. Dua: Ingatlah bahawa setiap punca rezeki itu ada tempat lokasinya serta ada tempat persembunyiannya. Tiga: Ingatlah bahawa setiap punca rezeki bersama tempat lokasinya dan tempat persembunyiannya dinyatakan oleh Al Quran di wajah terbuka peluang pencarian furqan kehidupan. Empat: Terokailah kitab-kitab Allah dan Al Quran dirupa punca informasi Bashaair - rezeki yang tersimpan padanya."
     ],
     "translit": "wamaa min daabbatin fii l'ardhi 'illaa 'alaa llahi rizquhaa waya'lamu mustaqarrahaa wamustawda'ahaa kullun fii kitaabin mmubiinin"
   },
   {
-    "id": 83,
+    "id": 101,
     "noStart": 101,
     "noEnd": 101,
     "title": "HADAP MUKA UNTUK MENYAKSIKAN TUHAN",
@@ -1679,7 +2044,7 @@
     "translit": "'innii wajjahtu wajhiya lilladzii fatara ssamaawaati wal'ardha haniifan wamaa 'ana mina lmusyrikiina"
   },
   {
-    "id": 84,
+    "id": 102,
     "noStart": 102,
     "noEnd": 102,
     "title": "PENYERAHAN 100% KEPADA TUHAN",
@@ -1699,7 +2064,7 @@
     "translit": "qul 'inna salaatii wanusukii wamahyaaya wamamaatii lillahi rabbi l'aalamiina laa syariika lahuu wabidzaalika 'umirtu wa'ana 'awwalu lmuslimiina"
   },
   {
-    "id": 85,
+    "id": 103,
     "noStart": 103,
     "noEnd": 103,
     "title": "KENAPA TAK TADABBUR AL QURAN",
@@ -1719,7 +2084,7 @@
     "translit": "'afalaa yatadabbaruuna lqur'aana 'am 'alaa quluubin 'aqfaaluhaa"
   },
   {
-    "id": 86,
+    "id": 104,
     "noStart": 104,
     "noEnd": 104,
     "title": "KELUHAN NABI UMATNYA MENINGGALKAN AL QURAN",
@@ -1739,7 +2104,7 @@
     "translit": "waqaala rrasuulu yaarabbi 'inna qawmii ttakhadzuu haadzaa lqur'aana mahjuuran"
   },
   {
-    "id": 87,
+    "id": 105,
     "noStart": 105,
     "noEnd": 105,
     "title": "LAUTAN JADI DAKWAT",
@@ -1759,7 +2124,7 @@
     "translit": "qu llaw kaana lbahru midaadan llikalimaati rabbii lanafida lbahru qabla 'an tanfada kalimaatu rabbii walaw ji'naa bimitslihii madadan"
   },
   {
-    "id": 88,
+    "id": 106,
     "noStart": 106,
     "noEnd": 106,
     "title": "KALIMAH YANG BAIK SEPERTI POKOK YANG BAIK",
@@ -1779,7 +2144,7 @@
     "translit": "'alam tara kayfa dharaba llahu matsalan kalimatan tayyibatan kasyajaratin tayyibatin 'asluhaa tsaabitun wafar'uhaa fii ssamaa'i tu'tii 'ukulahaa kulla hiini bi'idzni rabbihaa wayadhribu llahu l'amtsaala linnaasi la'allahum yatadzakkaruuna"
   },
   {
-    "id": 89,
+    "id": 107,
     "noStart": 107,
     "noEnd": 107,
     "title": "BERDAKWAH TANPA UPAH",
@@ -1799,8 +2164,29 @@
     "translit": "attabi'uu man llaa yas'alukum 'ajran wahum mmuhtaduuna"
   },
   {
-    "id": 90,
+    "id": 108,
     "noStart": 108,
+    "noEnd": 108,
+    "title": "FURQAN DITURUNKAN UNTUK PERINGATAN",
+    "text": "Maha suci (Tuhan) yang menurunkan furqan (Quran) kepada hambaNya. Supaya ia memberi peringatan kepada seluruh alam.",
+    "surahNumber": 25,
+    "surahName": "Al Furqan",
+    "ayahRange": "1",
+    "surahDisplay": "Surah 25: Al Furqan, Ayat 1",
+    "rangeLabel": "Falsafah 108",
+    "arabic": "۞ تَبَارَكَ ٱلَّذِی نَزَّلَ ٱلۡفُرۡقَانَ عَلَىٰ عَبۡدِهِۦ لِیَكُونَ لِلۡعَـٰلَمِینَ نَذِیرًا",
+    "kataKunci": [
+      "Al Furqan . Pembeza . Buruk . Baik . Kata . At Taabi’in . Di mata . Akhirat"
+    ],
+    "catitan": [
+      "Bila baca saja ayat ini, maka tiga (3) perkara kena masuk dalam kepala: Satu: Diri kena ingat istilah furqan itu pada dua (2) lapis. (i): Istilah furqan disudut pembeza buruk dan baik. (ii): Istilah furqan pada maksud end product (hasil pembaharuan) setelah sumber asas kemajuan dihurai dan ditafshilkan. Dua: Diri kena ingat Al Quran adalah kitab pengetahuan dan peringatan untuk seluruh alam dan ianya bukan hak milik Islam. Tiga: Diri kena ingat bahawa perbincangan Al Quran berkait rapat dengan furqan dan bukan berkait rapat dengan pahala. Dihakikat rupa: ‘Amilusshaalihaat bukan boleh dizahirkan oleh kegiatan berpahala tetapi boleh dizahirkan oleh furqan dari huraian sumber dan kegiatan ilmiah manusia."
+    ],
+    "translit": "tabaaraka lladzii nazzala lfurqaana 'alaa 'abdihii liyakuuna lil'aalamiina nadziiran",
+    "catitanShared": "108–109"
+  },
+  {
+    "id": 109,
+    "noStart": 109,
     "noEnd": 109,
     "title": "FURQAN DITURUNKAN UNTUK PERINGATAN",
     "text": "Maha suci (Tuhan) yang menurunkan furqan (Quran) kepada hambaNya. Supaya ia memberi peringatan kepada seluruh alam.",
@@ -1808,19 +2194,19 @@
     "surahName": "Al Furqan",
     "ayahRange": "1",
     "surahDisplay": "Surah 25: Al Furqan, Ayat 1",
-    "rangeLabel": "Falsafah 108-109",
+    "rangeLabel": "Falsafah 109",
     "arabic": "۞ تَبَارَكَ ٱلَّذِی نَزَّلَ ٱلۡفُرۡقَانَ عَلَىٰ عَبۡدِهِۦ لِیَكُونَ لِلۡعَـٰلَمِینَ نَذِیرًا",
     "kataKunci": [
-      "Al Furqan . Pembeza . Buruk . Baik . Kata . At Taabi’in . Di mata . Akhirat",
       "Al Furqan . Pembuka . Rahsia . Sumber . Kemajuan . Kehidupan . Di sudut . Kontemporari"
     ],
     "catitan": [
       "Bila baca saja ayat ini, maka tiga (3) perkara kena masuk dalam kepala: Satu: Diri kena ingat istilah furqan itu pada dua (2) lapis. (i): Istilah furqan disudut pembeza buruk dan baik. (ii): Istilah furqan pada maksud end product (hasil pembaharuan) setelah sumber asas kemajuan dihurai dan ditafshilkan. Dua: Diri kena ingat Al Quran adalah kitab pengetahuan dan peringatan untuk seluruh alam dan ianya bukan hak milik Islam. Tiga: Diri kena ingat bahawa perbincangan Al Quran berkait rapat dengan furqan dan bukan berkait rapat dengan pahala. Dihakikat rupa: ‘Amilusshaalihaat bukan boleh dizahirkan oleh kegiatan berpahala tetapi boleh dizahirkan oleh furqan dari huraian sumber dan kegiatan ilmiah manusia."
     ],
-    "translit": "tabaaraka lladzii nazzala lfurqaana 'alaa 'abdihii liyakuuna lil'aalamiina nadziiran"
+    "translit": "tabaaraka lladzii nazzala lfurqaana 'alaa 'abdihii liyakuuna lil'aalamiina nadziiran",
+    "catitanShared": "108–109"
   },
   {
-    "id": 91,
+    "id": 110,
     "noStart": 110,
     "noEnd": 110,
     "title": "BOLEHKAH PERDENGARKAN AL QURAN PADA ORANG PEKAK",
@@ -1840,7 +2226,7 @@
     "translit": "waminhum mman yastami'uuna 'ilayka 'afa'anta tusmi'u ssumma walaw kaanuu laa ya'qiluuna"
   },
   {
-    "id": 92,
+    "id": 111,
     "noStart": 111,
     "noEnd": 111,
     "title": "BOLEHKAH MEMPERLIHATKAN AL QURAN PADA ORANG BUTA",
@@ -1860,7 +2246,7 @@
     "translit": "waminhum mman yanzuru 'ilayka 'afa'anta tahdii l'umya walaw kaanuu laa yubsiruuna"
   },
   {
-    "id": 93,
+    "id": 112,
     "noStart": 112,
     "noEnd": 112,
     "title": "BERI PERINGATAN ATAU TIDAK, SAMA SAHAJA PADA ORANG INGKAR",
@@ -1880,7 +2266,7 @@
     "translit": "'inna lladziina kafaruu sawaa'un 'alayhim 'a'andzartahum 'am lam tundzirhum laa yu'minuuna"
   },
   {
-    "id": 94,
+    "id": 113,
     "noStart": 113,
     "noEnd": 113,
     "title": "SERULAH KE JALAN TUHANMU",
@@ -1900,7 +2286,7 @@
     "translit": "ad'u 'ilaa sabiili rabbika bilhikmati walmaw'izati lhasanati wajaadilhum billatii hiya 'ahsanu 'inna rabbaka huwa 'a'lamu biman dhalla 'an sabiilihii wahuwa 'a'lamu bilmuhtadiina"
   },
   {
-    "id": 95,
+    "id": 114,
     "noStart": 114,
     "noEnd": 114,
     "title": "POHON LAPANG DADA",
@@ -1920,7 +2306,7 @@
     "translit": "qaala rabbi syrah lii sadrii wayassir lii 'amrii wahlul 'uqdatan mmin llisaanii yafqahuu qawlii"
   },
   {
-    "id": 96,
+    "id": 115,
     "noStart": 115,
     "noEnd": 115,
     "title": "CARI HABUAN AKHIRAT TANPA LUPA HABUAN DUNIA",
@@ -1940,7 +2326,7 @@
     "translit": "wabtaghi fiimaa 'aataaka llahu ddaara l'aakhirata walaa tansa nasiibaka mina ddunyaa wa'ahsin kamaa 'ahsana llahu 'ilayka walaa tabghi lfasaada fii l'ardhi 'inna llaha laa yuhibbu lmufsidiina"
   },
   {
-    "id": 97,
+    "id": 116,
     "noStart": 116,
     "noEnd": 116,
     "title": "PERUMPAMAAN AMALAN YANG SIA-SIA / AYAT FATAMORGANA",
@@ -1960,7 +2346,7 @@
     "translit": "walladziina kafaruu 'a'maaluhum kasaraabi biqii'atin yahsabuhu zzam'aanu maa'an hattaa 'idzaa jaa'ahuu lam yajidhu syay'an wawajada llaha 'indahuu fawaffaahu hisaabahuu wallahu sarii'u lhisaabi"
   },
   {
-    "id": 98,
+    "id": 117,
     "noStart": 117,
     "noEnd": 117,
     "title": "LELAKI TIDAK LALAI WALAUPUN SIBUK BERNIAGA",
@@ -1980,7 +2366,7 @@
     "translit": "rijaalun llaa tulhiihim tijaaratun walaa bay'un 'an dzikri llahi wa'iqaami ssalawaati wa'iitaa'i zzakawaati yakhaafuuna yawman tataqallabu fiihi lquluubu wal'absaaru liyajziyahumu llahu 'ahsana maa 'amiluu wayaziidahum mmin fadhlihii wallahu yarzuqu man yasyaa'u bighayri hisaabin"
   },
   {
-    "id": 99,
+    "id": 118,
     "noStart": 118,
     "noEnd": 118,
     "title": "RASULULLAH IKUTAN TERBAIK",
@@ -2000,7 +2386,7 @@
     "translit": "llaqad kaana lakum fii rasuuli llahi 'uswatun hasanatun lliman kaana yarjuu llaha walyawma l'aakhira wadzakara llaha katsiiran"
   },
   {
-    "id": 100,
+    "id": 119,
     "noStart": 119,
     "noEnd": 119,
     "title": "AYAT BERUMAH TANGGA",
@@ -2020,7 +2406,7 @@
     "translit": "walladziina yaquuluuna rabbanaa hab lanaa min 'azwaajinaa wadzurriyyaatinaa qurrata 'a'yunin waj'alnaa lilmuttaqiina 'imaaman"
   },
   {
-    "id": 101,
+    "id": 120,
     "noStart": 120,
     "noEnd": 120,
     "title": "SEKIRANYA NAFSU MENGEPALAI KEBENARAN",
@@ -2040,7 +2426,7 @@
     "translit": "walawi ttaba'a lhaqqu 'ahwaa'ahum lafasadati ssamaawaatu wal'ardhu waman fiihinna bal 'ataynaahum bidzikrihim fahum 'an dzikrihim mmu'ridhuuna"
   },
   {
-    "id": 102,
+    "id": 121,
     "noStart": 121,
     "noEnd": 121,
     "title": "MENCARI JALAN WASILAH",
@@ -2060,7 +2446,7 @@
     "translit": "yaa'ayyuhaa lladziina 'aamanuu ttaquu llaha wabtaghuu 'ilayhi lwasiilata wajaahiduu fii sabiilihii la'allakum tuflihuuna"
   },
   {
-    "id": 103,
+    "id": 122,
     "noStart": 122,
     "noEnd": 122,
     "title": "RASULULLAH IKUTAN TERBAIK",
@@ -2080,7 +2466,7 @@
     "translit": "llaqad kaana lakum fii rasuuli llahi 'uswatun hasanatun lliman kaana yarjuu llaha walyawma l'aakhira wadzakara llaha katsiiran"
   },
   {
-    "id": 104,
+    "id": 123,
     "noStart": 123,
     "noEnd": 123,
     "title": "JANGAN MENGULANGI KESALAHAN YANG SAMA",
@@ -2100,7 +2486,7 @@
     "translit": "ya'izukumu llahu 'an ta'uuduu limitslihii 'abadan 'in kuntum mmu'miniina"
   },
   {
-    "id": 105,
+    "id": 124,
     "noStart": 124,
     "noEnd": 124,
     "title": "PENGASLIH MEWARISI BUMI",
@@ -2120,7 +2506,7 @@
     "translit": "walaqad katabnaa fii zzabuuri min ba'di dzdzikri 'anna l'ardha yaritsuhaa 'ibaadiya ssaalihuuna"
   },
   {
-    "id": 106,
+    "id": 125,
     "noStart": 125,
     "noEnd": 125,
     "title": "SETIAP UMAT ADA SYARIAT MASING-MASING",
@@ -2140,7 +2526,7 @@
     "translit": "llikulli 'ummatin ja'alnaa mansakan hum naasikuuhu falaa yunaazi'unnaka fii l'amri wad'u 'ilaa rabbika 'innaka la'alaa hudan mmustaqiimin"
   },
   {
-    "id": 107,
+    "id": 126,
     "noStart": 126,
     "noEnd": 126,
     "title": "IKUTLAH SETIAP SYARIAT YANG DITETAPKAN",
@@ -2160,7 +2546,7 @@
     "translit": "tsumma ja'alnaaka 'alaa syarii'atin mmina l'amri fattabi'haa walaa tattabi' 'ahwaa'a lladziina laa ya'lamuuna"
   },
   {
-    "id": 108,
+    "id": 127,
     "noStart": 127,
     "noEnd": 127,
     "title": "SETIAP NEGERI ADA PEMBESAR YANG JAHAT",
@@ -2180,7 +2566,7 @@
     "translit": "wakadzaalika ja'alnaa fii kulli qaryatin 'akaabira mujrimiihaa liyamkuruu fiihaa wamaa yamkuruuna 'illaa bi'anfusihim wamaa yasy'uruuna"
   },
   {
-    "id": 109,
+    "id": 128,
     "noStart": 128,
     "noEnd": 128,
     "title": "ORANG YANG PALING RUGI",
@@ -2200,7 +2586,7 @@
     "translit": "qul hal nunabbi'ukum bil'akhsariina 'a'maalan lladziina dhalla sa'yuhum fii lhayawaati ddunyaa wahum yahsabuuna 'annahum yuhsinuuna sun'an"
   },
   {
-    "id": 110,
+    "id": 129,
     "noStart": 129,
     "noEnd": 129,
     "title": "AL QURAN DALAM BAHASA ARAB - IBU SEGALA KITAB",
@@ -2220,7 +2606,7 @@
     "translit": "'innaa ja'alnaahu qur'aanan 'arabiyyan lla'allakum ta'qiluuna wa'innahuu fii 'ummi lkitaabi ladaynaa la'aliyyun hakiimun"
   },
   {
-    "id": 111,
+    "id": 130,
     "noStart": 130,
     "noEnd": 130,
     "title": "DOA LENGGOK KE LANGIT",
@@ -2240,7 +2626,7 @@
     "translit": "muhti'iina muqni'ii ru'uusihim laa yartaddu 'ilayhim tarfuhum wa'af'idatuhum hawaa'un"
   },
   {
-    "id": 112,
+    "id": 131,
     "noStart": 131,
     "noEnd": 131,
     "title": "SYUKUR DITAMBAH-KAFIR DIAZAB",
@@ -2260,7 +2646,7 @@
     "translit": "wa'idz ta'adzdzana rabbukum la'in syakartum la'aziidannakum wala'in kafartum 'inna 'adzaabii lasyadiidun"
   },
   {
-    "id": 113,
+    "id": 132,
     "noStart": 132,
     "noEnd": 132,
     "title": "NIKMAT ALLAH TIDAK TERHITUNG",
@@ -2280,7 +2666,7 @@
     "translit": "wa'aataakum mmin kulli maa sa'altumuuhu wa'in ta'udduu ni'mata llahi laa tuhsuuhaa 'inna l'insaana lazaluumun kaffaarun"
   },
   {
-    "id": 114,
+    "id": 133,
     "noStart": 133,
     "noEnd": 133,
     "title": "ORANG TIDAK BERILMU BANYAK PRASANGKA",
@@ -2300,7 +2686,7 @@
     "translit": "wamaa lahum bihii min 'ilmin 'in yattabi'uuna 'illaa zzanna wa'inna zzanna laa yughnii mina lhaqqi syay'an"
   },
   {
-    "id": 115,
+    "id": 134,
     "noStart": 134,
     "noEnd": 134,
     "title": "GALAKAN MENEROKA LANGIT DAN BUMI",
@@ -2320,7 +2706,7 @@
     "translit": "yaama'syara ljinni wal'insi 'ini stata'tum 'an tanfudzuu min 'aqtaari ssamaawaati wal'ardhi fanfudzuu laa tanfudzuuna 'illaa bisultaanin"
   },
   {
-    "id": 116,
+    "id": 135,
     "noStart": 135,
     "noEnd": 135,
     "title": "MEMINJAMKAN KEBAIKAN KEPADA ALLAH AKAN DIGANDAKAN GANJARAN",
@@ -2340,7 +2726,7 @@
     "translit": "mman dzaa lladzii yuqridhu llaha qardhan hasanan fayudhaa'ifahuu lahuu walahuu 'ajrun kariimun"
   },
   {
-    "id": 117,
+    "id": 136,
     "noStart": 136,
     "noEnd": 136,
     "title": "AYAT MEMBENARKAN KEWUJUDAN HADITH",
@@ -2360,7 +2746,7 @@
     "translit": "bilbayyinaati wazzuburi wa'anzalnaa 'ilayka dzdzikra litubayyina linnaasi maa nuzzila 'ilayhim wala'allahum yatafakkaruuna"
   },
   {
-    "id": 118,
+    "id": 137,
     "noStart": 137,
     "noEnd": 137,
     "title": "TUGAS HADITH MENJELASKAN AL QURAN",
@@ -2380,7 +2766,7 @@
     "translit": "wamaa 'anzalnaa 'alayka lkitaaba 'illaa litubayyina lahumu lladzii khtalafuu fiihi wahudan warahmatan lliqawmin yu'minuuna"
   },
   {
-    "id": 119,
+    "id": 138,
     "noStart": 138,
     "noEnd": 138,
     "title": "PERINGATAN KEPADA AHLI KITAB JANGAN BERLEBIH DALAM AGAMA",
@@ -2400,7 +2786,7 @@
     "translit": "qul yaa'ahla lkitaabi laa taghluu fii diinikum ghayra lhaqqi walaa tattabi'uu 'ahwaa'a qawmin qad dhalluu min qablu wa'adhalluu katsiiran wadhalluu 'an sawaa'i ssabiili"
   },
   {
-    "id": 120,
+    "id": 139,
     "noStart": 139,
     "noEnd": 139,
     "title": "BERBISIK-BISIK DENGAN KEBAIKAN DAN TAQWA",
@@ -2420,7 +2806,7 @@
     "translit": "yaa'ayyuhaa lladziina 'aamanuu 'idzaa tanaajaytum falaa tatanaajaw bil'itsmi wal'udwaani wama'siyati rrasuuli watanaajaw bilbirri wattaqwaa wattaquu llaha lladzii 'ilayhi tuhsyaruuna"
   },
   {
-    "id": 121,
+    "id": 140,
     "noStart": 140,
     "noEnd": 140,
     "title": "KAMPUNG ORANG-ORANG TAQWA",
@@ -2440,7 +2826,7 @@
     "translit": "waqiila lilladziina ttaqaw maadzaa 'anzala rabbukum qaaluu khayran llilladziina 'ahsanuu fii haadzihi ddunyaa hasanatun waladaaru l'aakhirati khayrun walani'ma daaru lmuttaqiina"
   },
   {
-    "id": 122,
+    "id": 141,
     "noStart": 141,
     "noEnd": 141,
     "title": "MEMPERDAYA ORANG, DIRI TERSEKSA",
@@ -2460,7 +2846,7 @@
     "translit": "'afa'amina lladziina makaruu ssayyi'aati 'an yakhsifa llahu bihimu l'ardha 'aw ya'tiyahumu l'adzaabu min haytsu laa yasy'uruuna"
   },
   {
-    "id": 123,
+    "id": 142,
     "noStart": 142,
     "noEnd": 142,
     "title": "GENERASI PENGASLIH CITA-CITA KELUARGA",
@@ -2480,7 +2866,7 @@
     "translit": "rabbi hab lii mina ssaalihiina fabasysyarnaahu bighulaamin haliimin"
   },
   {
-    "id": 124,
+    "id": 143,
     "noStart": 143,
     "noEnd": 143,
     "title": "DOA AGAR DITEMPATKAN PADA KEBERKATAN",
@@ -2500,7 +2886,7 @@
     "translit": "waqu rrabbi 'anzilnii munzalan mmubaarakan wa'anta khayru lmunziliina"
   },
   {
-    "id": 125,
+    "id": 144,
     "noStart": 144,
     "noEnd": 144,
     "title": "KEJITUAN IMAN AKAN DIUJI",
@@ -2520,7 +2906,7 @@
     "translit": "'ahasiba nnaasu 'an yutrakuu 'an yaquuluu 'aamannaa wahum laa yuftanuuna walaqad fatannaa lladziina min qablihim falaya'lamanna llahu lladziina sadaquu walaya'lamanna lkaadzibiina"
   },
   {
-    "id": 126,
+    "id": 145,
     "noStart": 145,
     "noEnd": 145,
     "title": "SYAITAN KEHORMAT",
@@ -2540,7 +2926,7 @@
     "translit": "waqaala lladziina kafaruu rabbanaa 'arinaa lladzayni 'adhallaanaa mina ljinni wal'insi naj'alhumaa tahta 'aqdaaminaa liyakuunaa mina l'asfaliina"
   },
   {
-    "id": 127,
+    "id": 146,
     "noStart": 146,
     "noEnd": 146,
     "title": "INGAT TUHAN DIHATI",
@@ -2560,7 +2946,7 @@
     "translit": "wadzkur rrabbaka fii nafsika tadharru'an wakhiifatan waduuna ljahri mina lqawli bilghuduwwi wal'aasaali walaa takun mmina lghaafiliina"
   },
   {
-    "id": 128,
+    "id": 147,
     "noStart": 147,
     "noEnd": 147,
     "title": "WAHYU BUKAN REKAAN",
@@ -2580,7 +2966,7 @@
     "translit": "wa'idzaa lam ta'tihim bi'aayatin qaaluu lawlaa jtabaytahaa qul 'innamaa 'attabi'u maa yuuhaa 'ilayya min rrabbii haadzaa basaa'iru min rrabbikum wahudan warahmatun lliqawmin yu'minuuna"
   },
   {
-    "id": 129,
+    "id": 148,
     "noStart": 148,
     "noEnd": 148,
     "title": "ORANG MATI TIDAK MENDENGAR",
@@ -2600,7 +2986,7 @@
     "translit": "wamaa yastawii l'ahyaa'u walaa l'amwaatu 'inna llaha yusmi'u man yasyaa'u wamaa 'anta bimusmi'in mman fii lqubuuri"
   },
   {
-    "id": 130,
+    "id": 149,
     "noStart": 149,
     "noEnd": 149,
     "title": "CARI HABUAN AKHIRAT TANPA LUPA HABUAN DUNIA",
@@ -2620,7 +3006,7 @@
     "translit": "wabtaghi fiimaa 'aataaka llahu ddaara l'aakhirata walaa tansa nasiibaka mina ddunyaa wa'ahsin kamaa 'ahsana llahu 'ilayka walaa tabghi lfasaada fii l'ardhi 'inna llaha laa yuhibbu lmufsidiina"
   },
   {
-    "id": 131,
+    "id": 150,
     "noStart": 150,
     "noEnd": 150,
     "title": "LIHAT ALAM SOGHIR KENAL ALAM KABIR",
@@ -2640,7 +3026,7 @@
     "translit": "'awa lam yatafakkaruu fii 'anfusihim mmaa khalaqa llahu ssamaawaati wal'ardha wamaa baynahumaa 'illaa bilhaqqi wa'ajalin mmusamman wa'inna katsiiran mmina nnaasi biliqaa'i rabbihim lakaafiruuna"
   },
   {
-    "id": 132,
+    "id": 151,
     "noStart": 151,
     "noEnd": 151,
     "title": "HADAP MUKA UNTUK MENYAKSIKAN TUHAN",
@@ -2660,7 +3046,7 @@
     "translit": "'innii wajjahtu wajhiya lilladzii fatara ssamaawaati wal'ardha haniifan wamaa 'ana mina lmusyrikiina"
   },
   {
-    "id": 133,
+    "id": 152,
     "noStart": 152,
     "noEnd": 152,
     "title": "PENYERAHAN 100% KEPADA ALLAH",
@@ -2680,7 +3066,7 @@
     "translit": "qul 'inna salaatii wanusukii wamahyaaya wamamaatii lillahi rabbi l'aalamiina laa syariika lahuu wabidzaalika 'umirtu wa'ana 'awwalu lmuslimiina"
   },
   {
-    "id": 134,
+    "id": 153,
     "noStart": 153,
     "noEnd": 153,
     "title": "AL QURAN DITURUNKAN, HURAIAN BERMACAM MACAM",
@@ -2700,7 +3086,7 @@
     "translit": "waqul 'innii 'anaa nnadziiru lmubiinu kamaa 'anzalnaa 'alaa lmuqtasimiina lladziina ja'aluu lqur'aana 'idhiina fawarabbika lanas'alannahum 'ajma'iina 'ammaa kaanuu ya'maluuna"
   },
   {
-    "id": 135,
+    "id": 154,
     "noStart": 154,
     "noEnd": 154,
     "title": "MOHON BARANG PAYAH DI LUAR KELAZIMAN",
@@ -2720,7 +3106,7 @@
     "translit": "wa'innii khiftu lmawaaliya min waraa'ii wakaanati mra'atii 'aaqiran fahab lii min lladunka waliyyan yaritsunii wayaritsu min 'aali ya'quuba waj'alhu rabbi radhiyyan"
   },
   {
-    "id": 136,
+    "id": 155,
     "noStart": 155,
     "noEnd": 155,
     "title": "MUSA SAMIRI BAPA HADITH PALSU",
@@ -2740,7 +3126,7 @@
     "translit": "fa'akhraja lahum 'ijlan jasadan llahuu khuwaarun faqaaluu haadzaa 'ilaahukum wa'ilaahu muusaa fanasiya"
   },
   {
-    "id": 137,
+    "id": 156,
     "noStart": 156,
     "noEnd": 156,
     "title": "MANUSIA KHALIFAH DI MUKA BUMI",
@@ -2760,7 +3146,7 @@
     "translit": "tsumma ja'alnaakum khalaa'ifa fii l'ardhi min ba'dihim linanzura kayfa ta'maluuna"
   },
   {
-    "id": 138,
+    "id": 157,
     "noStart": 157,
     "noEnd": 157,
     "title": "GEMENTAR HATI BILA SEBUT NAMA ALLAH",
@@ -2780,7 +3166,7 @@
     "translit": "'innamaa lmu'minuuna lladziina 'idzaa dzukira llahu wajilat quluubuhum wa'idzaa tuliyat 'alayhim 'aayaatuhuu zaadathum 'iimaanan wa'alaa rabbihim yatawakkaluuna"
   },
   {
-    "id": 139,
+    "id": 158,
     "noStart": 158,
     "noEnd": 158,
     "title": "TENTUKAN HIKMAH SEBELUM ILMU",
@@ -2800,7 +3186,7 @@
     "translit": "yu'tii lhikmata man yasyaa'u waman yu'ta lhikmata faqad 'uutiya khayran katsiiran wamaa yadzdzakkaru 'illaa 'uluu l'albaabi"
   },
   {
-    "id": 140,
+    "id": 159,
     "noStart": 159,
     "noEnd": 159,
     "title": "KASIH SAYANG KHAZANAH KETUHANAN",
@@ -2820,7 +3206,7 @@
     "translit": "wa'allafa bayna quluubihim law 'anfaqta maa fii l'ardhi jamii'an mmaa 'allafta bayna quluubihim walaakinna llaha 'allafa baynahum 'innahuu 'aziizun hakiimun"
   },
   {
-    "id": 141,
+    "id": 160,
     "noStart": 160,
     "noEnd": 160,
     "title": "HARTA DAN ANAK MEMBERI FAEDAH KEPADA YANG BERHATI SUCI",
@@ -2840,7 +3226,7 @@
     "translit": "yawma laa yanfa'u maalun walaa banuuna 'illaa man 'ataa llaha biqalbin saliimin"
   },
   {
-    "id": 142,
+    "id": 161,
     "noStart": 161,
     "noEnd": 161,
     "title": "PELIHARALAH DIRI DAN KELUARGA DARI NERAKA KESUSAHAN",
@@ -2860,7 +3246,7 @@
     "translit": "yaa'ayyuhaa lladziina 'aamanuu quu 'anfusakum wa'ahliikum naaran waquuduhaa nnaasu walhijaaratu 'alayhaa malaa'ikatun ghilaazun syidaadun llaa ya'suuna llaha maa 'amarahum wayaf'aluuna maa yu'maruuna"
   },
   {
-    "id": 143,
+    "id": 162,
     "noStart": 162,
     "noEnd": 162,
     "title": "HAMPA PENDENGARAN & AQLIAH - JADI BINATANG",
@@ -2880,7 +3266,7 @@
     "translit": "'am tahsabu 'anna 'aktsarahum yasma'uuna 'aw ya'qiluuna 'in hum 'illaa kal'an'aami bal hum 'adhallu sabiilan"
   },
   {
-    "id": 144,
+    "id": 163,
     "noStart": 163,
     "noEnd": 163,
     "title": "ORANG TERBAIK SERU KEPADA TUHAN",
@@ -2900,7 +3286,7 @@
     "translit": "waman 'ahsanu qawlan mmimman da'aa 'ilaa llahi wa'amila saalihan waqaala 'innanii mina lmuslimiina"
   },
   {
-    "id": 145,
+    "id": 164,
     "noStart": 164,
     "noEnd": 164,
     "title": "JALAN HIDUP FITRAH SEJAHTERA",
@@ -2920,7 +3306,7 @@
     "translit": "'inna ddiina 'inda llahi l'islaamu"
   },
   {
-    "id": 146,
+    "id": 165,
     "noStart": 165,
     "noEnd": 165,
     "title": "DISURUH BERBAKTI DENGAN IKHLAS",
@@ -2940,7 +3326,7 @@
     "translit": "qul 'innii 'umirtu 'an 'a'buda llaha mukhlisan llahu ddiina wa'umirtu li'an 'akuuna 'awwala lmuslimiina"
   },
   {
-    "id": 147,
+    "id": 166,
     "noStart": 166,
     "noEnd": 166,
     "title": "SEMPURNA JALAN FITRAH, NIKMAT DISISI",
@@ -2960,7 +3346,7 @@
     "translit": "alyawma 'akmaltu lakum diinakum wa'atmamtu 'alaykum ni'matii waradhiitu lakumu l'islaama diinan"
   },
   {
-    "id": 148,
+    "id": 167,
     "noStart": 167,
     "noEnd": 167,
     "title": "BILA SUSAH TUNDUK, BILA SENANG LUPA",
@@ -2980,7 +3366,7 @@
     "translit": "fa'idzaa massa l'insaana dhurrun da'aanaa tsumma 'idzaa khawwalnaahu ni'matan mminnaa qaala 'innamaa 'uutiituhuu 'alaa 'ilmi bal hiya fitnatun walaakinna 'aktsarahum laa ya'lamuuna"
   },
   {
-    "id": 149,
+    "id": 168,
     "noStart": 168,
     "noEnd": 168,
     "title": "BERPEGANG DENGAN TALI ALLAH",
@@ -3000,7 +3386,7 @@
     "translit": "wa'tasimuu bihabli llahi jamii'an walaa tafarraquu wadzkuruu ni'mata llahi 'alaykum 'idz kuntum 'a'daa'an fa'allafa bayna quluubikum fa'asbahtum bini'matihii 'ikhwaanan wakuntum 'alaa syafaa hufratin mmina nnaari fa'anqadzakum mminhaa kadzaalika yubayyinu llahu lakum 'aayaatihii la'allakum tahtaduuna"
   },
   {
-    "id": 150,
+    "id": 169,
     "noStart": 169,
     "noEnd": 169,
     "title": "KEBENARAN MENGHANCURKAN KEBATILAN",
@@ -3020,7 +3406,7 @@
     "translit": "bal naqdzifu bilhaqqi 'alaa lbaatili fayadmaghuhuu fa'idzaa huwa zaahiqun walakumu lwaylu mimmaa tasifuuna"
   },
   {
-    "id": 151,
+    "id": 170,
     "noStart": 170,
     "noEnd": 170,
     "title": "AL QURAN ASUH JADI CERDIK",
@@ -3040,7 +3426,7 @@
     "translit": "qul 'uuhiya 'ilayya 'annahu stama'a nafarun mmina ljinni faqaaluu 'innaa sami'naa qur'aanan 'ajaban yahdii 'ilaa rrusydi fa'aamannaa bihii walan nnusyrika birabbinaa 'ahadan"
   },
   {
-    "id": 152,
+    "id": 171,
     "noStart": 171,
     "noEnd": 171,
     "title": "USAH CERCA SEMBAHAN ORANG LAIN",
@@ -3060,7 +3446,7 @@
     "translit": "walaa tasubbuu lladziina yad'uuna min duuni llahi fayasubbuu llaha 'adwaa bighayri 'ilmin kadzaalika zayyannaa likulli 'ummatin 'amalahum tsumma 'ilaa rabbihim mmarji'uhum fayunabbi'uhum bimaa kaanuu ya'maluuna"
   },
   {
-    "id": 153,
+    "id": 172,
     "noStart": 172,
     "noEnd": 172,
     "title": "KEPIMPINAN TEGUH",
@@ -3080,7 +3466,7 @@
     "translit": "wasyadadnaa mulkahuu wa'aataynaahu lhikmata wafasla lkhitaabi"
   },
   {
-    "id": 154,
+    "id": 173,
     "noStart": 173,
     "noEnd": 173,
     "title": "DIPERMUDAHKAN AL QURAN KEPADA YANG MAHU PERINGATAN",
@@ -3100,7 +3486,7 @@
     "translit": "walaqad yassarnaa lqur'aana lidzdzikri fahal min mmuddakirin"
   },
   {
-    "id": 155,
+    "id": 174,
     "noStart": 174,
     "noEnd": 174,
     "title": "PELIHARALAH DIRI & KEUARGA DARI NERAKA KESUSAHAN",
@@ -3120,7 +3506,7 @@
     "translit": "yaa'ayyuhaa lladziina 'aamanuu quu 'anfusakum wa'ahliikum naaran waquuduhaa nnaasu walhijaaratu 'alayhaa malaa'ikatun ghilaazun syidaadun llaa ya'suuna llaha maa 'amarahum wayaf'aluuna maa yu'maruuna"
   },
   {
-    "id": 156,
+    "id": 175,
     "noStart": 175,
     "noEnd": 175,
     "title": "AL QURAN PENGAJARAN, PENAWAR, PETUNJUK ORANG BERTUHAN",
@@ -3140,7 +3526,7 @@
     "translit": "yaa'ayyuhaa nnaasu qad jaa'atkum mmaw'izatun mmin rrabbikum wasyifaa'un llimaa fii ssuduuri wahudan warahmatun llilmu'miniina"
   },
   {
-    "id": 157,
+    "id": 176,
     "noStart": 176,
     "noEnd": 176,
     "title": "BERSUNGGUH UNTUK BERTEMU TUHAN PASTI BERJUMPA",
@@ -3160,7 +3546,7 @@
     "translit": "yaa'ayyuhaa l'insaanu 'innaka kaadihun 'ilaa rabbika kadhan famulaaqiihi"
   },
   {
-    "id": 158,
+    "id": 177,
     "noStart": 177,
     "noEnd": 177,
     "title": "CARI UNTUNG DUNIA, DAPAT DUA",
@@ -3180,7 +3566,7 @@
     "translit": "mman kaana yuriidu tsawaaba ddunyaa fa'inda llahi tsawaabu ddunyaa wal'aakhirati wakaana llahu samii'aa basiiran"
   },
   {
-    "id": 159,
+    "id": 178,
     "noStart": 178,
     "noEnd": 178,
     "title": "MANUSIA BINATANG BILA PANCAINDERA TIDAK DIGUNAKAN",
@@ -3200,7 +3586,7 @@
     "translit": "walaqad dzara'naa lijahannama katsiiran mmina ljinni wal'insi lahum quluubun llaa yafqahuuna bihaa walahum 'a'yunun llaa yubsiruuna bihaa walahum 'aadzaanun llaa yasma'uuna bihaa 'ulaa'ika kal'an'aami bal hum 'adhallu 'ulaa'ika humu lghaafiluuna"
   },
   {
-    "id": 160,
+    "id": 179,
     "noStart": 179,
     "noEnd": 179,
     "title": "MENGIKUT ORANG RAMAI MENYESATKAN",
@@ -3220,7 +3606,7 @@
     "translit": "wa'in tuti' 'aktsara man fii l'ardhi yudhilluuka 'an sabiili llahi 'in yattabi'uuna 'illaa zzanna wa'in hum 'illaa yakhrusuuna"
   },
   {
-    "id": 161,
+    "id": 180,
     "noStart": 180,
     "noEnd": 180,
     "title": "BERTUHAN ALLAH, BERBAKTI IBU BAPA, BERBUAT BAIK MASYARAKAT",
@@ -3240,7 +3626,7 @@
     "translit": "wa'buduu llaha walaa tusyrikuu bihii syay'an wabilwaalidayni 'ihsaanan wabidzii lqurbaa walyataamaa walmasaakiini waljaari dzii lqurbaa waljaari ljunubi wassaahibi biljanbi wabni ssabiili wamaa malakat 'aymaanukum 'inna llaha laa yuhibbu man kaana mukhtaalan fakhuuran"
   },
   {
-    "id": 162,
+    "id": 181,
     "noStart": 181,
     "noEnd": 181,
     "title": "KUASA ATAS NAMA",
@@ -3260,7 +3646,7 @@
     "translit": "bismi llahi rrahmaani rrahiimi"
   },
   {
-    "id": 163,
+    "id": 182,
     "noStart": 182,
     "noEnd": 182,
     "title": "RIBA PEROSAK PERJANJIAN",
@@ -3280,7 +3666,7 @@
     "translit": "yaa'ayyuhaa lladziina 'aamanuu laa ta'kuluu rribawaa 'adh'aafan mmudhaa'afatan wattaquu llaha la'allakum tuflihuuna"
   },
   {
-    "id": 164,
+    "id": 183,
     "noStart": 183,
     "noEnd": 183,
     "title": "IBLIS PENYESAT MANUSIA",
@@ -3300,7 +3686,7 @@
     "translit": "qaala fabi'izzatika la'ughwiyannahum 'ajma'iina 'illaa 'ibaadaka minhumu lmukhlasiina"
   },
   {
-    "id": 165,
+    "id": 184,
     "noStart": 184,
     "noEnd": 184,
     "title": "AMTHAL SUMBER FURQAN",
@@ -3320,7 +3706,7 @@
     "translit": "'inna llaha laa yastahyii 'an yadhriba matsalan mmaa ba'uudhatan famaa fawqahaa fa'ammaa lladziina 'aamanuu faya'lamuuna 'annahu lhaqqu min rrabbihim wa'ammaa lladziina kafaruu fayaquuluuna maadzaa 'araada llahu bihaadzaa matsalan yudhillu bihii katsiiran wayahdii bihii katsiiran wamaa yudhillu bihii 'illaa lfaasiqiina"
   },
   {
-    "id": 166,
+    "id": 185,
     "noStart": 185,
     "noEnd": 185,
     "title": "BUAT JAHAT TERASA BAIK / HIPOKRIT",
@@ -3340,7 +3726,7 @@
     "translit": "wa'idzaa qiila lahum laa tufsiduu fii l'ardhi qaaluu 'innamaa nahnu muslihuuna 'alaa 'innahum humu lmufsiduuna walaakin llaa yasy'uruuna"
   },
   {
-    "id": 167,
+    "id": 186,
     "noStart": 186,
     "noEnd": 186,
     "title": "MANUSIA SEBAIK BAIK KEJADIAN",
@@ -3360,7 +3746,7 @@
     "translit": "laqad khalaqnaa l'insaana fii 'ahsani taqwiimin tsumma radadnaahu 'asfala saafiliina 'illaa lladziina 'aamanuu wa'amiluu ssaalihaati falahum 'ajrun ghayru mamnuunin"
   },
   {
-    "id": 168,
+    "id": 187,
     "noStart": 187,
     "noEnd": 187,
     "title": "BERITA PERLU DITAPIS",
@@ -3380,7 +3766,7 @@
     "translit": "yaa'ayyuhaa lladziina 'aamanuu 'in jaa'akum faasiqu binaba'in fatabayyanuu 'an tusiibuu qawmaa bijahaalatin fatusbihuu 'alaa maa fa'altum naadimiina"
   },
   {
-    "id": 169,
+    "id": 188,
     "noStart": 188,
     "noEnd": 188,
     "title": "MUKMIN ITU BERSAUDARA",
@@ -3400,7 +3786,7 @@
     "translit": "'innamaa lmu'minuuna 'ikhwatun fa'aslihuu bayna 'akhawaykum wattaquu llaha la'allakum turhamuuna"
   },
   {
-    "id": 170,
+    "id": 189,
     "noStart": 189,
     "noEnd": 189,
     "title": "PATUH PERJANJIAN/ ILMU WASILAH",
@@ -3420,7 +3806,7 @@
     "translit": "'inna lladziina yubaayi'uunaka 'innamaa yubaayi'uuna llaha yadu llahi fawqa 'aydiihim faman nnakatsa fa'innamaa yankutsu 'alaa nafsihii waman 'awfaa bimaa 'aahada 'alayhu llaha fasayu'tiihi 'ajran 'aziiman"
   },
   {
-    "id": 171,
+    "id": 190,
     "noStart": 190,
     "noEnd": 190,
     "title": "SOLAT MENCEGAH KEMUNGKARAN",
@@ -3440,7 +3826,7 @@
     "translit": "atlu maa 'uuhiya 'ilayka mina lkitaabi wa'aqimi ssalawaata 'inna ssalawaata tanhaa 'ani lfahsyaa'i walmunkari waladzikru llahi 'akbaru wallahu ya'lamu maa tasna'uuna"
   },
   {
-    "id": 172,
+    "id": 191,
     "noStart": 191,
     "noEnd": 191,
     "title": "MUTMAINAH TARAF NAFSU DIREDHAI",
@@ -3460,7 +3846,7 @@
     "translit": "yaa'ayyatuhaa nnafsu lmutma'innatu rji'ii 'ilaa rabbiki raadhiyatan mmardhiyyatan fadkhulii fii 'ibaadii wadkhulii jannatii"
   },
   {
-    "id": 173,
+    "id": 192,
     "noStart": 192,
     "noEnd": 192,
     "title": "KEBENARAN BERAGAMA 3 PERKARA",
@@ -3480,7 +3866,7 @@
     "translit": "'inna lladziina 'aamanuu walladziina haaduu wannasaaraa wassaabi'iina man 'aamana billahi walyawmi l'aakhiri wa'amila saalihan falahum 'ajruhum 'inda rabbihim walaa khawfun 'alayhim walaa hum yahzanuuna"
   },
   {
-    "id": 174,
+    "id": 193,
     "noStart": 193,
     "noEnd": 193,
     "title": "MATA HATI KASHAF",
@@ -3500,7 +3886,7 @@
     "translit": "llaqad kunta fii ghaflatin mmin haadzaa fakasyafnaa 'anka ghitaa'aka fabasaruka lyawma hadiidun"
   },
   {
-    "id": 175,
+    "id": 194,
     "noStart": 194,
     "noEnd": 194,
     "title": "HATI MUDAH BERKARAT",
@@ -3520,7 +3906,7 @@
     "translit": "kallaa bal raana 'alaa quluubihim mmaa kaanuu yaksibuuna"
   },
   {
-    "id": 176,
+    "id": 195,
     "noStart": 195,
     "noEnd": 195,
     "title": "TIDAK GUNA FURQAN BAGI ORANG INGKAR",
@@ -3540,7 +3926,7 @@
     "translit": "quli nzuruu maadzaa fii ssamaawaati wal'ardhi wamaa tughnii l'aayaatu wannudzuru 'an qawmin llaa yu'minuuna"
   },
   {
-    "id": 177,
+    "id": 196,
     "noStart": 196,
     "noEnd": 196,
     "title": "PERHATILAH BEKALAN MASA DEPAN",
@@ -3560,7 +3946,7 @@
     "translit": "yaa'ayyuhaa lladziina 'aamanuu ttaquu llaha waltanzur nafsun mmaa qaddamat lighadin wattaquu llaha 'inna llaha khabiiru bimaa ta'maluuna"
   },
   {
-    "id": 178,
+    "id": 197,
     "noStart": 197,
     "noEnd": 197,
     "title": "KEKUATAN ILMU AL QURAN, BUKIT HANCUR",
@@ -3580,7 +3966,7 @@
     "translit": "law 'anzalnaa haadzaa lqur'aana 'alaa jabalin llara'aytahuu khaasyi'an mmutasaddi'an mmin khasyyati llahi watilka l'amtsaalu nadhribuhaa linnaasi la'allahum yatafakkaruuna"
   },
   {
-    "id": 179,
+    "id": 198,
     "noStart": 198,
     "noEnd": 198,
     "title": "DARJAT BERGANTUNG KEPADA AMALAN",
@@ -3600,7 +3986,7 @@
     "translit": "walikullin darajaatun mmimmaa 'amiluu waliyuwaffiyahum 'a'maalahum wahum laa yuzlamuuna"
   },
   {
-    "id": 180,
+    "id": 199,
     "noStart": 199,
     "noEnd": 199,
     "title": "TUJUH AYAT YANG DIULANG-ULANG",
@@ -3620,7 +4006,7 @@
     "translit": "walaqad 'aataynaaka sab'an mmina lmatsaanii walqur'aana l'aziima"
   },
   {
-    "id": 181,
+    "id": 200,
     "noStart": 200,
     "noEnd": 200,
     "title": "LUPA AL QURAN, SYAITAN KUASAI DIRI",
