@@ -80,9 +80,10 @@ k = read_docx('Nota Exam Khitab Hilalul Wasil.docx')
 S = k['sections']
 khitab = {
     'id': 'khitab',
-    'short': 'Khitab Hilalul Wasil',
-    'title': 'Khitab Hilalul Wasil',
-    'istilah': 'Istilah karya: Khitab Hilaalul Washil',
+    'short': 'Khitab Hilaalul Washil',
+    'title': 'Khitab Hilaalul Washil',
+    'classShort': 'Khitab Hilalul Wasil',
+    'istilah': 'Ejaan nota kelas: Khitab Hilalul Wasil',
     'basis': 'Berdasarkan kerangka Al Fathun Nawa · Jilid 9',
     'lead': lead(k),
     'key': {
@@ -131,9 +132,10 @@ s = read_docx('Nota Exam Syariah Khofiah.docx')
 S = s['sections']
 syariah = {
     'id': 'syariah',
-    'short': 'Syariah Khofiah',
-    'title': 'Syariah Khofiah',
-    'istilah': 'Istilah karya: Syariat Khafiah',
+    'short': 'Syariat Khafiah',
+    'title': 'Syariat Khafiah',
+    'classShort': 'Syariah Khofiah',
+    'istilah': 'Ejaan nota kelas: Syariah Khofiah',
     'basis': 'Berdasarkan kerangka Al Fathun Nawa · Jilid 6 dan 9',
     'lead': lead(s),
     'key': {
@@ -185,8 +187,10 @@ t = read_docx('Nota Exam Tawilul Maani.docx')
 S = t['sections']
 tawil = {
     'id': 'tawil',
-    'short': 'Ta’wilul Ma’ani',
-    'title': 'Ta’wilul Ma’ani',
+    'short': 'Ta’wiilul Ma’ani',
+    'title': 'Ta’wiilul Ma’ani',
+    'classShort': 'Ta’wilul Ma’ani',
+    'istilah': 'Ejaan nota kelas: Ta’wilul Ma’ani',
     'basis': 'Berdasarkan kerangka Al Fathun Nawa · Jilid 6 dan 9',
     'lead': lead(t),
     'key': {
