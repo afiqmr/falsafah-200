@@ -228,7 +228,7 @@
   .revealbtn:hover{ filter:brightness(1.08); }
 
   .gradebar{
-    display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:20px;
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;
   }
   .gradebtn{
     border-radius:10px; padding:12px 8px; border:1px solid var(--border);
@@ -241,8 +241,25 @@
   .gradebtn.again:hover .g-label{ color:var(--rose); }
   .gradebtn.good:hover{ background:var(--gold-soft); border-color:var(--gold); }
   .gradebtn.good:hover .g-label{ color:var(--gold-cite); }
-  .gradebtn.easy:hover{ background:var(--emerald-soft); border-color:var(--emerald); }
-  .gradebtn.easy:hover .g-label{ color:var(--emerald); }
+
+  /* ---------- Kaji summary popup ---------- */
+  .namecard.summarycard{ max-width:440px; text-align:left; }
+  .summarycard h3{ text-align:center; }
+  .summarycard .sum-intro{ text-align:center; }
+  .sum-section{ margin-bottom:14px; }
+  .sum-label{
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:800; margin-bottom:6px;
+  }
+  .sum-label.again{ color:var(--rose); }
+  .sum-label.good{ color:var(--emerald); }
+  .sum-list{
+    list-style:none; margin:0; padding:0; max-height:26vh; overflow-y:auto;
+    border:1px solid var(--border); border-radius:10px;
+  }
+  .sum-list li{ display:flex; gap:8px; padding:8px 12px; font-size:13px; border-bottom:1px solid var(--border); }
+  .sum-list li:last-child{ border-bottom:0; }
+  .sum-list .sl-no{ font-weight:800; color:var(--gold-cite); white-space:nowrap; }
+  .sum-empty{ font-size:12px; color:var(--muted); margin:0; }
 
   .studydone{ text-align:center; padding:50px 20px; }
   .studydone .big{ font-size:40px; color:var(--emerald); }
@@ -646,6 +663,10 @@
   <div class="detailsheet" id="detailSheet"></div>
 </div>
 
+<div class="nameoverlay" id="summaryOverlay">
+  <div class="namecard summarycard" id="summaryCard"></div>
+</div>
+
 <div class="nameoverlay" id="nameOverlay">
   <div class="namecard">
     <h3>Salam Sejahtera &amp; Selamat Datang</h3>
@@ -725,13 +746,23 @@
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   }
 
+  // kajiIds: distinct falsafah studied today (counts toward the daily goal).
+  // results: latest rating per id today. again: "Belum ingat" ids still to review, in order.
+  function freshDaily(){
+    return { date: todayStr(), kajiIds: [], kuizCount: 0, results: {}, again: [], summaryShown: false };
+  }
   function loadDaily(){
-    var fresh = { date: todayStr(), kajiIds: [], kuizCount: 0 };
+    var fresh = freshDaily();
     try{
       var raw = localStorage.getItem(DAILY_KEY);
       if(raw){
         var st = JSON.parse(raw);
-        if(st.date === fresh.date) return st;
+        if(st.date === fresh.date){
+          st.results = st.results || {};
+          st.again = st.again || [];
+          st.summaryShown = !!st.summaryShown;
+          return st;
+        }
       }
     }catch(e){}
     return fresh;
@@ -744,7 +775,7 @@
   var daily = loadDaily();
   function rolloverDailyIfNeeded(){
     var t = todayStr();
-    if(daily.date !== t){ daily = { date: t, kajiIds: [], kuizCount: 0 }; }
+    if(daily.date !== t){ daily = freshDaily(); }
   }
 
   function markKajiDoneToday(id){
@@ -818,15 +849,14 @@
   }
 
   function grade(id, result){
-    // result: 0 = again, 1 = good, 2 = easy
+    // result: 0 = belum ingat, 1 = ingat
     var c = getCard(id);
     c.seen = (c.seen||0)+1;
     if(result===0){
       c.box = 0;
       c.due = todayStr();
     } else {
-      var step = result===2 ? 2 : 1;
-      c.box = Math.min(BOX_INTERVALS.length-1, c.box+step);
+      c.box = Math.min(BOX_INTERVALS.length-1, c.box+1);
       c.due = addDays(todayStr(), BOX_INTERVALS[c.box]);
       c.correct = (c.correct||0)+1;
     }
@@ -1002,52 +1032,112 @@
                });
   }
 
+  function entryById(id){ return DATA.find(function(e){ return e.id === id; }); }
+
+  // Order of play: a first pass of new falsafah up to the daily goal, then a
+  // summary popup, then every "Belum ingat" card again until it is rated "Ingat".
   function renderStudy(){
     renderMissionBar();
     rolloverDailyIfNeeded();
     var stage = document.getElementById('studyStage');
+    var goal = kajiGoal();
+    var fresh = dueQueue().filter(function(e){ return daily.kajiIds.indexOf(e.id) === -1; });
+    var firstPassDone = daily.kajiIds.length >= goal || !fresh.length;
+    var entry = null, reviewing = false;
 
-    if(daily.kajiIds.length >= kajiGoal() && !allowExtraKaji){
-      stage.innerHTML =
-        '<div class="folio"><div class="kaji-goal-done">' +
-        '<div class="big">&#127942;</div>' +
-        '<h3>Sasaran hari ini selesai!</h3>' +
-        '<p>Anda telah mengkaji ' + daily.kajiIds.length + ' falsafah hari ini. Datang semula esok untuk teruskan, atau kaji tambahan sekarang jika anda rasa mahu terus.</p>' +
-        '<button class="kaji-extra-btn" id="extraKajiBtn">Kaji tambahan hari ini</button>' +
-        '</div></div>';
-      var extraBtn = document.getElementById('extraKajiBtn');
-      if(extraBtn) extraBtn.onclick = function(){ allowExtraKaji = true; renderStudy(); };
+    if(!firstPassDone){
+      entry = fresh[0];
+    } else {
+      if(!daily.summaryShown && daily.kajiIds.length) openKajiSummary();
+      var againEntries = daily.again.map(entryById).filter(Boolean);
+      if(againEntries.length){
+        entry = againEntries[0];
+        reviewing = true;
+      } else if(allowExtraKaji && fresh.length){
+        entry = fresh[0];
+      }
+    }
+
+    if(!entry){
       currentCardId = null;
+      if(daily.kajiIds.length >= goal){
+        stage.innerHTML =
+          '<div class="folio"><div class="kaji-goal-done">' +
+          '<div class="big">&#127942;</div>' +
+          '<h3>Sasaran hari ini selesai!</h3>' +
+          '<p>Anda telah mengkaji ' + daily.kajiIds.length + ' falsafah dan mengulang semua yang belum ingat. ' +
+          (fresh.length ? 'Datang semula esok untuk teruskan, atau kaji tambahan sekarang jika anda rasa mahu terus.' : 'Datang semula esok untuk ulang kaji seterusnya.') + '</p>' +
+          (fresh.length ? '<button class="kaji-extra-btn" id="extraKajiBtn">Kaji tambahan hari ini</button>' : '') +
+          '</div></div>';
+        var extraBtn = document.getElementById('extraKajiBtn');
+        if(extraBtn) extraBtn.onclick = function(){ allowExtraKaji = true; renderStudy(); };
+      } else {
+        stage.innerHTML =
+          '<div class="folio"><div class="studydone">' +
+          '<div class="big">&#10003;</div>' +
+          '<p style="margin-top:10px;color:var(--muted);">Tiada falsafah tertunggak buat masa ini.<br>Kembali esok untuk ulang kaji seterusnya, atau jelajah Senarai.</p>' +
+          '</div></div>';
+      }
       return;
     }
 
-    var queue = dueQueue().filter(function(e){ return daily.kajiIds.indexOf(e.id) === -1; });
-
-    if(queue.length===0){
-      stage.innerHTML =
-        '<div class="folio"><div class="studydone">' +
-        '<div class="big">&#10003;</div>' +
-        '<p style="margin-top:10px;color:var(--muted);">Tiada falsafah tertunggak buat masa ini.<br>Kembali esok untuk ulang kaji seterusnya, atau jelajah Senarai.</p>' +
-        '</div></div>';
-      currentCardId = null;
-      return;
-    }
-
-    var entry = queue[0];
     currentCardId = entry.id;
     revealed = false;
     var box = getCard(entry.id).box;
+    var badge = reviewing
+      ? '<span class="badge badge-gold">Ulang &middot; ' + daily.again.length + ' lagi</span>'
+      : '<span class="badge ' + BOX_BADGE_CLASS[box] + '">' + BOX_LABELS[box] + '</span>';
 
     stage.innerHTML =
       '<div class="folio">' +
         '<div class="folio-top">' +
-          '<span class="rangepill">' + entry.rangeLabel + '</span>' +
-          '<span class="badge ' + BOX_BADGE_CLASS[box] + '">' + BOX_LABELS[box] + '</span>' +
+          '<span class="rangepill">' + entry.rangeLabel + '</span>' + badge +
         '</div>' +
         '<div id="folioBody"></div>' +
       '</div>';
 
     renderFolioBody(entry);
+  }
+
+  function recordKaji(id, result){
+    grade(id, result);
+    markKajiDoneToday(id);
+    daily.results[id] = result === 0 ? 'again' : 'good';
+    var i = daily.again.indexOf(id);
+    if(i >= 0) daily.again.splice(i, 1);
+    if(result === 0) daily.again.push(id);
+    saveDaily(daily);
+  }
+
+  function openKajiSummary(){
+    daily.summaryShown = true;
+    saveDaily(daily);
+    var again = [], good = [];
+    daily.kajiIds.forEach(function(id){
+      var e = entryById(id);
+      if(!e) return;
+      (daily.results[id] === 'again' ? again : good).push(e);
+    });
+    function list(items){
+      if(!items.length) return '<p class="sum-empty">Tiada.</p>';
+      return '<ul class="sum-list">' + items.map(function(e){
+        return '<li><span class="sl-no">' + e.rangeLabel.replace('Falsafah ', '') + '</span><span class="sentence-case">' + escapeHtml(e.title.toLowerCase()) + '</span></li>';
+      }).join('') + '</ul>';
+    }
+    var reached = daily.kajiIds.length >= kajiGoal();
+    document.getElementById('summaryCard').innerHTML =
+      '<h3>' + (reached ? 'Sasaran ' + daily.kajiIds.length + '/' + kajiGoal() + ' selesai!' : 'Sesi kaji selesai') + '</h3>' +
+      '<p class="sum-intro">Ini ringkasan falsafah yang anda kaji hari ini.</p>' +
+      '<div class="sum-section"><div class="sum-label again">Belum ingat &middot; ' + again.length + '</div>' + list(again) + '</div>' +
+      '<div class="sum-section"><div class="sum-label good">Ingat &middot; ' + good.length + '</div>' + list(good) + '</div>' +
+      '<button class="namebtn" id="summaryContinue">' +
+        (daily.again.length ? 'Ulang kaji yang belum ingat (' + daily.again.length + ')' : 'Selesai') +
+      '</button>';
+    document.getElementById('summaryOverlay').classList.add('active');
+    document.getElementById('summaryContinue').onclick = function(){
+      document.getElementById('summaryOverlay').classList.remove('active');
+      window.scrollTo(0, 0);
+    };
   }
 
   function renderFolioBody(entry){
@@ -1066,19 +1156,18 @@
         '<div class="folio-text-label">Maksud</div>' +
         '<p class="folio-text">' + escapeHtml(entry.text) + '</p>' +
         '<p class="surah-ref">' + escapeHtml(entry.surahDisplay) + '</p>' +
-        renderExtras(entry) +
         '<div class="gradebar">' +
           '<button class="gradebtn again" data-g="0"><span class="g-label">Belum ingat</span><span class="g-sub">Ulang hari ini</span></button>' +
           '<button class="gradebtn good" data-g="1"><span class="g-label">Ingat</span><span class="g-sub">+' + BOX_INTERVALS[Math.min(BOX_INTERVALS.length-1,getCard(entry.id).box+1)] + ' hari</span></button>' +
-          '<button class="gradebtn easy" data-g="2"><span class="g-label">Mudah</span><span class="g-sub">+' + BOX_INTERVALS[Math.min(BOX_INTERVALS.length-1,getCard(entry.id).box+2)] + ' hari</span></button>' +
-        '</div>';
+        '</div>' +
+        renderExtras(entry);
       var btns = el.querySelectorAll('.gradebtn');
       btns.forEach(function(b){
         b.onclick = function(){
-          grade(entry.id, parseInt(b.getAttribute('data-g'),10));
-          markKajiDoneToday(entry.id);
+          recordKaji(entry.id, parseInt(b.getAttribute('data-g'),10));
           renderStudy();
           renderProgress();
+          window.scrollTo(0, 0);
         };
       });
     }
