@@ -111,29 +111,32 @@
 
   /* Liquid-glass tab bar: frosted translucent track + a glossy bubble that slides to the active tab */
   nav.tabs{
-    --glass-tint:color-mix(in srgb, var(--surface-2) 50%, transparent);
-    --glass-edge:rgba(255,255,255,.14);
-    --glass-hi:rgba(255,255,255,.16);
-    --glass-shadow:0 10px 30px -12px rgba(0,0,0,.55);
-    --bubble-top:rgba(255,255,255,.24);
-    --bubble-bottom:rgba(255,255,255,.07);
-    --bubble-edge:rgba(255,255,255,.28);
-    --bubble-text:var(--gold-cite);
+    --glass-tint:linear-gradient(135deg, rgba(212,175,55,.10), rgba(59,130,246,.10) 55%, rgba(212,175,55,.06)),
+      color-mix(in srgb, var(--surface-2) 55%, transparent);
+    --glass-edge:rgba(212,175,55,.28);
+    --glass-hi:rgba(255,255,255,.12);
+    --glass-shadow:0 10px 30px -12px rgba(0,0,0,.6), 0 0 24px -10px rgba(212,175,55,.35);
+    --bubble-top:rgba(253,224,138,.95);
+    --bubble-bottom:rgba(212,175,55,.88);
+    --bubble-edge:rgba(255,236,170,.75);
+    --bubble-glow:rgba(212,175,55,.55);
+    --bubble-text:var(--gold-ink);
     position:relative; isolation:isolate;
     display:flex; gap:4px; margin-top:14px; padding:5px;
     border-radius:100px; border:1px solid var(--glass-edge);
-    background:linear-gradient(180deg, var(--glass-hi), transparent 60%), var(--glass-tint);
-    -webkit-backdrop-filter:blur(22px) saturate(180%);
+    background:linear-gradient(180deg, var(--glass-hi), transparent 60%), var(--glass-tint);    -webkit-backdrop-filter:blur(22px) saturate(180%);
     backdrop-filter:blur(22px) saturate(180%);
     box-shadow:inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 rgba(0,0,0,.12), var(--glass-shadow);
   }
   nav.tabs .tab-glass{
     position:absolute; z-index:0; top:5px; bottom:5px; left:0; width:0;
     border-radius:100px; pointer-events:none;
-    background:linear-gradient(180deg, var(--bubble-top), var(--bubble-bottom));
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0) 48%),
+      linear-gradient(180deg, var(--bubble-top), var(--bubble-bottom));
     border:1px solid var(--bubble-edge);
-    box-shadow:inset 0 1px 1px rgba(255,255,255,.45), inset 0 -2px 6px rgba(0,0,0,.10),
-      0 6px 16px -6px rgba(0,0,0,.45), 0 0 0 .5px rgba(255,255,255,.08);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.7), inset 0 -3px 6px rgba(0,0,0,.14),
+      0 6px 18px -6px var(--bubble-glow), 0 2px 6px -2px rgba(0,0,0,.35);
     -webkit-backdrop-filter:blur(8px) saturate(200%);
     backdrop-filter:blur(8px) saturate(200%);
     transition:transform .45s cubic-bezier(.3,1.3,.5,1), width .45s cubic-bezier(.3,1.3,.5,1);
@@ -633,19 +636,19 @@
   body[data-theme="light"] .wordmark .mark{ color:var(--navy); }
   body[data-theme="light"] .header-ayat{ color:var(--gold-cite); }
   body[data-theme="light"] nav.tabs{
-    --glass-tint:color-mix(in srgb, var(--surface-2) 55%, transparent);
-    --glass-edge:rgba(255,255,255,.75);
-    --glass-hi:rgba(255,255,255,.55);
-    --glass-shadow:0 10px 28px -14px rgba(16,33,43,.28);
-    --bubble-top:rgba(255,255,255,.92);
-    --bubble-bottom:rgba(255,255,255,.62);
-    --bubble-edge:rgba(255,255,255,.95);
-    --bubble-text:var(--navy);
+    --glass-tint:linear-gradient(135deg, rgba(255,127,80,.12), rgba(15,118,110,.08) 60%, rgba(255,127,80,.06)),
+      color-mix(in srgb, var(--surface) 70%, transparent);
+    --glass-edge:rgba(255,127,80,.30);
+    --glass-hi:rgba(255,255,255,.65);
+    --glass-shadow:0 10px 28px -14px rgba(184,69,31,.30);
+    --bubble-top:rgba(255,154,112,.96);
+    --bubble-bottom:rgba(228,87,46,.92);
+    --bubble-edge:rgba(255,200,175,.9);
+    --bubble-glow:rgba(228,87,46,.45);
+    --bubble-text:#FFFFFF;
   }
-  body[data-theme="light"] nav.tabs .tab-glass{
-    box-shadow:inset 0 1px 1px rgba(255,255,255,1), inset 0 -2px 6px rgba(16,33,43,.06),
-      0 6px 16px -6px rgba(16,33,43,.30);
-  }
+  body[data-theme="light"] nav.tabs button:not(.active){ color:#5B6B6B; }
+  body[data-theme="light"] nav.tabs button:not(.active):hover{ color:var(--navy); }
   body[data-theme="light"] .badge-neutral{ background:rgba(110,117,117,.12); border-color:rgba(110,117,117,.25); }
   body[data-theme="light"] .badge-gold{ color:var(--coral-deep); border-color:rgba(255,127,80,.35); }
   body[data-theme="light"] .badge-emerald{ border-color:rgba(15,118,110,.3); }
