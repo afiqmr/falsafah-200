@@ -648,6 +648,16 @@
   .lp-now .arabic-text{ font-size:24px; margin:4px 0 8px; }
   .lp-ctl{ display:flex; justify-content:center; gap:14px; margin-top:8px; }
   .lp-msg{ font-size:12px; color:var(--re); margin-top:6px; min-height:16px; }
+  .lp-wbw{ display:flex; flex-wrap:wrap; direction:rtl; gap:12px 10px; margin:8px 0 4px; }
+  .lp-wbw .w{ display:flex; flex-direction:column; align-items:center; text-align:center; max-width:130px; }
+  .lp-wbw .w-ar{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:26px; line-height:1.7; color:var(--ink); }
+  .lp-wbw .w-en{ direction:ltr; font-size:11.5px; line-height:1.3; color:var(--muted); margin-top:2px; }
+  .lp-wbw .w-id{ direction:ltr; font-size:11.5px; line-height:1.3; color:var(--gold-cite); margin-top:2px; font-style:italic; }
+  .lp-wbw .w-end .w-ar{ color:var(--gold-cite); font-size:21px; }
+  .lp-legend{ font-size:10.5px; color:var(--muted); margin:6px 0 0; }
+  .lp-legend .k-id{ color:var(--gold-cite); font-style:italic; }
+  .lp-maksud{ margin:12px 0 8px; font-size:14px; line-height:1.6; color:var(--ink); }
+  .lp-maksud span{ display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
   .rangechip .rc-edit{ color:var(--gold-cite); }
   .rangechip:hover{ border-color:var(--gold); }
 
@@ -2570,6 +2580,7 @@
     var token = ++LP.token;
     LP.rep = 0; LP.clip = 0; LP.clips = null; LP.loading = true; LP.msg = '';
     lpUpdateUI(); lpMeta(entry);
+    lpWbwFor(entry).then(function(){ if(token === LP.token) lpUpdateUI(); }).catch(function(){});
     audioClips(entry).then(function(clips){
       if(token !== LP.token) return;
       LP.loading = false;
@@ -2697,13 +2708,24 @@
     var playing = LP.clips && !lpAudio.paused;
     return '<div class="lp-now"><div class="lp-meta">Sedang dimainkan &middot; ' + lpStatusText() + '</div>' +
       '<h4>' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</h4>' +
-      '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>' +
-      '<div class="lp-meta">' + escapeHtml(entry.surahDisplay) + '</div>' +
       '<div class="lp-ctl"><button type="button" class="mp-btn" data-lp="prev" aria-label="Sebelum">&#9198;</button>' +
       '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + (playing ? '&#10074;&#10074;' : '&#9654;') + '</button>' +
       '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
       '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&#9632;</button></div>' +
-      '<div class="lp-msg">' + escapeHtml(LP.msg || '') + '</div></div>';
+      '<div class="lp-msg">' + escapeHtml(LP.msg || '') + '</div>' +
+      lpWordsHtml(entry) +
+      '<div class="lp-maksud"><span>Maksud</span>' + escapeHtml(entry.text) + '</div>' +
+      '<div class="lp-meta">' + escapeHtml(entry.surahDisplay) + '</div></div>';
+  }
+  function lpWordsHtml(entry){
+    var words = lpWbwCache[entry.id];
+    if(!words) return '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>';
+    return '<div class="lp-wbw" lang="ar">' + words.map(function(w){
+      return '<div class="w' + (w.end ? ' w-end' : '') + '"><span class="w-ar">' + escapeHtml(w.ar) + '</span>' +
+        (w.en ? '<span class="w-en" lang="en">' + escapeHtml(w.en) + '</span>' : '') +
+        (w.id ? '<span class="w-id" lang="id">' + escapeHtml(w.id) + '</span>' : '') + '</div>';
+    }).join('') + '</div>' +
+    '<p class="lp-legend"><span class="k-en">English</span> &middot; <span class="k-id">Bahasa Indonesia</span> &middot; kata demi kata daripada Quran.com</p>';
   }
   function openListen(){
     var from = LP.active ? LP.from : studyRange.from, to = LP.active ? LP.to : studyRange.to;
@@ -2842,6 +2864,37 @@
       return out;
     });
   }
+  // Word by word for the Dengar player: English plus Indonesian, both from Quran.com
+  var idVerseCache = {}, lpWbwCache = {};
+  function fetchVerseId(key){
+    if(!idVerseCache[key]){
+      idVerseCache[key] = fetch(WBW_API + key + '?words=true&language=id')
+        .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(j){ return j.verse.words; })
+        .catch(function(err){ delete idVerseCache[key]; throw err; });
+    }
+    return idVerseCache[key];
+  }
+  function lpWbwFor(entry){
+    if(lpWbwCache[entry.id]) return Promise.resolve(lpWbwCache[entry.id]);
+    return alignEntry(entry).then(function(A){
+      return Promise.all(A.verses.map(function(vs){ return fetchVerseId(vs.key).catch(function(){ return []; }); })).then(function(idLists){
+        var idW = [].concat.apply([], idLists);
+        var to = A.to;
+        if(A.found && to + 1 < A.W.length && A.W[to + 1].w.char_type_name === 'end') to++;
+        var out = [];
+        for(var i = A.from; i <= to; i++){
+          var w = A.W[i].w, iw = idW.length === A.W.length ? idW[i] : null, end = w.char_type_name === 'end';
+          out.push({ ar: end ? '﴿' + w.text_uthmani + '﴾' : w.text_uthmani, end: end,
+                     en: end ? '' : (w.translation && w.translation.text) || '',
+                     id: end || !iw ? '' : (iw.translation && iw.translation.text) || '' });
+        }
+        lpWbwCache[entry.id] = out;
+        return out;
+      });
+    });
+  }
+
   // Audio clips for a falsafah: one per verse, trimmed to the quoted words when
   // the falsafah quotes only part of an ayat (Quran.com word timings).
   var AUDIO_BASE = 'https://verses.quran.com/';
