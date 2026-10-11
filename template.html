@@ -429,7 +429,7 @@
     position:relative;
     background:var(--surface); border-radius:28px 28px 0 0;
     max-width:760px; width:100%; padding:34px 24px 30px;
-    height:64vh; max-height:none; overflow-y:auto; overscroll-behavior:contain;
+    height:calc(100vh - 90px); height:calc(100dvh - 90px); max-height:none; overflow-y:auto; overscroll-behavior:contain;
     border-top:1px solid var(--border);
     box-shadow:0 -12px 40px -12px rgba(0,0,0,.35);
     transform:translateY(calc(100% + 40px));
@@ -438,7 +438,7 @@
   }
   .detailoverlay.active .detailsheet{ transform:translateY(0); }
   .detailsheet.dragging{ transition:none; }
-  @media (max-width:600px){ .detailsheet{ height:86vh; } }
+  @media (max-width:600px){ .detailsheet{ height:calc(100vh - 70px); height:calc(100dvh - 70px); } }
   .detailsheet::before{
     content:""; position:absolute; top:10px; left:50%; width:40px; height:5px; margin-left:-20px;
     border-radius:3px; background:var(--muted); opacity:.45;
