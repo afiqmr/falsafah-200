@@ -16,6 +16,7 @@
     --gold-ink:#0B0F17;
     --gold-soft:rgba(212,175,55,.14);
     --gold-cite:#FBBF24;
+    --re:#F59E0B;
     --emerald:#34D399;
     --emerald-soft:rgba(52,211,153,.14);
     --rose:#F87171;
@@ -40,6 +41,7 @@
     --gold-ink:#10212B;
     --gold-soft:rgba(255,127,80,.14);
     --gold-cite:#0F766E;
+    --re:#EA6A2A;
     --coral-deep:#B8451F;
     --coral-btn:#E4572E;
     --emerald:#0F766E;
@@ -341,7 +343,7 @@
   .sum-label{
     font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:800; margin-bottom:6px;
   }
-  .sum-label.again{ color:var(--gold-cite); }
+  .sum-label.again{ color:var(--re); }
   .sum-label.good{ color:var(--emerald); }
   .sum-list{
     list-style:none; margin:0; padding:0; max-height:26vh; overflow-y:auto;
@@ -360,11 +362,11 @@
   .ks-line{ font-size:13px; color:var(--muted); display:flex; gap:12px; flex-wrap:wrap; }
   .ks-line b{ color:var(--ink); font-variant-numeric:tabular-nums; }
   .ks-ok{ color:var(--emerald); font-weight:800; }
-  .ks-re{ color:var(--gold-cite); font-weight:800; }
+  .ks-re{ color:var(--re); font-weight:800; }
   .ks-bar{ display:flex; height:5px; border-radius:100px; overflow:hidden; background:var(--border); margin-top:6px; }
   .ks-bar span{ display:block; height:100%; }
   .ks-bar .ok{ background:var(--emerald); }
-  .ks-bar .re{ background:var(--gold); }
+  .ks-bar .re{ background:var(--re); }
   .progbtn{
     flex:none; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:100px;
     border:1px solid var(--border); background:var(--surface-2); color:var(--ink);
@@ -382,7 +384,7 @@
   .prog .sl-title{ flex:1; }
   .prog .sl-meta{ font-size:11px; color:var(--muted); white-space:nowrap; }
   .prog .lbl-ok{ color:var(--emerald); }
-  .prog .lbl-re{ color:var(--gold-cite); }
+  .prog .lbl-re{ color:var(--re); }
   .prog .pnote{ font-size:12px; color:var(--muted); margin:6px 0 0; line-height:1.5; }
   .uji-row{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
   .uji-row button{
@@ -415,13 +417,25 @@
   .kc-col{ flex:1; display:flex; flex-direction:column; align-items:center; height:100%; }
   .kc-stack{ flex:1; width:100%; max-width:22px; display:flex; flex-direction:column-reverse; justify-content:flex-start; background:var(--surface-2); border-radius:5px; overflow:hidden; }
   .kc-stack .ok{ background:var(--emerald); display:block; }
-  .kc-stack .re{ background:var(--gold); display:block; }
+  .kc-stack .re{ background:var(--re); display:block; }
   .kc-lbl{ font-size:10px; color:var(--muted); margin-top:4px; }
   .kc-lbl.today{ color:var(--ink); font-weight:800; }
   .kmj-legend{ display:flex; gap:14px; font-size:11px; color:var(--muted); margin-top:8px; }
   .kmj-legend i{ display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:5px; }
-  .kmj-legend i.ok{ background:var(--emerald); } .kmj-legend i.re{ background:var(--gold); }
+  .kmj-legend i.ok{ background:var(--emerald); } .kmj-legend i.re{ background:var(--re); }
   @media (max-width:600px){ .kmj-tiles{ grid-template-columns:repeat(2,1fr); } }
+  .kmj-tiles [data-list], .lvl-grid [data-list]{ cursor:pointer; position:relative; transition:border-color .15s; }
+  .kmj-tiles [data-list]:hover, .lvl-grid [data-list]:hover{ border-color:var(--gold); }
+  .kmj-tiles [data-list]::after, .lvl-grid [data-list]::after{ content:"\203A"; position:absolute; right:10px; top:8px; font-size:16px; color:var(--muted); }
+  .kmj-today{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+  .kmj-today button{ text-align:left; border:1px solid var(--border); background:var(--surface-2); color:var(--ink); border-radius:12px; padding:10px 12px; font-family:inherit; cursor:pointer; font-size:12px; }
+  .kmj-today button b{ display:block; font-size:22px; font-variant-numeric:tabular-nums; }
+  .kmj-today .t-re b{ color:var(--re); } .kmj-today .t-ok b{ color:var(--emerald); }
+  .kmj-today button:hover{ border-color:var(--gold); }
+  .lv-switch{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border-radius:100px; background:var(--surface-2); border:1px solid var(--border); margin:12px 0; }
+  .lv-switch button{ border:0; background:transparent; color:var(--muted); font-family:inherit; font-size:13px; font-weight:800; padding:8px; border-radius:100px; cursor:pointer; }
+  .lv-switch button.active{ background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--gold); }
+  .prog .card-list{ display:flex; flex-direction:column; gap:10px; }
   .focusbar{
     display:flex; align-items:center; gap:10px; margin:0 0 12px; padding:10px 14px; border-radius:12px;
     background:var(--gold-soft); border:1px solid rgba(212,175,55,.32); font-size:13px;
@@ -1683,9 +1697,14 @@
   }
   var progSets = {};
   var UJI_LABELS = { today: 'Perlu ulang hari ini', focus: 'Perlu fokus', kelas: 'Kelas minggu ini' };
+  var sheetBack = null;   // { label, open } for the sheet currently showing a list
   function progClick(e){
-    var li = e.target.closest('[data-open]');
-    if(li){ openDetail(+li.getAttribute('data-open'), li.closest('#detailSheet') ? 'butiran' : false); return; }
+    var li = e.target.closest('[data-open]') || e.target.closest('.listcard[data-id]');
+    if(li){ var id = +(li.getAttribute('data-open') || li.getAttribute('data-id')); openDetail(id, li.closest('#detailSheet') ? sheetBack : false); return; }
+    var lb = e.target.closest('[data-list]');
+    if(lb){ openListSheet(lb.getAttribute('data-list')); return; }
+    var sw = e.target.closest('[data-lv]');
+    if(sw){ listView = sw.getAttribute('data-lv'); openListSheet(currentList); return; }
     var b = e.target.closest('[data-uji]');
     if(b){ var set = b.getAttribute('data-set'); startFocus(progSets[set] || [], b.getAttribute('data-uji'), UJI_LABELS[set] || ''); }
   }
@@ -1703,6 +1722,7 @@
   // ---------- Butiran: today's Kaji in detail (sheet from the Kaji tab) ----------
   function openButiran(){
     rolloverDailyIfNeeded();
+    sheetBack = { label: 'Butiran', open: openButiran };
     var L = todayLists(), n = L.ok.length + L.re.length;
     progSets.today = L.re;
     var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
@@ -1721,36 +1741,110 @@
     openSheetHtml(html);
   }
 
-  // ---------- Kemajuan tab: overall progress ----------
+  // ---------- Kemajuan tab: overall progress across all 200 falsafah ----------
+  function allLevels(){
+    var lv = [[],[],[],[],[],[]];
+    DATA.forEach(function(e){ lv[getCard(e.id).box].push(e.id); });
+    return lv;
+  }
+  function allFocus(){
+    return DATA.filter(function(e){ return missesOf(e.id) >= 2; })
+      .sort(function(a, b){ return (missesOf(b.id) - missesOf(a.id)) || (getCard(a.id).box - getCard(b.id).box) || (a.id - b.id); })
+      .map(function(e){ return e.id; });
+  }
+  // Every list the Kemajuan tab can open: [title, ids, uji set or null, meta]
+  function listDef(key){
+    var L = todayLists(), lv = allLevels();
+    if(key === 'today-re') return ['Perlu ulang hari ini', L.re, 'today'];
+    if(key === 'today-ok') return ['Ingat hari ini', L.ok, null];
+    if(key === 'focus') return ['Perlu fokus', allFocus(), 'focus', function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }];
+    if(key === 'studied') return ['Pernah dikaji', DATA.filter(function(e){ return (getCard(e.id).seen||0) > 0; }).map(function(e){ return e.id; }), null];
+    if(key === 'unstudied') return ['Belum pernah dikaji', DATA.filter(function(e){ return !(getCard(e.id).seen||0); }).map(function(e){ return e.id; }), null];
+    if(key === 'kelas'){ var W = classWeekly(); return ['Kelas minggu ini', W ? W.top.map(function(x){ return x.id; }) : [], 'kelas']; }
+    var m = /^lv(\d)$/.exec(key);
+    if(m) return ['Tahap: ' + BOX_LABELS[+m[1]], lv[+m[1]], +m[1] < 5 ? 'lv' + m[1] : null];
+    return ['', [], null];
+  }
+  var currentList = null, listView = 'ringkas';
+  function openListSheet(key){
+    currentList = key;
+    var d = listDef(key), title = d[0], ids = d[1], set = d[2], meta = d[3];
+    if(set) progSets[set] = ids;
+    if(set && /^lv/.test(set)) UJI_LABELS[set] = title;
+    sheetBack = { label: title, open: function(){ openListSheet(key); } };
+    var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
+      '<h3 class="ptitle">' + escapeHtml(title) + '</h3>' +
+      '<p class="psub">' + ids.length + ' falsafah' + (ids.length ? ' &middot; tekan untuk lihat butiran' : '') + '</p>';
+    if(!ids.length){
+      html += '<p class="pnote" style="margin-top:16px;">Tiada falsafah dalam senarai ini lagi.</p>';
+    } else {
+      html += '<div class="lv-switch"><button type="button" data-lv="ringkas" class="' + (listView === 'ringkas' ? 'active' : '') + '">Senarai ringkas</button>' +
+        '<button type="button" data-lv="penuh" class="' + (listView === 'penuh' ? 'active' : '') + '">Butiran penuh</button></div>' +
+        (set ? ujiRow(set, ids.length) : '') +
+        '<div style="margin-top:12px;">' +
+        (listView === 'penuh'
+          ? '<div class="card-list">' + ids.map(function(id){ var e = entryById(id); return e ? listCardHtml(e) : ''; }).join('') + '</div>'
+          : progItems(ids, meta)) +
+        '</div>';
+    }
+    html += '</div>';
+    openSheetHtml(html);
+  }
+
   function renderKemajuan(){
     rolloverDailyIfNeeded();
     var stage = document.getElementById('kemajuanStage');
     if(!stage) return;
-    var F = focusList(), W = classWeekly();
-    progSets.focus = F;
+    var L = todayLists(), nToday = L.ok.length + L.re.length;
+    var F = allFocus(), W = classWeekly(), lv = allLevels(), total = DATA.length;
+    var studied = DATA.filter(function(e){ return (getCard(e.id).seen||0) > 0; }).length;
+    progSets.focus = F; progSets.today = L.re;
     progSets.kelas = W ? W.top.map(function(x){ return x.id; }) : [];
-    var levels = [0,0,0,0,0,0], studied = 0, total = STUDY_POOL.length;
-    STUDY_POOL.forEach(function(e){ var c = getCard(e.id); levels[c.box]++; if((c.seen||0) > 0) studied++; });
-    // last 14 days, oldest first
     var days14 = []; for(var i = 13; i >= 0; i--) days14.push(addDays(todayStr(), -i));
     var maxN = 1, activeDays = 0;
     days14.forEach(function(d){ var h = kajiHistory[d]; var n = h ? (h.g||[]).length + (h.a||[]).length : 0; if(n){ activeDays++; maxN = Math.max(maxN, n); } });
     var histDays = Object.keys(kajiHistory).sort().reverse().filter(function(d){ var h = kajiHistory[d]; return h && ((h.g||[]).length || (h.a||[]).length); }).slice(0, 14);
 
     var html = '<div class="prog kmj">' +
-      '<div class="kmj-head"><h2>Kemajuan anda</h2><span class="psub">Falsafah ' + studyRange.from + '&ndash;' + studyRange.to + ' &middot; ' + total + ' falsafah</span></div>' +
+      '<div class="kmj-head"><h2>Kemajuan anda</h2><span class="psub">Semua 200 falsafah</span></div>' +
       '<div class="kmj-tiles">' +
-        '<div><b>' + levels[5] + '<small>/' + total + '</small></b>Dikuasai</div>' +
-        '<div><b>' + studied + '<small>/' + total + '</small></b>Pernah dikaji</div>' +
-        '<div><b>' + F.length + '</b>Perlu fokus</div>' +
+        '<div data-list="lv5"><b>' + lv[5].length + '<small>/' + total + '</small></b>Dikuasai</div>' +
+        '<div data-list="studied"><b>' + studied + '<small>/' + total + '</small></b>Pernah dikaji</div>' +
+        '<div data-list="focus"><b>' + F.length + '</b>Perlu fokus</div>' +
         '<div><b>' + activeDays + '<small>/14</small></b>Hari aktif</div>' +
       '</div>';
 
-    // Keseluruhan
-    html += '<div class="prog-sec card-sec"><h4>Tahap hafalan</h4>' +
-      '<div class="lvl-bar">' + levels.map(function(v, i){ return v ? '<span style="width:' + (v/total*100) + '%;background:' + LEVEL_COLORS[i] + '"></span>' : ''; }).join('') + '</div>' +
-      '<div class="lvl-grid">' + levels.map(function(v, i){ return '<div><b>' + v + '</b><i style="background:' + LEVEL_COLORS[i] + '"></i>' + BOX_LABELS[i] + '</div>'; }).join('') + '</div>' +
+    // Hari ini
+    html += '<div class="prog-sec card-sec"><h4>Hari ini &middot; <span class="cnt">' + nToday + '</span> dikaji</h4>' +
+      (nToday ? '<div class="ks-bar" style="height:8px;"><span class="ok" style="width:' + (L.ok.length/nToday*100) + '%"></span><span class="re" style="width:' + (L.re.length/nToday*100) + '%"></span></div>' : '') +
+      '<div class="kmj-today">' +
+        '<button type="button" class="t-re" data-list="today-re"><b>' + L.re.length + '</b>&#8635; Perlu ulang &rsaquo;</button>' +
+        '<button type="button" class="t-ok" data-list="today-ok"><b>' + L.ok.length + '</b>&#10003; Ingat &rsaquo;</button>' +
+      '</div>' +
+      (L.re.length ? ujiRow('today', L.re.length) : '') +
+      (nToday ? '' : '<p class="pnote">Belum ada falsafah dikaji hari ini.</p>') + '</div>';
+
+    // Tahap hafalan
+    html += '<div class="prog-sec card-sec"><h4>Tahap hafalan &middot; tekan untuk lihat senarai</h4>' +
+      '<div class="lvl-bar">' + lv.map(function(v, i){ return v.length ? '<span style="width:' + (v.length/total*100) + '%;background:' + LEVEL_COLORS[i] + '"></span>' : ''; }).join('') + '</div>' +
+      '<div class="lvl-grid">' + lv.map(function(v, i){ return '<div data-list="lv' + i + '"><b>' + v.length + '</b><i style="background:' + LEVEL_COLORS[i] + '"></i>' + BOX_LABELS[i] + '</div>'; }).join('') + '</div>' +
       '<p class="pnote">Setiap kali anda tekan Ingat, falsafah naik satu tahap. Belum ingat membawanya kembali ke Baru.</p></div>';
+
+    // Perlu fokus
+    html += '<div class="prog-sec card-sec"><h4>Perlu fokus &middot; <span class="cnt">' + F.length + '</span></h4>' +
+      (F.length ? progItems(F.slice(0, 5), function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }) +
+                  (F.length > 5 ? '<button type="button" class="backbtn" data-list="focus" style="margin:10px 0 0;">Lihat semua ' + F.length + ' &rsaquo;</button>' : '') +
+                  ujiRow('focus', F.length)
+                : '<p class="pnote">Belum ada. Falsafah yang terlupa 2 kali atau lebih akan muncul di sini.</p>') +
+      '</div>';
+
+    // Kelas minggu ini (Fridays)
+    if(W){
+      html += '<div class="prog-sec card-sec"><h4>Kelas minggu ini &middot; paling kerap terlupa</h4>' +
+        progItems(progSets.kelas, function(id){ var x = W.top.filter(function(t){ return t.id === id; })[0]; return x ? x.students + ' pelajar' : ''; }) +
+        ujiRow('kelas', progSets.kelas.length) +
+        '<p class="pnote">Dikira daripada semua pelajar dalam 7 hari lepas. Dipaparkan setiap Jumaat.</p></div>';
+    }
 
     // 14-day chart
     html += '<div class="prog-sec card-sec"><h4>14 hari lepas</h4><div class="kmj-chart">' +
@@ -1761,20 +1855,6 @@
           '<div class="kc-lbl' + (d === todayStr() ? ' today' : '') + '">' + new Date(d + 'T00:00:00').getDate() + '</div></div>';
       }).join('') + '</div>' +
       '<div class="kmj-legend"><span><i class="ok"></i>Ingat</span><span><i class="re"></i>Perlu ulang</span></div></div>';
-
-    // Kelas minggu ini (Fridays)
-    if(W){
-      html += '<div class="prog-sec card-sec"><h4>Kelas minggu ini &middot; paling kerap terlupa</h4>' +
-        progItems(progSets.kelas, function(id){ var x = W.top.filter(function(t){ return t.id === id; })[0]; return x ? x.students + ' pelajar' : ''; }) +
-        ujiRow('kelas', progSets.kelas.length) +
-        '<p class="pnote">Dikira daripada semua pelajar dalam 7 hari lepas. Dipaparkan setiap Jumaat.</p></div>';
-    }
-
-    // Perlu fokus
-    html += '<div class="prog-sec card-sec"><h4>Perlu fokus &middot; <span class="cnt">' + F.length + '</span></h4>' +
-      (F.length ? progItems(F, function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }) + ujiRow('focus', F.length)
-                : '<p class="pnote">Belum ada. Falsafah yang terlupa 2 kali atau lebih akan muncul di sini.</p>') +
-      '</div>';
 
     // Sejarah
     html += '<div class="prog-sec card-sec hist"><h4>Sejarah harian</h4>' +
@@ -1988,7 +2068,7 @@
     document.getElementById('detailSheet').onclick = null;
     document.getElementById('detailSheet').innerHTML =
       '<button class="closebtn" id="closeDetail">&times;</button>' +
-      (fromProgress ? '<button type="button" class="backbtn" id="backToProg">&lsaquo; Butiran</button><br>' : '') +
+      (fromProgress ? '<button type="button" class="backbtn" id="backToProg">&lsaquo; ' + escapeHtml(fromProgress.label) + '</button><br>' : '') +
       '<span class="rangepill">'+entry.rangeLabel+'</span> ' +
       '<span class="badge '+BOX_BADGE_CLASS[box]+'">'+BOX_LABELS[box]+'</span>' +
       '<h3 class="folio-title" style="margin-top:14px;">'+escapeHtml(displayTitle(entry.title))+'</h3>' +
@@ -2007,9 +2087,10 @@
     document.getElementById('detailOverlay').classList.add('active');
     document.getElementById('closeDetail').onclick = closeDetail;
     var bp = document.getElementById('backToProg');
-    if(bp) bp.onclick = function(){ openButiran(); };
+    if(bp) bp.onclick = function(){ fromProgress.open(); };
   }
   function closeDetail(){
+    if(document.getElementById('view-kemajuan').classList.contains('active')) renderKemajuan();
     document.getElementById('detailOverlay').classList.remove('active');
     document.body.classList.remove('sheet-open');
   }
