@@ -1,5 +1,7 @@
 <title>الفتح النوى - Falsafah 200</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0F172A">
+<script>try{ if(localStorage.getItem('falsafah200_theme_v1') === 'light'){ document.querySelector('meta[name="theme-color"]').setAttribute('content', '#FAF5EC'); document.documentElement.style.backgroundColor = '#FAF5EC'; } else document.documentElement.style.backgroundColor = '#0F172A'; }catch(e){}</script>
 <meta name="description" content="Kaji dan hafaz 200 Falsafah Al Quran dari Al Fathun Nawa Jilid 7, dengan ayat asal, ulang kaji jarak masa, kuiz dan penjejakan kemajuan.">
 <style>
   :root{
@@ -1450,8 +1452,15 @@
   try{ var savedTheme = localStorage.getItem(THEME_KEY); if(savedTheme==='light'||savedTheme==='dark') theme = savedTheme; }catch(e){}
   var SUN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
   var MOON_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  var THEME_BG = { light:'#FAF5EC', dark:'#0F172A' };
   function applyTheme(){
     document.body.setAttribute('data-theme', theme);
+    // Keep the phone's status bar / browser bar the same colour as the page (iPhone and Android read these)
+    var root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    root.style.backgroundColor = THEME_BG[theme];
+    root.style.colorScheme = theme;
+    document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){ m.setAttribute('content', THEME_BG[theme]); });
     var btn = document.getElementById('themeToggle');
     if(btn) btn.innerHTML = theme === 'light' ? MOON_ICON : SUN_ICON;
   }
@@ -1464,7 +1473,15 @@
     }
     applyTheme();
   }
-  document.getElementById('themeToggle').onclick = toggleTheme;
+  // Safari re-reads the top bar colour when the page moves; nudge it by one pixel after a theme change
+  function nudgeBars(){
+    requestAnimationFrame(function(){
+      var y = window.scrollY;
+      window.scrollTo(0, y > 0 ? y - 1 : y + 1);
+      requestAnimationFrame(function(){ window.scrollTo(0, y); });
+    });
+  }
+  document.getElementById('themeToggle').onclick = function(){ toggleTheme(); setTimeout(nudgeBars, 450); };
 
   // Small hint beside the theme button on each page open; any click, tap or key press hides it.
   var themeTipShown = false;

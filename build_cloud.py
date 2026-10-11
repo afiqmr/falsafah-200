@@ -30,7 +30,6 @@ head = nl.join([
     '<link rel="manifest" href="manifest.webmanifest">',
     '<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">',
     '<link rel="icon" type="image/png" href="icons/favicon-32.png">',
-    '<meta name="theme-color" content="#A72724">',
     '<meta name="mobile-web-app-capable" content="yes">',
     '<meta name="apple-mobile-web-app-capable" content="yes">',
     '<meta name="apple-mobile-web-app-title" content="Falsafah 200">',
