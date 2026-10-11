@@ -1,0 +1,307 @@
+<!-- ================= Akaun & segerak awan (Firebase) ================= -->
+<style>
+  .acctbtn{
+    display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px; border-radius:100px; flex:none;
+    background:var(--surface-2); border:1px solid var(--border); color:var(--muted);
+    font-family:inherit; font-size:12px; font-weight:800; cursor:pointer; white-space:nowrap; max-width:150px;
+  }
+  .acctbtn span{ overflow:hidden; text-overflow:ellipsis; }
+  .acctbtn:hover{ color:var(--ink); border-color:var(--gold); }
+  .acctbtn.on{ color:var(--ink); border-color:color-mix(in srgb, var(--emerald) 55%, var(--border)); }
+  .acctbtn .dot{ width:8px; height:8px; border-radius:50%; background:var(--muted); flex:none; }
+  .acctbtn.on .dot{ background:var(--emerald); }
+  .acctbtn.busy .dot{ background:var(--gold); animation:acctPulse 1s ease-in-out infinite; }
+  @keyframes acctPulse{ 50%{ opacity:.3; } }
+  #acctOverlay{ z-index:80; }
+  #acctOverlay.gate.active{ background:color-mix(in srgb, var(--bg) 82%, transparent); }
+  #acctCard{ text-align:left; max-width:380px; }
+  #acctCard h3, #acctCard .sub{ text-align:center; }
+  #acctCard .brand{ text-align:center; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin:0 0 6px; }
+  .acct-seg{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border-radius:100px; background:var(--surface-2); border:1px solid var(--border); margin:0 0 16px; }
+  .acct-seg button{ border:0; background:transparent; color:var(--muted); font-family:inherit; font-size:14px; font-weight:800; padding:9px; border-radius:100px; cursor:pointer; }
+  .acct-seg button.active{ background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--gold); }
+  .acct-field{ margin-bottom:10px; }
+  .acct-field label{ display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 5px 2px; }
+  #acctCard input{ text-align:left; margin-bottom:0; }
+  #acctCard input.pin{ letter-spacing:.5em; font-weight:800; text-align:center; font-size:20px; }
+  .acct-msg{ min-height:18px; font-size:13px; font-weight:700; margin:6px 0 10px; text-align:center; }
+  .acct-msg.err{ color:var(--rose); }
+  .acct-msg.ok{ color:var(--emerald); }
+  .acct-note{ font-size:12px; color:var(--muted); line-height:1.55; margin:12px 0 0; text-align:center; }
+  .acct-who{ text-align:center; margin:4px 0 14px; }
+  .acct-who b{ display:block; font-size:18px; }
+  .acct-who span{ font-size:13px; color:var(--muted); word-break:break-all; }
+  .acct-row{ display:flex; gap:8px; margin-top:10px; }
+  .acct-row button{ flex:1; }
+  .acct-ghost{ background:var(--surface-2) !important; color:var(--ink) !important; border:1px solid var(--border) !important; }
+  #acctCard .nameskip{ margin:10px auto 0; }
+  .acct-links{ display:flex; justify-content:space-between; gap:10px; }
+  .acct-links .nameskip{ margin:10px 0 0 !important; }
+  .acct-spin{ width:26px; height:26px; margin:18px auto 6px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--gold); animation:acctSpin .8s linear infinite; }
+  @keyframes acctSpin{ to{ transform:rotate(360deg); } }
+</style>
+
+<div class="nameoverlay" id="acctOverlay" aria-modal="true" role="dialog">
+  <div class="namecard" id="acctCard"></div>
+</div>
+
+<script>
+  // Firebase web config (public by design; access is controlled by Firestore rules).
+  window.FIREBASE_CONFIG = __FIREBASE_CONFIG__;
+</script>
+<script type="module">
+const CFG = window.FIREBASE_CONFIG;
+const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1' };
+const SYNCED = new Set(Object.values(KEYS));
+const LAST_USER = 'falsafah200_last_user_v1';   // remembered on this device so the username is filled in
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const origSet = Storage.prototype.setItem;
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { origSet.call(localStorage, k, v); } catch (e) {} };
+const lsDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
+const maskEmail = e => { const [u, d] = String(e).split('@'); return (u.length <= 2 ? u[0] + '*' : u.slice(0, 2) + '***') + '@' + (d || ''); };
+const firstName = n => String(n || '').trim().split(/\s+/)[0] || 'Akaun';
+
+// ---------- header button ----------
+const actions = document.querySelector('.header-actions');
+const btn = document.createElement('button');
+btn.className = 'acctbtn'; btn.id = 'acctBtn'; btn.type = 'button';
+btn.innerHTML = '<i class="dot"></i><span>Log masuk</span>';
+actions.insertBefore(btn, actions.firstChild);
+function setBtn(state, text) { btn.classList.toggle('on', state === 'on'); btn.classList.toggle('busy', state === 'busy'); btn.querySelector('span').textContent = text; }
+
+// ---------- sheet ----------
+const overlay = $('acctOverlay'), card = $('acctCard');
+let mode = 'wait', fb = null, user = null, profile = null, lastSync = null, gated = true;
+overlay.addEventListener('click', e => { if (e.target === overlay && !gated) closeSheet(); });
+btn.onclick = () => { if (user) { gated = false; openSheet('account'); } else openGate(); };
+function openSheet(m) { mode = m; overlay.classList.toggle('gate', gated); render(); overlay.classList.add('active'); }
+function openGate() { gated = true; openSheet('login'); }
+function closeSheet() { overlay.classList.remove('active'); }
+function msg(text, kind) { const m = $('acctMsg'); if (m) { m.textContent = text || ''; m.className = 'acct-msg ' + (kind || ''); } }
+const BRAND = '<p class="brand">Al-Fathun Nawa &middot; Falsafah 1&ndash;200</p>';
+const pinInput = (id, ac) => `<input id="${id}" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="${ac}" placeholder="••••••">`;
+const userInput = v => `<input id="fUser" maxlength="20" autocapitalize="none" autocomplete="username" spellcheck="false" placeholder="cth. ahmad_t1" value="${esc(v || '')}">`;
+
+function render() {
+  if (!CFG) { card.innerHTML = BRAND + '<h3>Akaun</h3><p class="sub">Log masuk belum disediakan untuk versi ini.</p>'; return; }
+  if (mode === 'wait') { card.innerHTML = BRAND + '<h3>Selamat datang</h3><div class="acct-spin"></div><p class="sub">Memuatkan…</p>'; return; }
+  if (mode === 'account' && user) {
+    const t = lastSync ? lastSync.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' }) : '—';
+    card.innerHTML = `<h3>Akaun anda</h3>
+      <div class="acct-who"><b>${esc(profile?.name || '')}</b><span>@${esc(profile?.username || '')} · ${esc(user.email || '')}</span></div>
+      <p class="acct-msg ok" id="acctMsg">Progress synced ✓ · ${t}</p>
+      <button class="namebtn" id="acctSyncNow">Sync progress</button>
+      <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">Log keluar</button><button class="namebtn acct-ghost" id="acctClose">Tutup</button></div>
+      <p class="acct-note">Di telefon atau komputer lain, log masuk dengan nama pengguna & PIN yang sama untuk sambung kemajuan anda.</p>`;
+    $('acctSyncNow').onclick = async () => { msg('Syncing…'); dirty = true; await push(); await pullMerge(true); msg('Progress synced ✓', 'ok'); };
+    $('acctOut').onclick = logout; $('acctClose').onclick = closeSheet; return;
+  }
+  const reg = mode === 'register', last = lsGet(LAST_USER) || '';
+  card.innerHTML = `${BRAND}<h3>${reg ? 'Daftar akaun' : 'Log masuk'}</h3>
+    <p class="sub">${reg ? 'Sekali daftar sahaja. Kemajuan anda disimpan di awan.' : 'Masukkan nama pengguna dan PIN 6 digit anda.'}</p>
+    <div class="acct-seg"><button type="button" data-m="login" class="${reg ? '' : 'active'}">Log Masuk</button><button type="button" data-m="register" class="${reg ? 'active' : ''}">Daftar</button></div>
+    ${reg ? '<div class="acct-field"><label>Nama penuh</label><input id="fName" maxlength="60" autocomplete="name" placeholder="cth. Ahmad bin Abdullah"></div>' : ''}
+    <div class="acct-field"><label>Nama pengguna</label>${userInput(reg ? '' : last)}</div>
+    ${reg ? '<div class="acct-field"><label>Emel <span style="text-transform:none;letter-spacing:0;font-weight:600">(untuk Lupa PIN)</span></label><input id="fEmail" type="email" maxlength="80" autocapitalize="none" autocomplete="email" spellcheck="false" placeholder="nama@contoh.com"></div>' : ''}
+    <div class="acct-field"><label>PIN 6 digit</label>${pinInput('fPin', reg ? 'new-password' : 'current-password')}</div>
+    ${reg ? `<div class="acct-field"><label>Sahkan PIN</label>${pinInput('fPin2', 'new-password')}</div>` : ''}
+    <p class="acct-msg" id="acctMsg"></p>
+    <button class="namebtn" id="acctGo">${reg ? 'Daftar' : 'Log masuk'}</button>
+    ${reg ? '' : '<button class="nameskip" id="acctForgot" type="button">Lupa PIN?</button>'}
+    <p class="acct-note">${reg ? 'Nama pengguna: 3–20 huruf kecil, nombor, _ atau . Kami simpan nama, nama pengguna, emel dan kemajuan hafalan anda sahaja.' : 'Belum ada akaun? Tekan Daftar.'}</p>`;
+  card.querySelectorAll('.acct-seg button').forEach(b => b.onclick = () => { mode = b.dataset.m; render(); });
+  $('acctGo').onclick = reg ? register : login;
+  if (!reg) $('acctForgot').onclick = forgot;
+  card.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') $('acctGo').click(); }));
+  card.querySelectorAll('input.pin').forEach(i => i.addEventListener('input', () => { i.value = i.value.replace(/\D/g, '').slice(0, 6); }));
+  $('fUser').addEventListener('input', e => { e.target.value = e.target.value.toLowerCase().replace(/\s/g, ''); });
+  if (!reg && last) setTimeout(() => $('fPin')?.focus(), 350);
+}
+const cleanUser = u => (u || '').trim().toLowerCase();
+const validUser = u => /^[a-z0-9_.]{3,20}$/.test(u);
+const cleanEmail = e => (e || '').trim().toLowerCase();
+const validEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+const ERR = c => ({
+  'auth/email-already-in-use': 'Emel ini sudah didaftarkan dengan akaun lain.',
+  'auth/invalid-email': 'Emel tidak sah.',
+  'auth/invalid-credential': 'Nama pengguna atau PIN salah.', 'auth/wrong-password': 'Nama pengguna atau PIN salah.', 'auth/user-not-found': 'Nama pengguna atau PIN salah.',
+  'auth/invalid-login-credentials': 'Nama pengguna atau PIN salah.',
+  'auth/too-many-requests': 'Terlalu banyak cubaan. Cuba lagi selepas beberapa minit.',
+  'auth/network-request-failed': 'Tiada sambungan internet. Cuba lagi.',
+  'auth/operation-not-allowed': 'Log masuk belum diaktifkan di Firebase (Email/Password).',
+  'unavailable': 'Tiada sambungan internet. Cuba lagi.',
+  'permission-denied': 'Pangkalan data menolak akses. Semak peraturan Firestore.'
+}[c] || 'Ralat: ' + c);
+
+// ---------- Firebase ----------
+async function loadFb() {
+  if (fb) return fb;
+  const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+  const [{ initializeApp }, A, F] = await Promise.all([import(base + 'firebase-app.js'), import(base + 'firebase-auth.js'), import(base + 'firebase-firestore.js')]);
+  const app = initializeApp(CFG);
+  fb = { A, F, auth: A.getAuth(app), db: F.getFirestore(app) };
+  return fb;
+}
+const userDoc = () => fb.F.doc(fb.db, 'users', user.uid);
+const nameDoc = u => fb.F.doc(fb.db, 'usernames', u);   // public lookup: username -> sign-in email
+let registering = false;
+async function emailFor(u) { const s = await fb.F.getDoc(nameDoc(u)); return s.exists() ? s.data().email : null; }
+
+async function register() {
+  const name = ($('fName').value || '').trim().replace(/\s+/g, ' '), u = cleanUser($('fUser').value), email = cleanEmail($('fEmail').value), p = $('fPin').value, p2 = $('fPin2').value;
+  if (name.length < 3) return msg('Sila isi nama penuh anda.', 'err');
+  if (!validUser(u)) return msg('Nama pengguna: 3–20 huruf kecil, nombor, _ atau .', 'err');
+  if (!validEmail(email)) return msg('Sila isi emel yang sah.', 'err');
+  if (!/^\d{6}$/.test(p)) return msg('PIN mesti 6 digit nombor.', 'err');
+  if (p !== p2) return msg('PIN tidak sepadan.', 'err');
+  msg('Mendaftar…'); $('acctGo').disabled = true; registering = true;
+  let cred = null;
+  try {
+    await loadFb();
+    if (await emailFor(u)) throw { code: 'username-taken' };
+    cred = await fb.A.createUserWithEmailAndPassword(fb.auth, email, p);
+    user = cred.user; profile = { name, username: u, email };
+    try { await fb.F.setDoc(nameDoc(u), { uid: user.uid, email }); }
+    catch (e) { await cred.user.delete().catch(() => {}); user = null; throw { code: 'username-taken' }; }   // someone took it a moment ago
+    lsSet(LAST_USER, u); lsSet(KEYS.username, name);
+    await fb.F.setDoc(userDoc(), { profile, data: localSnapshot(), createdAt: fb.F.serverTimestamp(), updatedAt: fb.F.serverTimestamp() });
+    lastSync = new Date();
+    afterLogin();
+  } catch (e) {
+    registering = false;
+    msg(e.code === 'username-taken' ? 'Nama pengguna ini sudah digunakan. Cuba nama lain.' : ERR(e.code || e.message), 'err');
+    const g = $('acctGo'); if (g) g.disabled = false;
+  }
+}
+async function login() {
+  const u = cleanUser($('fUser').value), p = $('fPin').value;
+  if (!validUser(u)) return msg('Masukkan nama pengguna anda.', 'err');
+  if (!/^\d{6}$/.test(p)) return msg('Masukkan PIN 6 digit.', 'err');
+  msg('Log masuk…'); $('acctGo').disabled = true;
+  try {
+    await loadFb();
+    const email = await emailFor(u);
+    if (!email) throw { code: 'auth/invalid-credential' };
+    await fb.A.signInWithEmailAndPassword(fb.auth, email, p);
+    lsSet(LAST_USER, u);
+    msg('Berjaya! Memuatkan kemajuan anda…', 'ok');   // onAuthStateChanged takes over
+  } catch (e) { msg(ERR(e.code || e.message), 'err'); const g = $('acctGo'); if (g) g.disabled = false; const f = $('fPin'); if (f) { f.value = ''; f.focus(); } }
+}
+async function forgot() {
+  const u = cleanUser($('fUser').value);
+  if (!validUser(u)) return msg('Isi nama pengguna anda dahulu, kemudian tekan Lupa PIN.', 'err');
+  try {
+    await loadFb();
+    const email = await emailFor(u);
+    if (!email) return msg('Nama pengguna tidak dijumpai.', 'err');
+    await fb.A.sendPasswordResetEmail(fb.auth, email);
+    msg(`Pautan tetapan semula dihantar ke ${maskEmail(email)}. Tetapkan PIN 6 digit baharu (nombor sahaja). Semak juga folder Spam.`, 'ok');
+  } catch (e) { msg(ERR(e.code || e.message), 'err'); }
+}
+async function logout() {
+  await push().catch(() => {});
+  await fb.A.signOut(fb.auth);
+  Object.values(KEYS).forEach(lsDel); lsDel('falsafah200_order_v3');   // next person on this device starts clean; the username stays filled in
+  try { sessionStorage.removeItem('fn_merged'); } catch (e) {}
+  location.reload();
+}
+
+// After sign-in: close the gate, then ask for the julat if this account has none yet.
+function afterLogin() {
+  registering = false; gated = false;
+  setBtn('on', firstName(profile?.name));
+  closeSheet();
+  if (!lsGet(KEYS.range)) {
+    setTimeout(() => {
+      $('greetBtn')?.click();                                   // opens the app's own setup sheet (julat)
+      const ni = $('nameInput'); if (ni && !ni.value) ni.value = profile?.name || '';
+    }, 380);
+  }
+}
+
+// ---------- merge ----------
+const parse = s => { try { return s ? JSON.parse(s) : null; } catch (e) { return null; } };
+function localSnapshot() { const o = {}; for (const [k, key] of Object.entries(KEYS)) { const v = lsGet(key); if (v !== null) o[k] = v; } return o; }
+function better(a, b) { // pick the card with more study history
+  if (!a) return b; if (!b) return a;
+  if ((a.seen || 0) !== (b.seen || 0)) return (a.seen || 0) > (b.seen || 0) ? a : b;
+  if ((a.box || 0) !== (b.box || 0)) return (a.box || 0) > (b.box || 0) ? a : b;
+  return (a.due || '') >= (b.due || '') ? a : b;
+}
+function mergeDaily(a, b) {
+  if (!a) return b; if (!b) return a;
+  if (a.date !== b.date) return a.date > b.date ? a : b;
+  const kaji = [...new Set([...(a.kajiIds || []), ...(b.kajiIds || [])])];
+  const results = Object.assign({}, b.results || {}, a.results || {});
+  const again = [...new Set([...(a.again || []), ...(b.again || [])])].filter(id => results[id] === 'again');
+  return { date: a.date, kajiIds: kaji, kuizCount: Math.max(a.kuizCount || 0, b.kuizCount || 0), results, again, summaryShown: !!(a.summaryShown || b.summaryShown) };
+}
+function merge(local, remote) {
+  const out = {};
+  const ls = parse(local.srs) || {}, rs = parse(remote.srs) || {};
+  const srs = {}; new Set([...Object.keys(ls), ...Object.keys(rs)]).forEach(id => { srs[id] = better(ls[id], rs[id]); });
+  if (Object.keys(srs).length) out.srs = JSON.stringify(srs);
+  const d = mergeDaily(parse(local.daily), parse(remote.daily)); if (d) out.daily = JSON.stringify(d);
+  out.username = remote.username || local.username; if (!out.username) delete out.username;
+  out.range = remote.range || local.range; if (!out.range) delete out.range;
+  out.theme = local.theme || remote.theme; if (!out.theme) delete out.theme;
+  return out;
+}
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+async function pullMerge(force) {
+  const snap = await fb.F.getDoc(userDoc());
+  const remote = snap.exists() ? (snap.data().data || {}) : {};
+  profile = (snap.exists() && snap.data().profile) || profile;
+  const local = localSnapshot();
+  const merged = merge(local, remote);
+  if (!merged.username && profile?.name) merged.username = profile.name;
+  const localChanged = !same(merged, local);
+  for (const [k, key] of Object.entries(KEYS)) if (merged[k] !== undefined) lsSet(key, merged[k]);
+  if (!same(merged, remote)) await fb.F.setDoc(userDoc(), { profile, data: merged, updatedAt: fb.F.serverTimestamp() }, { merge: true });
+  lastSync = new Date();
+  // the study screen reads storage at start-up, so reload once to show merged progress
+  let reloaded = false; try { reloaded = sessionStorage.getItem('fn_merged') === '1'; } catch (e) {}
+  if (localChanged && (!reloaded || force)) { try { sessionStorage.setItem('fn_merged', '1'); } catch (e) {} location.reload(); return true; }
+  return false;
+}
+
+// ---------- push on every save (debounced) ----------
+let timer = null, dirty = false;
+Storage.prototype.setItem = function (k, v) {
+  origSet.call(this, k, v);
+  if (this === window.localStorage && SYNCED.has(k) && user) { dirty = true; clearTimeout(timer); timer = setTimeout(push, 1500); }
+};
+async function push() {
+  if (!user || !fb || !dirty) return;
+  dirty = false; setBtn('busy', firstName(profile?.name));
+  try { await fb.F.setDoc(userDoc(), { profile, data: localSnapshot(), updatedAt: fb.F.serverTimestamp() }, { merge: true }); lastSync = new Date(); }
+  catch (e) { dirty = true; }
+  setBtn(dirty ? '' : 'on', firstName(profile?.name));
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && dirty) push(); });
+
+// ---------- start: nothing is usable until the student is signed in ----------
+document.getElementById('nameOverlay')?.classList.remove('active');
+openSheet('wait');
+(async () => {
+  if (!CFG) { render(); return; }
+  try {
+    await loadFb();
+    fb.A.onAuthStateChanged(fb.auth, async u => {
+      user = u;
+      if (!u) { if (!overlay.classList.contains('active') || mode === 'wait') openGate(); setBtn('', 'Log masuk'); return; }
+      if (registering) return;   // register() finishes the hand-off itself
+      profile = profile || { name: lsGet(KEYS.username) || '', username: lsGet(LAST_USER) || '', email: u.email };
+      setBtn('busy', firstName(profile.name));
+      try {
+        if (await pullMerge(false)) return;   // reloading with merged progress
+      } catch (e) { setBtn('', 'Luar talian'); }
+      afterLogin();
+    });
+  } catch (e) {
+    card.innerHTML = BRAND + '<h3>Tiada sambungan</h3><p class="sub">Aplikasi perlu internet untuk log masuk kali pertama. Semak sambungan anda, kemudian cuba lagi.</p><button class="namebtn" onclick="location.reload()">Cuba lagi</button>';
+  }
+})();
+</script>

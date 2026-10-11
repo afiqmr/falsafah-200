@@ -63,3 +63,42 @@ Run all three in that order after a full Arabic rebuild, then run `build.py`. Fo
 - The Arabic font is [Scheherazade New](https://software.sil.org/scheherazade/) by SIL, and the interface font is Noto Sans. Both load from Google Fonts.
 
 Made for students of the Advanced Diploma in Al-Quranic Philosophy, Institut Falsafah Al-Quran, in collaboration with Yayasan Gual Periok and World Philosophical Forum (WPF) Malaysia.
+
+## Cloud login test (branch `cloud-login-test`)
+
+A test version with accounts and cloud sync, live at https://falsafah200-test.vercel.app.
+
+- Students must register or log in before using the app. Register: full name, username, email, 6-digit PIN. Log in: username + PIN.
+- "Lupa PIN?" emails a reset link through Firebase.
+- Progress (Kaji, daily goal, julat, theme) is saved to Firebase Firestore and merged across devices.
+
+| File | What it is |
+|------|------------|
+| `cloud/cloud_ui.html` | Login screen, account sheet and Firebase sync code, added to the end of the app |
+| `cloud/firebase-config.json` | Firebase web config for project `falsafah-200-test` (public by design; access is controlled by the Firestore rules) |
+| `build_cloud.py` | Builds `cloud-test/index.html` from `index.html` plus the files above |
+| `cloud-test/index.html` | The built test app; deploy this folder |
+
+Build: `python build.py`, then `python build_cloud.py`.
+
+Firestore rules for the test project:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+    match /usernames/{name} {
+      allow get: if true;
+      allow list, update, delete: if false;
+      allow create: if request.auth != null
+        && name.matches('^[a-z0-9_.]{3,20}$')
+        && request.resource.data.keys().hasOnly(['uid', 'email'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email;
+    }
+  }
+}
+```
