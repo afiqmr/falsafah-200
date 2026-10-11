@@ -81,14 +81,22 @@ A test version with accounts and cloud sync, live at https://falsafah200-test.ve
 
 Build: `python build.py`, then `python build_cloud.py`.
 
+Admin: the account registered with `afiqmonsieur@gmail.com` (after verifying the email) gets a "Papan pentadbir" button in its account sheet. It lists every student's progress and publishes the class's most-missed falsafah of the last 7 days to `stats/weekly`, which students see in Kemajuan on Fridays.
+
 Firestore rules for the test project:
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'afiqmonsieur@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if isAdmin();
     }
     match /usernames/{name} {
       allow get: if true;
@@ -98,6 +106,10 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['uid', 'email'])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.email == request.auth.token.email;
+    }
+    match /stats/{doc} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
     }
   }
 }

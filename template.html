@@ -338,7 +338,7 @@
   .sum-label{
     font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:800; margin-bottom:6px;
   }
-  .sum-label.again{ color:var(--rose); }
+  .sum-label.again{ color:var(--gold-cite); }
   .sum-label.good{ color:var(--emerald); }
   .sum-list{
     list-style:none; margin:0; padding:0; max-height:26vh; overflow-y:auto;
@@ -350,6 +350,63 @@
   .sum-empty{ font-size:12px; color:var(--muted); margin:0; }
 
   .studydone{ text-align:center; padding:50px 20px; }
+
+  /* ---------- Kaji stats line + Kemajuan ---------- */
+  .kaji-stats{ display:flex; align-items:center; gap:12px; margin:-6px 0 14px; }
+  .ks-main{ flex:1; min-width:0; }
+  .ks-line{ font-size:13px; color:var(--muted); display:flex; gap:12px; flex-wrap:wrap; }
+  .ks-line b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .ks-ok{ color:var(--emerald); font-weight:800; }
+  .ks-re{ color:var(--gold-cite); font-weight:800; }
+  .ks-bar{ display:flex; height:5px; border-radius:100px; overflow:hidden; background:var(--border); margin-top:6px; }
+  .ks-bar span{ display:block; height:100%; }
+  .ks-bar .ok{ background:var(--emerald); }
+  .ks-bar .re{ background:var(--gold); }
+  .progbtn{
+    flex:none; display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:100px;
+    border:1px solid var(--border); background:var(--surface-2); color:var(--ink);
+    font-family:inherit; font-size:13px; font-weight:800; cursor:pointer;
+  }
+  .progbtn:hover{ border-color:var(--gold); }
+  .prog h3.ptitle{ font-size:20px; margin:4px 0 4px; }
+  .prog .psub{ font-size:13px; color:var(--muted); margin:0 0 6px; }
+  .prog-sec{ margin-top:22px; }
+  .prog-sec > h4{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; font-weight:800; }
+  .prog-sec > h4 .cnt{ color:var(--ink); }
+  .prog .sum-list{ max-height:none; }
+  .prog .sum-list li{ cursor:pointer; align-items:baseline; }
+  .prog .sum-list li:hover{ background:var(--surface-2); }
+  .prog .sl-title{ flex:1; }
+  .prog .sl-meta{ font-size:11px; color:var(--muted); white-space:nowrap; }
+  .prog .lbl-ok{ color:var(--emerald); }
+  .prog .lbl-re{ color:var(--gold-cite); }
+  .prog .pnote{ font-size:12px; color:var(--muted); margin:6px 0 0; line-height:1.5; }
+  .uji-row{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .uji-row button{
+    flex:1; min-width:140px; padding:10px 12px; border-radius:10px; cursor:pointer;
+    font-family:inherit; font-size:13px; font-weight:800;
+    border:1px solid var(--border); background:var(--surface-2); color:var(--ink);
+  }
+  .uji-row button.primary{ background:var(--gold); color:var(--gold-ink); border-color:transparent; }
+  .lvl-bar{ display:flex; height:12px; border-radius:100px; overflow:hidden; background:var(--border); }
+  .lvl-bar span{ display:block; height:100%; }
+  .lvl-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
+  .lvl-grid div{ border:1px solid var(--border); border-radius:10px; padding:8px 10px; font-size:12px; color:var(--muted); }
+  .lvl-grid b{ display:block; font-size:18px; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .lvl-grid i{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
+  .hist details{ border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
+  .hist summary{ cursor:pointer; padding:9px 12px; font-size:13px; font-weight:700; display:flex; gap:10px; }
+  .hist summary .hd{ flex:1; }
+  .hist details .sum-list{ border:0; border-top:1px solid var(--border); border-radius:0; }
+  .prog .backbtn, .detailsheet .backbtn{
+    border:0; background:none; color:var(--gold-cite); font-family:inherit; font-size:13px; font-weight:800; cursor:pointer; padding:0; margin:0 0 10px;
+  }
+  .focusbar{
+    display:flex; align-items:center; gap:10px; margin:0 0 12px; padding:10px 14px; border-radius:12px;
+    background:var(--gold-soft); border:1px solid rgba(212,175,55,.32); font-size:13px;
+  }
+  .focusbar span{ flex:1; }
+  .focusbar button{ border:0; background:none; color:var(--gold-cite); font-family:inherit; font-weight:800; font-size:13px; cursor:pointer; text-decoration:underline; }
   .studydone .big{ font-size:40px; color:var(--emerald); }
 
   /* ---------- Browse (Senarai) ---------- */
@@ -905,6 +962,7 @@
         <h2>Ulang kaji</h2>
         <div class="duecount"><b id="dueNum">0</b>/<span id="dueGoal">20</span> falsafah dikaji hari ini</div>
       </div>
+      <div class="kaji-stats" id="kajiStats"></div>
       <button class="rangechip" type="button"></button>
       <div id="studyStage"></div>
     </section>
@@ -1105,6 +1163,41 @@
 
   function kajiGoal(){ return Math.min(DAILY_KAJI_GOAL, STUDY_POOL.length); }
 
+  // Daily history: for each day, the latest result per falsafah (g = ingat,
+  // a = perlu ulang) and every falsafah missed at least once (m). Kept 120 days.
+  var HISTORY_KEY = 'falsafah200_history_v1';
+  var kajiHistory = (function(){ try{ var h = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}'); return (h && typeof h === 'object') ? h : {}; }catch(e){ return {}; } })();
+  function logHistory(id, result){
+    var t = todayStr();
+    var d = kajiHistory[t] || (kajiHistory[t] = { g:[], a:[], m:[] });
+    d.g = (d.g||[]).filter(function(x){ return x !== id; });
+    d.a = (d.a||[]).filter(function(x){ return x !== id; });
+    d.m = d.m || [];
+    (result ? d.g : d.a).push(id);
+    if(!result && d.m.indexOf(id) === -1) d.m.push(id);
+    var days = Object.keys(kajiHistory).sort();
+    while(days.length > 120){ delete kajiHistory[days.shift()]; }
+    try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(kajiHistory)); }catch(e){}
+  }
+  function todayLists(){
+    var ok = [], re = [];
+    daily.kajiIds.forEach(function(id){ (daily.results[id] === 'again' ? re : ok).push(id); });
+    return { ok: ok, re: re };
+  }
+  function renderKajiStats(){
+    var el = document.getElementById('kajiStats');
+    if(!el) return;
+    var L = todayLists(), n = L.ok.length + L.re.length;
+    el.innerHTML =
+      '<div class="ks-main">' +
+        '<div class="ks-line"><span class="ks-ok">&#10003; <b>' + L.ok.length + '</b> Ingat</span>' +
+        '<span class="ks-re">&#8635; <b>' + L.re.length + '</b> Perlu ulang</span></div>' +
+        '<div class="ks-bar">' + (n ? '<span class="ok" style="width:' + (L.ok.length/n*100) + '%"></span><span class="re" style="width:' + (L.re.length/n*100) + '%"></span>' : '') + '</div>' +
+      '</div>' +
+      '<button type="button" class="progbtn" id="progBtn">&#128202; Kemajuan</button>';
+    document.getElementById('progBtn').onclick = function(){ openProgress(); };
+  }
+
   function renderMissionBar(){
     rolloverDailyIfNeeded();
     var msLeft = DEADLINE.getTime() - Date.now();
@@ -1134,6 +1227,7 @@
         '<div class="mi-track"><span class="'+(kuizDone>=DAILY_KUIZ_GOAL?'mi-fill-done':'')+'" style="width:'+kuizPct+'%;"></span></div>' +
       '</div>';
 
+    renderKajiStats();
     var dn = document.getElementById('dueNum');
     if(dn) dn.textContent = kajiDone;
     var dg = document.getElementById('dueGoal');
@@ -1390,6 +1484,7 @@
   function renderStudy(){
     renderMissionBar();
     rolloverDailyIfNeeded();
+    if(focus && focus.mode === 'kaji'){ renderFocusStudy(); return; }
     var stage = document.getElementById('studyStage');
     var goal = kajiGoal();
     var fresh = dueQueue().filter(function(e){ return daily.kajiIds.indexOf(e.id) === -1; });
@@ -1452,12 +1547,190 @@
 
   function recordKaji(id, result){
     grade(id, result);
+    logHistory(id, result);
+    if(focus && focus.mode === 'kaji'){
+      var qi = focus.queue.indexOf(id);
+      if(qi >= 0) focus.queue.splice(qi, 1);
+      if(result === 0) focus.queue.push(id);
+      else {
+        focus.done++;
+        // A card remembered in a focus session comes back tomorrow, to check it stuck
+        var c = getCard(id), tmr = addDays(todayStr(), 1);
+        if(c.due > tmr){ c.due = tmr; saveState(srs); }
+      }
+    }
     markKajiDoneToday(id);
     daily.results[id] = result === 0 ? 'again' : 'good';
     var i = daily.again.indexOf(id);
     if(i >= 0) daily.again.splice(i, 1);
     if(result === 0) daily.again.push(id);
     saveDaily(daily);
+  }
+
+  // ---------- Focus sessions: test only a chosen set of falsafah ----------
+  var focus = null;   // { mode:'kaji'|'kuiz', ids:[...], queue:[...], label, done }
+  function startFocus(ids, mode, label){
+    ids = ids.filter(function(id){ return entryById(id); });
+    if(!ids.length) return;
+    focus = { mode: mode, ids: ids.slice(), queue: shuffle(ids.slice()), label: label, done: 0 };
+    closeDetail();
+    var tab = document.querySelector('nav.tabs button[data-view="' + (mode === 'kaji' ? 'study' : 'quiz') + '"]');
+    if(mode === 'kuiz'){ quizCurrent = null; }
+    if(tab) tab.click();
+    if(mode === 'kaji') renderStudy();
+    else if(quizCurrent === null) newQuiz();
+    window.scrollTo(0, document.getElementById('tabBar').getBoundingClientRect().top + window.scrollY);
+  }
+  function endFocus(){
+    var mode = focus && focus.mode;
+    focus = null;
+    if(mode === 'kuiz') newQuiz(); else renderStudy();
+  }
+  function focusBar(){
+    var total = focus.ids.length;
+    var txt = focus.mode === 'kaji'
+      ? 'Sesi fokus: <b>' + escapeHtml(focus.label) + '</b> &middot; ' + Math.min(focus.done, total) + '/' + total + ' ingat'
+      : 'Kuiz fokus: <b>' + escapeHtml(focus.label) + '</b> &middot; ' + total + ' falsafah';
+    return '<div class="focusbar"><span>' + txt + '</span><button type="button" id="focusEnd">Tamat</button></div>';
+  }
+  function renderFocusStudy(){
+    var stage = document.getElementById('studyStage');
+    if(!focus.queue.length){
+      currentCardId = null;
+      stage.innerHTML =
+        '<div class="folio"><div class="kaji-goal-done">' +
+        '<div class="big">&#127775;</div>' +
+        '<h3>Bagus! Sesi fokus selesai.</h3>' +
+        '<p>Anda telah mengulang ' + focus.ids.length + ' falsafah (' + escapeHtml(focus.label) + '). Kad ini akan muncul semula esok untuk pastikan ia benar-benar melekat.</p>' +
+        '<button class="kaji-extra-btn" id="focusDone">Kembali ke kaji biasa</button>' +
+        '</div></div>';
+      document.getElementById('focusDone').onclick = endFocus;
+      return;
+    }
+    var entry = entryById(focus.queue[0]);
+    currentCardId = entry.id;
+    revealed = false;
+    stage.innerHTML = focusBar() +
+      '<div class="folio">' +
+        '<div class="folio-top">' +
+          '<span class="rangepill">' + entry.rangeLabel + '</span>' +
+          '<span class="badge badge-gold">Fokus &middot; ' + focus.queue.length + ' lagi</span>' +
+        '</div>' +
+        '<div id="folioBody"></div>' +
+      '</div>';
+    document.getElementById('focusEnd').onclick = endFocus;
+    renderFolioBody(entry);
+  }
+
+  // ---------- Kemajuan (progress) panel ----------
+  var LEVEL_COLORS = ['var(--border)','#E9B949','#D4AF37','#7FB7A6','#34D399','#0F9F74'];
+  function missesOf(id){ var c = srs[id]; return c ? Math.max(0, (c.seen||0) - (c.correct||0)) : 0; }
+  function focusList(){
+    return STUDY_POOL.filter(function(e){ return missesOf(e.id) >= 2; })
+      .sort(function(a, b){ return (missesOf(b.id) - missesOf(a.id)) || (getCard(a.id).box - getCard(b.id).box) || (a.id - b.id); })
+      .map(function(e){ return e.id; });
+  }
+  function progItems(ids, meta){
+    if(!ids.length) return '';
+    return '<ul class="sum-list">' + ids.map(function(id){
+      var e = entryById(id); if(!e) return '';
+      return '<li data-open="' + id + '"><span class="sl-no">' + e.rangeLabel.replace('Falsafah ', '') + '</span>' +
+        '<span class="sl-title">' + escapeHtml(displayTitle(e.title)) + '</span>' +
+        (meta ? '<span class="sl-meta">' + meta(id) + '</span>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+  function ujiRow(set, n){
+    return '<div class="uji-row">' +
+      '<button type="button" class="primary" data-uji="kaji" data-set="' + set + '">Uji ' + n + ' ini &middot; Kaji</button>' +
+      '<button type="button" data-uji="kuiz" data-set="' + set + '">Uji ' + n + ' ini &middot; Kuiz</button></div>';
+  }
+  function fmtDay(ds){
+    var d = new Date(ds + 'T00:00:00');
+    try{ return d.toLocaleDateString('ms-MY', { weekday:'short', day:'numeric', month:'short' }); }catch(e){ return ds; }
+  }
+  function classWeekly(){
+    var w = window.fnWeekly;
+    if(!w || !w.top || !w.top.length) return null;
+    if(new Date().getDay() !== 5) return null;   // shown on Fridays
+    return w;
+  }
+  var progSets = {};
+  function openProgress(){
+    rolloverDailyIfNeeded();
+    var L = todayLists(), F = focusList(), W = classWeekly();
+    progSets = { today: L.re, focus: F, kelas: W ? W.top.map(function(x){ return x.id; }) : [] };
+    var n = L.ok.length + L.re.length;
+    var levels = [0,0,0,0,0,0];
+    STUDY_POOL.forEach(function(e){ levels[getCard(e.id).box]++; });
+    var total = STUDY_POOL.length;
+    var days = Object.keys(kajiHistory).sort().reverse().filter(function(d){ var h = kajiHistory[d]; return h && ((h.g||[]).length || (h.a||[]).length); }).slice(0, 14);
+
+    var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
+      '<h3 class="ptitle">Kemajuan anda</h3>' +
+      '<p class="psub">Julat: Falsafah ' + studyRange.from + '&ndash;' + studyRange.to + ' &middot; ' + total + ' falsafah</p>';
+
+    // Hari ini
+    html += '<div class="prog-sec"><h4>Hari ini &middot; <span class="cnt">' + n + '</span> dikaji</h4>';
+    if(!n){
+      html += '<p class="pnote">Belum ada falsafah dikaji hari ini. Mulakan di tab Kaji.</p>';
+    } else {
+      html += '<div class="ks-bar" style="height:8px;margin:0 0 10px;"><span class="ok" style="width:' + (L.ok.length/n*100) + '%"></span><span class="re" style="width:' + (L.re.length/n*100) + '%"></span></div>' +
+        '<div class="sum-label good" style="margin-top:4px;">&#10003; Ingat &middot; ' + L.ok.length + '</div>' +
+        (L.ok.length ? progItems(L.ok) : '<p class="pnote">Tiada lagi.</p>') +
+        '<div class="sum-label again" style="margin-top:12px;">&#8635; Perlu ulang &middot; ' + L.re.length + '</div>' +
+        (L.re.length ? progItems(L.re) + ujiRow('today', L.re.length) : '<p class="pnote">Tiada. Syabas!</p>');
+    }
+    html += '</div>';
+
+    // Kelas minggu ini (Fridays)
+    if(W){
+      html += '<div class="prog-sec"><h4>Kelas minggu ini &middot; paling kerap terlupa</h4>' +
+        progItems(progSets.kelas, function(id){ var x = W.top.filter(function(t){ return t.id === id; })[0]; return x ? x.students + ' pelajar' : ''; }) +
+        ujiRow('kelas', progSets.kelas.length) +
+        '<p class="pnote">Dikira daripada semua pelajar dalam 7 hari lepas. Dipaparkan setiap Jumaat.</p></div>';
+    }
+
+    // Perlu fokus
+    html += '<div class="prog-sec"><h4>Perlu fokus &middot; <span class="cnt">' + F.length + '</span></h4>' +
+      (F.length ? progItems(F, function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }) + ujiRow('focus', F.length)
+                : '<p class="pnote">Belum ada. Falsafah yang terlupa 2 kali atau lebih akan muncul di sini.</p>') +
+      '</div>';
+
+    // Keseluruhan
+    html += '<div class="prog-sec"><h4>Keseluruhan &middot; <span class="cnt">' + levels[5] + '/' + total + '</span> dikuasai</h4>' +
+      '<div class="lvl-bar">' + levels.map(function(v, i){ return v ? '<span style="width:' + (v/total*100) + '%;background:' + LEVEL_COLORS[i] + '"></span>' : ''; }).join('') + '</div>' +
+      '<div class="lvl-grid">' + levels.map(function(v, i){ return '<div><b>' + v + '</b><i style="background:' + LEVEL_COLORS[i] + '"></i>' + BOX_LABELS[i] + '</div>'; }).join('') + '</div>' +
+      '<p class="pnote">Setiap kali anda tekan Ingat, falsafah naik satu tahap. Belum ingat membawanya kembali ke Baru.</p></div>';
+
+    // Sejarah
+    html += '<div class="prog-sec hist"><h4>Sejarah 14 hari</h4>' +
+      (days.length ? days.map(function(d){
+        var h = kajiHistory[d], g = h.g || [], a = h.a || [];
+        return '<details><summary><span class="hd">' + fmtDay(d) + (d === todayStr() ? ' (hari ini)' : '') + '</span>' +
+          '<span class="lbl-ok">&#10003; ' + g.length + '</span><span class="lbl-re">&#8635; ' + a.length + '</span></summary>' +
+          progItems(a.concat(g), function(id){ return a.indexOf(id) >= 0 ? '<span class="lbl-re">perlu ulang</span>' : '<span class="lbl-ok">ingat</span>'; }) +
+          '</details>';
+      }).join('') : '<p class="pnote">Sejarah akan muncul selepas anda mula mengkaji.</p>') +
+      '</div>';
+
+    html += '</div>';
+    var sheet = document.getElementById('detailSheet');
+    sheet.innerHTML = html;
+    sheet.scrollTop = 0;
+    sheet.onclick = function(e){
+      var li = e.target.closest('[data-open]');
+      if(li){ openDetail(+li.getAttribute('data-open'), true); return; }
+      var b = e.target.closest('[data-uji]');
+      if(b){
+        var set = b.getAttribute('data-set');
+        var label = set === 'today' ? 'Perlu ulang hari ini' : (set === 'kelas' ? 'Kelas minggu ini' : 'Perlu fokus');
+        startFocus(progSets[set] || [], b.getAttribute('data-uji'), label);
+      }
+    };
+    document.querySelector('.app').style.transformOrigin = '50% ' + (window.scrollY + window.innerHeight / 2) + 'px';
+    document.body.classList.add('sheet-open');
+    document.getElementById('detailOverlay').classList.add('active');
+    document.getElementById('closeDetail').onclick = closeDetail;
   }
 
   function openKajiSummary(){
@@ -1479,8 +1752,8 @@
     document.getElementById('summaryCard').innerHTML =
       '<h3>' + (reached ? 'Sasaran ' + daily.kajiIds.length + '/' + kajiGoal() + ' selesai!' : 'Sesi kaji selesai') + '</h3>' +
       '<p class="sum-intro">Ini ringkasan falsafah yang anda kaji hari ini.</p>' +
-      '<div class="sum-section"><div class="sum-label again">Belum ingat &middot; ' + again.length + '</div>' + list(again) + '</div>' +
-      '<div class="sum-section"><div class="sum-label good">Ingat &middot; ' + good.length + '</div>' + list(good) + '</div>' +
+      '<div class="sum-section"><div class="sum-label again">&#8635; Perlu ulang &middot; ' + again.length + '</div>' + list(again) + '</div>' +
+      '<div class="sum-section"><div class="sum-label good">&#10003; Ingat &middot; ' + good.length + '</div>' + list(good) + '</div>' +
       '<button class="namebtn" id="summaryContinue">' +
         (daily.again.length ? 'Ulang kaji yang belum ingat (' + daily.again.length + ')' : 'Selesai') +
       '</button>';
@@ -1651,12 +1924,14 @@
     };
   });
 
-  function openDetail(id){
+  function openDetail(id, fromProgress){
     var entry = DATA.find(function(e){ return e.id===id; });
     if(!entry) return;
     var box = getCard(id).box;
+    document.getElementById('detailSheet').onclick = null;
     document.getElementById('detailSheet').innerHTML =
       '<button class="closebtn" id="closeDetail">&times;</button>' +
+      (fromProgress ? '<button type="button" class="backbtn" id="backToProg">&lsaquo; Kemajuan</button><br>' : '') +
       '<span class="rangepill">'+entry.rangeLabel+'</span> ' +
       '<span class="badge '+BOX_BADGE_CLASS[box]+'">'+BOX_LABELS[box]+'</span>' +
       '<h3 class="folio-title" style="margin-top:14px;">'+escapeHtml(displayTitle(entry.title))+'</h3>' +
@@ -1674,6 +1949,8 @@
     document.body.classList.add('sheet-open');
     document.getElementById('detailOverlay').classList.add('active');
     document.getElementById('closeDetail').onclick = closeDetail;
+    var bp = document.getElementById('backToProg');
+    if(bp) bp.onclick = function(){ openProgress(); };
   }
   function closeDetail(){
     document.getElementById('detailOverlay').classList.remove('active');
@@ -1754,7 +2031,14 @@
   }
 
   function newQuiz(){
-    var entry = STUDY_POOL[Math.floor(Math.random()*STUDY_POOL.length)];
+    var entry;
+    if(focus && focus.mode === 'kuiz'){
+      if(!focus.queue.length) focus.queue = shuffle(focus.ids.slice());
+      if(focus.ids.length > 1 && quizCurrent && focus.queue[0] === quizCurrent.entry.id) focus.queue.push(focus.queue.shift());
+      entry = entryById(focus.queue.shift());
+    } else {
+      entry = STUDY_POOL[Math.floor(Math.random()*STUDY_POOL.length)];
+    }
     var mode = Math.random() < 0.5 ? 'title-from-arabic' : 'arabic-from-title';
     quizCurrent = { entry: entry, mode: mode };
     var stage = document.getElementById('quizStage');
@@ -1778,6 +2062,10 @@
         '<div class="eyebrow" style="margin-bottom:10px;">Pilih ayat yang sepadan dengan falsafah ini.</div>' +
         '<div class="quizoptions" id="quizOpts"></div>';
       renderOptions(opts2, entry.arabic, true, false);
+    }
+    if(focus && focus.mode === 'kuiz'){
+      stage.insertAdjacentHTML('afterbegin', focusBar());
+      document.getElementById('focusEnd').onclick = endFocus;
     }
   }
 
@@ -1970,6 +2258,8 @@
   document.getElementById('searchInput').addEventListener('input', function(e){
     renderBrowse(e.target.value);
   });
+
+  window.FN_APP = { displayTitle: function(t){ return displayTitle(t); }, refreshProgress: function(){ renderKajiStats(); } };
 
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, function(c){

@@ -39,7 +39,45 @@
   .acct-links .nameskip{ margin:10px 0 0 !important; }
   .acct-spin{ width:26px; height:26px; margin:18px auto 6px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--gold); animation:acctSpin .8s linear infinite; }
   @keyframes acctSpin{ to{ transform:rotate(360deg); } }
+  /* ---------- Admin ---------- */
+  #adminPanel{ position:fixed; inset:0; z-index:90; background:var(--bg); overflow-y:auto; display:none; }
+  #adminPanel.active{ display:block; }
+  .adm{ max-width:900px; margin:0 auto; padding:20px 18px 60px; }
+  .adm-top{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .adm-top h2{ flex:1; font-size:22px; margin:0; }
+  .adm-top button, .adm-btn{ border:1px solid var(--border); background:var(--surface-2); color:var(--ink); border-radius:100px; padding:8px 14px; font-family:inherit; font-weight:800; font-size:13px; cursor:pointer; }
+  .adm-sub{ color:var(--muted); font-size:13px; margin:0 0 16px; }
+  .adm-tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px; }
+  .adm-tiles div{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; font-size:12px; color:var(--muted); }
+  .adm-tiles b{ display:block; font-size:24px; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .adm-sec{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:16px; }
+  .adm-sec h3{ font-size:15px; margin:0 0 4px; }
+  .adm .hint{ font-size:12px; color:var(--muted); margin:0 0 10px; }
+  .adm-rows{ list-style:none; margin:0; padding:0; }
+  .adm-rows li{ display:flex; gap:10px; padding:8px 4px; border-bottom:1px solid var(--border); font-size:13px; align-items:baseline; }
+  .adm-rows li:last-child{ border-bottom:0; }
+  .adm-rows .no{ font-weight:800; color:var(--gold-cite); min-width:28px; }
+  .adm-rows .tt{ flex:1; }
+  .adm-rows .mt{ color:var(--muted); font-size:12px; white-space:nowrap; }
+  .adm-search{ width:100%; padding:11px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:14px; margin:0 0 12px; }
+  .stu{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:10px; cursor:pointer; }
+  .stu:hover{ border-color:var(--gold); }
+  .stu-h{ display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
+  .stu-h b{ font-size:15px; }
+  .stu-h .who{ color:var(--muted); font-size:12px; flex:1; }
+  .stu-h .act{ font-size:12px; color:var(--muted); }
+  .stu-h .act.today{ color:var(--emerald); font-weight:800; }
+  .stu-m{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin:8px 0 6px; }
+  .stu-m b{ color:var(--ink); }
+  .stu .lvl-bar{ display:flex; height:8px; border-radius:100px; overflow:hidden; background:var(--border); }
+  .stu .lvl-bar span{ display:block; height:100%; }
+  .stu-d{ display:none; margin-top:12px; border-top:1px solid var(--border); padding-top:10px; }
+  .stu.open .stu-d{ display:block; }
+  .stu-d h4{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:10px 0 4px; }
+  @media (max-width:600px){ .adm-tiles{ grid-template-columns:repeat(2,1fr); } }
 </style>
+
+<div id="adminPanel" role="dialog" aria-modal="true"></div>
 
 <div class="nameoverlay" id="acctOverlay" aria-modal="true" role="dialog">
   <div class="namecard" id="acctCard"></div>
@@ -51,7 +89,9 @@
 </script>
 <script type="module">
 const CFG = window.FIREBASE_CONFIG;
-const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1' };
+const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1', history: 'falsafah200_history_v1' };
+const ADMIN_EMAILS = ['afiqmonsieur@gmail.com'];   // must match the Firestore rules
+const isAdminUser = () => !!(user && ADMIN_EMAILS.includes((user.email || '').toLowerCase()));
 const SYNCED = new Set(Object.values(KEYS));
 const LAST_USER = 'falsafah200_last_user_v1';   // remembered on this device so the username is filled in
 const $ = id => document.getElementById(id);
@@ -93,10 +133,13 @@ function render() {
       <div class="acct-who"><b>${esc(profile?.name || '')}</b><span>@${esc(profile?.username || '')} · ${esc(user.email || '')}</span></div>
       <p class="acct-msg ok" id="acctMsg">Progress synced ✓ · ${t}</p>
       <button class="namebtn" id="acctSyncNow">Sync progress</button>
+      ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">Papan pentadbir</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">Log keluar</button><button class="namebtn acct-ghost" id="acctClose">Tutup</button></div>
       <p class="acct-note">Di telefon atau komputer lain, log masuk dengan nama pengguna & PIN yang sama untuk sambung kemajuan anda.</p>`;
     $('acctSyncNow').onclick = async () => { msg('Syncing…'); dirty = true; await push(); await pullMerge(true); msg('Progress synced ✓', 'ok'); };
-    $('acctOut').onclick = logout; $('acctClose').onclick = closeSheet; return;
+    $('acctOut').onclick = logout; $('acctClose').onclick = closeSheet;
+    if ($('acctAdmin')) $('acctAdmin').onclick = () => { closeSheet(); openAdmin(); };
+    return;
   }
   const reg = mode === 'register', last = lsGet(LAST_USER) || '';
   card.innerHTML = `${BRAND}<h3>${reg ? 'Daftar akaun' : 'Log masuk'}</h3>
@@ -211,6 +254,7 @@ async function logout() {
 // After sign-in: close the gate, then ask for the julat if this account has none yet.
 function afterLogin() {
   registering = false; gated = false;
+  loadWeekly();
   setBtn('on', firstName(profile?.name));
   closeSheet();
   if (!lsGet(KEYS.range)) {
@@ -238,6 +282,19 @@ function mergeDaily(a, b) {
   const again = [...new Set([...(a.again || []), ...(b.again || [])])].filter(id => results[id] === 'again');
   return { date: a.date, kajiIds: kaji, kuizCount: Math.max(a.kuizCount || 0, b.kuizCount || 0), results, again, summaryShown: !!(a.summaryShown || b.summaryShown) };
 }
+function mergeHistory(a, b) {   // per day: union, and a falsafah remembered on either device counts as remembered
+  if (!a) return b; if (!b) return a;
+  const out = {};
+  new Set([...Object.keys(a), ...Object.keys(b)]).forEach(d => {
+    const x = a[d] || {}, y = b[d] || {};
+    const g = [...new Set([...(x.g || []), ...(y.g || [])])];
+    const ag = [...new Set([...(x.a || []), ...(y.a || [])])].filter(id => !g.includes(id));
+    const m = [...new Set([...(x.m || []), ...(y.m || [])])];
+    out[d] = { g, a: ag, m };
+  });
+  const days = Object.keys(out).sort(); while (days.length > 120) delete out[days.shift()];
+  return out;
+}
 function merge(local, remote) {
   const out = {};
   const ls = parse(local.srs) || {}, rs = parse(remote.srs) || {};
@@ -247,6 +304,7 @@ function merge(local, remote) {
   out.username = remote.username || local.username; if (!out.username) delete out.username;
   out.range = remote.range || local.range; if (!out.range) delete out.range;
   out.theme = local.theme || remote.theme; if (!out.theme) delete out.theme;
+  const h = mergeHistory(parse(local.history), parse(remote.history)); if (h) out.history = JSON.stringify(h);
   return out;
 }
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -281,6 +339,135 @@ async function push() {
   setBtn(dirty ? '' : 'on', firstName(profile?.name));
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && dirty) push(); });
+
+// ---------- class weekly list (shown to students on Fridays) ----------
+const DATA = (() => { try { return JSON.parse(document.getElementById('falsafah-data').textContent); } catch (e) { return []; } })();
+const byId = id => DATA.find(e => e.id === +id);
+const title = e => (window.FN_APP && e ? window.FN_APP.displayTitle(e.title) : (e ? e.title : ''));
+const dayStr = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return dayStr(d); };
+async function loadWeekly() {
+  try {
+    if (isAdminUser() && user.emailVerified) { const st = await loadStudents(); await publishWeekly(st); }
+    const s = await fb.F.getDoc(fb.F.doc(fb.db, 'stats', 'weekly'));
+    if (!s.exists()) return;
+    const w = s.data();
+    if (w.to && w.to >= daysAgo(8)) { window.fnWeekly = w; }
+  } catch (e) {}
+}
+function weeklyFrom(students) {
+  const from = daysAgo(6), to = dayStr(new Date()), tally = {};
+  let active = 0;
+  students.forEach(st => {
+    const h = st.history || {}; let was = false; const missed = new Set();
+    Object.keys(h).forEach(d => { if (d >= from && d <= to) { was = true; (h[d].m || []).forEach(id => missed.add(id)); } });
+    if (was) active++;
+    missed.forEach(id => { tally[id] = (tally[id] || 0) + 1; });
+  });
+  const top = Object.keys(tally).map(id => ({ id: +id, students: tally[id] }))
+    .sort((a, b) => b.students - a.students || a.id - b.id).slice(0, 10);
+  return { from, to, top, activeStudents: active };
+}
+async function publishWeekly(students) {
+  const w = weeklyFrom(students);
+  await fb.F.setDoc(fb.F.doc(fb.db, 'stats', 'weekly'), Object.assign({}, w, { updatedAt: fb.F.serverTimestamp() }));
+  return w;
+}
+
+// ---------- admin: every student's progress ----------
+const LVL = ['Baru', 'Belajar', 'Semakan', 'Kukuh', 'Mahir', 'Dikuasai'];
+const LVL_C = ['var(--border)', '#E9B949', '#D4AF37', '#7FB7A6', '#34D399', '#0F9F74'];
+async function loadStudents() {
+  const snap = await fb.F.getDocs(fb.F.collection(fb.db, 'users'));
+  const out = [];
+  snap.forEach(d => {
+    const v = d.data() || {}, data = v.data || {};
+    const srs = parse(data.srs) || {}, daily = parse(data.daily), range = parse(data.range) || { from: 1, to: 200 }, history = parse(data.history) || {};
+    const pool = DATA.filter(e => e.noEnd >= range.from && e.noStart <= range.to);
+    const levels = [0, 0, 0, 0, 0, 0]; pool.forEach(e => { levels[(srs[e.id] && srs[e.id].box) || 0]++; });
+    const misses = id => srs[id] ? Math.max(0, (srs[id].seen || 0) - (srs[id].correct || 0)) : 0;
+    const focus = pool.filter(e => misses(e.id) >= 2).sort((a, b) => misses(b.id) - misses(a.id)).map(e => ({ id: e.id, n: misses(e.id) }));
+    let today = null;
+    if (daily && daily.date === dayStr(new Date())) {
+      const ids = daily.kajiIds || [], r = daily.results || {};
+      today = { ok: ids.filter(id => r[id] !== 'again'), re: ids.filter(id => r[id] === 'again') };
+    }
+    const updated = v.updatedAt && v.updatedAt.toDate ? v.updatedAt.toDate() : null;
+    out.push({ uid: d.id, profile: v.profile || {}, range, pool: pool.length, levels, focus, today, history, updated,
+      seen: Object.values(srs).reduce((a, c) => a + (c.seen || 0), 0) });
+  });
+  out.sort((a, b) => (b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0));
+  return out;
+}
+const panel = $('adminPanel');
+function relTime(d) {
+  if (!d) return 'belum aktif';
+  const days = Math.floor((new Date(dayStr(new Date()) + 'T00:00:00') - new Date(dayStr(d) + 'T00:00:00')) / 86400000);
+  const hm = d.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' });
+  return days <= 0 ? 'hari ini, ' + hm : days === 1 ? 'semalam' : days + ' hari lalu';
+}
+function rows(list, meta) {
+  if (!list.length) return '<p class="hint">Tiada.</p>';
+  return '<ul class="adm-rows">' + list.map(x => { const e = byId(x.id ?? x); return e ? `<li><span class="no">${e.id}</span><span class="tt">${esc(title(e))}</span>${meta ? `<span class="mt">${meta(x)}</span>` : ''}</li>` : ''; }).join('') + '</ul>';
+}
+async function openAdmin() {
+  panel.classList.add('active'); document.body.style.overflow = 'hidden';
+  if (!user.emailVerified) {
+    panel.innerHTML = `<div class="adm"><div class="adm-top"><h2>Papan pentadbir</h2><button id="admClose">Tutup</button></div>
+      <div class="adm-sec"><h3>Sahkan emel anda dahulu</h3><p class="hint">Untuk keselamatan, papan pentadbir hanya dibuka selepas ${esc(user.email)} disahkan. Tekan butang di bawah, buka pautan dalam emel (semak juga Spam), kemudian tekan "Saya sudah sahkan".</p>
+      <p class="acct-msg" id="admMsg"></p>
+      <div class="acct-row"><button class="adm-btn" id="admSend">Hantar emel pengesahan</button><button class="adm-btn" id="admDone">Saya sudah sahkan</button></div></div></div>`;
+    $('admClose').onclick = closeAdmin;
+    $('admSend').onclick = async () => { try { await fb.A.sendEmailVerification(user); $('admMsg').textContent = 'Emel dihantar ke ' + user.email + '.'; $('admMsg').className = 'acct-msg ok'; } catch (e) { $('admMsg').textContent = ERR(e.code || e.message); $('admMsg').className = 'acct-msg err'; } };
+    $('admDone').onclick = async () => { await user.reload(); user = fb.auth.currentUser; await user.getIdToken(true); if (user.emailVerified) openAdmin(); else { $('admMsg').textContent = 'Belum disahkan lagi. Buka pautan dalam emel dahulu.'; $('admMsg').className = 'acct-msg err'; } };
+    return;
+  }
+  panel.innerHTML = `<div class="adm"><div class="adm-top"><h2>Papan pentadbir</h2><button id="admClose">Tutup</button></div><div class="acct-spin"></div><p class="adm-sub" style="text-align:center">Memuatkan data pelajar…</p></div>`;
+  $('admClose').onclick = closeAdmin;
+  let students;
+  try { students = await loadStudents(); }
+  catch (e) {
+    panel.innerHTML = `<div class="adm"><div class="adm-top"><h2>Papan pentadbir</h2><button id="admClose">Tutup</button></div><div class="adm-sec"><h3>Tidak dapat membaca data pelajar</h3><p class="hint">${esc(ERR(e.code || e.message))} Pastikan peraturan Firestore terbaharu sudah diterbitkan.</p></div></div>`;
+    $('admClose').onclick = closeAdmin; return;
+  }
+  let w = weeklyFrom(students);
+  try { w = await publishWeekly(students); window.fnWeekly = w; } catch (e) {}
+  const today = dayStr(new Date());
+  const activeToday = students.filter(s => s.updated && dayStr(s.updated) === today).length;
+  const avgMast = students.length ? Math.round(students.reduce((a, s) => a + (s.pool ? s.levels[5] / s.pool : 0), 0) / students.length * 100) : 0;
+  const card = (s, i) => {
+    const p = s.profile, t = s.today, lv = s.levels, tot = s.pool || 1;
+    const days = Object.keys(s.history).sort().reverse().filter(d => (s.history[d].g || []).length || (s.history[d].a || []).length).slice(0, 14);
+    return `<div class="stu" data-i="${i}" data-q="${esc(((p.name || '') + ' ' + (p.username || '') + ' ' + (p.email || '')).toLowerCase())}">
+      <div class="stu-h"><b>${esc(p.name || '(tiada nama)')}</b><span class="who">@${esc(p.username || '')} · ${esc(p.email || '')}</span>
+        <span class="act ${s.updated && dayStr(s.updated) === today ? 'today' : ''}">${relTime(s.updated)}</span></div>
+      <div class="stu-m"><span>Hari ini: <b>${t ? '✓ ' + t.ok.length + ' · ↻ ' + t.re.length : '—'}</b></span>
+        <span>Dikuasai: <b>${lv[5]}/${s.pool}</b></span><span>Julat: <b>${s.range.from}–${s.range.to}</b></span>
+        <span>Perlu fokus: <b>${s.focus.length}</b></span><span>Jumlah ulang kaji: <b>${s.seen}</b></span></div>
+      <div class="lvl-bar">${lv.map((v, k) => v ? `<span style="width:${v / tot * 100}%;background:${LVL_C[k]}" title="${LVL[k]}: ${v}"></span>` : '').join('')}</div>
+      <div class="stu-d">
+        <h4>Tahap</h4><p class="hint">${lv.map((v, k) => LVL[k] + ' ' + v).join(' · ')}</p>
+        ${t ? `<h4>Hari ini · perlu ulang</h4>${rows(t.re)}` : ''}
+        <h4>Perlu fokus (terlupa 2 kali atau lebih)</h4>${rows(s.focus, x => 'terlupa ' + x.n + '×')}
+        <h4>Sejarah 14 hari</h4>${days.length ? '<ul class="adm-rows">' + days.map(d => `<li><span class="tt">${d}</span><span class="mt">✓ ${(s.history[d].g || []).length} · ↻ ${(s.history[d].a || []).length}</span></li>`).join('') + '</ul>' : '<p class="hint">Tiada sejarah lagi.</p>'}
+      </div></div>`;
+  };
+  panel.innerHTML = `<div class="adm">
+    <div class="adm-top"><h2>Papan pentadbir</h2><button id="admRefresh">Muat semula</button><button id="admClose">Tutup</button></div>
+    <p class="adm-sub">Data dibaca terus daripada Firebase · ${new Date().toLocaleString('ms-MY')}</p>
+    <div class="adm-tiles"><div><b>${students.length}</b>Pelajar berdaftar</div><div><b>${activeToday}</b>Aktif hari ini</div><div><b>${w.activeStudents}</b>Aktif 7 hari</div><div><b>${avgMast}%</b>Purata dikuasai</div></div>
+    <div class="adm-sec"><h3>Kelas minggu ini · paling kerap terlupa</h3>
+      <p class="hint">${w.from} hingga ${w.to}. Bilangan pelajar yang terlupa setiap falsafah sekurang-kurangnya sekali. Senarai ini dikemas kini setiap kali anda membuka papan ini atau log masuk, dan dipaparkan kepada pelajar dalam Kemajuan setiap Jumaat.</p>
+      ${rows(w.top, x => x.students + ' pelajar')}</div>
+    <input class="adm-search" id="admSearch" placeholder="Cari nama, nama pengguna atau emel…">
+    <div id="admList">${students.map(card).join('') || '<p class="hint">Belum ada pelajar berdaftar.</p>'}</div>
+  </div>`;
+  $('admClose').onclick = closeAdmin;
+  $('admRefresh').onclick = openAdmin;
+  $('admList').onclick = e => { const c = e.target.closest('.stu'); if (c) c.classList.toggle('open'); };
+  $('admSearch').oninput = e => { const q = e.target.value.trim().toLowerCase(); panel.querySelectorAll('.stu').forEach(c => { c.style.display = !q || c.dataset.q.includes(q) ? '' : 'none'; }); };
+}
+function closeAdmin() { panel.classList.remove('active'); document.body.style.overflow = ''; }
 
 // ---------- start: nothing is usable until the student is signed in ----------
 document.getElementById('nameOverlay')?.classList.remove('active');
