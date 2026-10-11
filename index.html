@@ -978,7 +978,7 @@
       <nav class="tabs" style="width:100%;" role="tablist">
         <span class="tab-glass" aria-hidden="true"></span>
         <button data-view="study" class="active" role="tab">Kaji</button>
-        <button data-view="kemajuan" role="tab">Kemajuan</button>
+        <button data-view="kemajuan" role="tab">Progres</button>
         <button data-view="browse" role="tab">Senarai</button>
         <button data-view="quiz" role="tab">Kuiz</button>
         <button data-view="notes" role="tab">Nota</button>
@@ -1734,7 +1734,7 @@
         '<div class="prog-sec"><div class="sum-label good">&#10003; Ingat &middot; ' + L.ok.length + '</div>' +
         (L.ok.length ? progItems(L.ok) : '<p class="pnote">Tiada lagi.</p>') + '</div>';
     }
-    html += '<p class="pnote" style="margin-top:18px;">Kemajuan keseluruhan anda ada di tab Kemajuan.</p></div>';
+    html += '<p class="pnote" style="margin-top:18px;">Progres keseluruhan anda ada di tab Progres.</p></div>';
     openSheetHtml(html);
   }
 
@@ -1803,7 +1803,7 @@
     var histDays = Object.keys(kajiHistory).sort().reverse().filter(function(d){ var h = kajiHistory[d]; return h && ((h.g||[]).length || (h.a||[]).length); }).slice(0, 14);
 
     var html = '<div class="prog kmj">' +
-      '<div class="kmj-head"><h2>Kemajuan anda</h2><span class="psub">Semua 200 falsafah</span></div>' +
+      '<div class="kmj-head"><h2>Progres anda</h2><span class="psub">Semua 200 falsafah</span></div>' +
       '<div class="kmj-tiles">' +
         '<div data-list="lv5"><b>' + lv[5].length + '<small>/' + total + '</small></b>Dikuasai</div>' +
         '<div data-list="studied"><b>' + studied + '<small>/' + total + '</small></b>Pernah dikaji</div>' +

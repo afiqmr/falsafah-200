@@ -464,7 +464,7 @@ async function openAdmin() {
     <p class="adm-sub">Data dibaca terus daripada Firebase · ${new Date().toLocaleString('ms-MY')}</p>
     <div class="adm-tiles"><div><b>${students.length}</b>Pelajar berdaftar</div><div><b>${activeToday}</b>Aktif hari ini</div><div><b>${w.activeStudents}</b>Aktif 7 hari</div><div><b>${avgMast}%</b>Purata dikuasai</div></div>
     <div class="adm-sec"><h3>Kelas minggu ini · paling kerap terlupa</h3>
-      <p class="hint">${w.from} hingga ${w.to}. Bilangan pelajar yang terlupa setiap falsafah sekurang-kurangnya sekali. Senarai ini dikemas kini setiap kali anda membuka papan ini atau log masuk, dan dipaparkan kepada pelajar dalam Kemajuan setiap Jumaat.</p>
+      <p class="hint">${w.from} hingga ${w.to}. Bilangan pelajar yang terlupa setiap falsafah sekurang-kurangnya sekali. Senarai ini dikemas kini setiap kali anda membuka papan ini atau log masuk, dan dipaparkan kepada pelajar dalam tab Progres setiap Jumaat.</p>
       ${rows(w.top, x => x.students + ' pelajar')}</div>
     <input class="adm-search" id="admSearch" placeholder="Cari nama, nama pengguna atau emel…">
     <div id="admList">${students.map(card).join('') || '<p class="hint">Belum ada pelajar berdaftar.</p>'}</div>

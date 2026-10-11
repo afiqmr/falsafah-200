@@ -81,7 +81,7 @@ A test version with accounts and cloud sync, live at https://falsafah200-test.ve
 
 Build: `python build.py`, then `python build_cloud.py`.
 
-Admin: the account registered with `afiqmonsieur@gmail.com` (after verifying the email) gets a "Papan pentadbir" button in its account sheet. It lists every student's progress and publishes the class's most-missed falsafah of the last 7 days to `stats/weekly`, which students see in Kemajuan on Fridays.
+Admin: the account registered with `afiqmonsieur@gmail.com` (after verifying the email) gets a "Papan pentadbir" button in its account sheet. It lists every student's progress and publishes the class's most-missed falsafah of the last 7 days to `stats/weekly`, which students see in the Progres tab on Fridays.
 
 Firestore rules for the test project:
 

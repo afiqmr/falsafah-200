@@ -981,7 +981,7 @@
       <nav class="tabs" style="width:100%;" role="tablist">
         <span class="tab-glass" aria-hidden="true"></span>
         <button data-view="study" class="active" role="tab">Kaji</button>
-        <button data-view="kemajuan" role="tab">Kemajuan</button>
+        <button data-view="kemajuan" role="tab">Progres</button>
         <button data-view="browse" role="tab">Senarai</button>
         <button data-view="quiz" role="tab">Kuiz</button>
         <button data-view="notes" role="tab">Nota</button>
@@ -1737,7 +1737,7 @@
         '<div class="prog-sec"><div class="sum-label good">&#10003; Ingat &middot; ' + L.ok.length + '</div>' +
         (L.ok.length ? progItems(L.ok) : '<p class="pnote">Tiada lagi.</p>') + '</div>';
     }
-    html += '<p class="pnote" style="margin-top:18px;">Kemajuan keseluruhan anda ada di tab Kemajuan.</p></div>';
+    html += '<p class="pnote" style="margin-top:18px;">Progres keseluruhan anda ada di tab Progres.</p></div>';
     openSheetHtml(html);
   }
 
@@ -1806,7 +1806,7 @@
     var histDays = Object.keys(kajiHistory).sort().reverse().filter(function(d){ var h = kajiHistory[d]; return h && ((h.g||[]).length || (h.a||[]).length); }).slice(0, 14);
 
     var html = '<div class="prog kmj">' +
-      '<div class="kmj-head"><h2>Kemajuan anda</h2><span class="psub">Semua 200 falsafah</span></div>' +
+      '<div class="kmj-head"><h2>Progres anda</h2><span class="psub">Semua 200 falsafah</span></div>' +
       '<div class="kmj-tiles">' +
         '<div data-list="lv5"><b>' + lv[5].length + '<small>/' + total + '</small></b>Dikuasai</div>' +
         '<div data-list="studied"><b>' + studied + '<small>/' + total + '</small></b>Pernah dikaji</div>' +
@@ -2999,7 +2999,7 @@ async function openAdmin() {
     <p class="adm-sub">Data dibaca terus daripada Firebase · ${new Date().toLocaleString('ms-MY')}</p>
     <div class="adm-tiles"><div><b>${students.length}</b>Pelajar berdaftar</div><div><b>${activeToday}</b>Aktif hari ini</div><div><b>${w.activeStudents}</b>Aktif 7 hari</div><div><b>${avgMast}%</b>Purata dikuasai</div></div>
     <div class="adm-sec"><h3>Kelas minggu ini · paling kerap terlupa</h3>
-      <p class="hint">${w.from} hingga ${w.to}. Bilangan pelajar yang terlupa setiap falsafah sekurang-kurangnya sekali. Senarai ini dikemas kini setiap kali anda membuka papan ini atau log masuk, dan dipaparkan kepada pelajar dalam Kemajuan setiap Jumaat.</p>
+      <p class="hint">${w.from} hingga ${w.to}. Bilangan pelajar yang terlupa setiap falsafah sekurang-kurangnya sekali. Senarai ini dikemas kini setiap kali anda membuka papan ini atau log masuk, dan dipaparkan kepada pelajar dalam tab Progres setiap Jumaat.</p>
       ${rows(w.top, x => x.students + ' pelajar')}</div>
     <input class="adm-search" id="admSearch" placeholder="Cari nama, nama pengguna atau emel…">
     <div id="admList">${students.map(card).join('') || '<p class="hint">Belum ada pelajar berdaftar.</p>'}</div>
