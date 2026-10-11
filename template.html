@@ -610,6 +610,41 @@
     cursor:pointer;
   }
   .rangechip b{ color:var(--ink); }
+  .chiprow{ display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; }
+  .listenbtn{
+    display:inline-flex; align-items:center; gap:6px; margin:0 0 14px;
+    background:var(--surface-2); border:1px solid var(--border); color:var(--ink);
+    border-radius:100px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;
+  }
+  .listenbtn:hover, .listenbtn.on{ border-color:var(--gold); }
+  .miniplayer{
+    position:fixed; left:50%; bottom:calc(12px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:45;
+    width:calc(100% - 24px); max-width:560px; display:flex; align-items:center; gap:10px;
+    background:var(--surface); border:1px solid var(--gold); border-radius:18px; padding:8px 10px;
+    box-shadow:0 12px 30px -10px rgba(0,0,0,.45);
+  }
+  .miniplayer[hidden]{ display:none; }
+  .miniplayer .mp-info{ flex:1; min-width:0; cursor:pointer; }
+  .miniplayer .mp-t{ font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .miniplayer .mp-s{ font-size:11px; color:var(--muted); }
+  .mp-btn{ flex:none; width:40px; height:40px; border-radius:50%; border:1px solid var(--border); background:var(--surface-2); color:var(--ink); font-size:16px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-family:inherit; }
+  .mp-btn.main{ background:var(--gold); color:var(--gold-ink); border-color:transparent; width:44px; height:44px; }
+  body.has-miniplayer .credit{ padding-bottom:90px; }
+  .lp-set{ margin-top:16px; }
+  .lp-set > label{ display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 6px; }
+  .lp-range{ display:flex; gap:8px; align-items:center; font-size:13px; color:var(--muted); }
+  .lp-range input{ width:70px; padding:9px 10px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:15px; text-align:center; }
+  .lp-quick{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .lp-quick button, .lp-seg button{ border:1px solid var(--border); background:var(--surface-2); color:var(--ink); border-radius:100px; padding:7px 12px; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+  .lp-seg{ display:flex; gap:6px; flex-wrap:wrap; }
+  .lp-seg button.active{ background:var(--gold); color:var(--gold-ink); border-color:transparent; }
+  .lp-go{ width:100%; margin-top:18px; padding:13px; border-radius:12px; border:0; background:var(--gold); color:var(--gold-ink); font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; }
+  .lp-now{ margin-top:18px; border:1px solid var(--border); border-radius:16px; padding:14px; background:var(--surface-2); }
+  .lp-now .lp-meta{ font-size:12px; color:var(--muted); }
+  .lp-now h4{ margin:4px 0 6px; font-size:17px; }
+  .lp-now .arabic-text{ font-size:24px; margin:4px 0 8px; }
+  .lp-ctl{ display:flex; justify-content:center; gap:14px; margin-top:8px; }
+  .lp-msg{ font-size:12px; color:var(--re); margin-top:6px; min-height:16px; }
   .rangechip .rc-edit{ color:var(--gold-cite); }
   .rangechip:hover{ border-color:var(--gold); }
 
@@ -996,7 +1031,7 @@
         <div class="duecount"><b id="dueNum">0</b>/<span id="dueGoal">20</span> falsafah dikaji hari ini</div>
       </div>
       <div class="kaji-stats" id="kajiStats"></div>
-      <button class="rangechip" type="button"></button>
+      <div class="chiprow"><button class="rangechip" type="button"></button><button class="listenbtn" type="button" id="listenBtn">&#127911; Dengar</button></div>
       <div id="studyStage"></div>
     </section>
 
@@ -1049,6 +1084,8 @@
     <img class="credit-logo" src="__LOGO_URI__" alt="Afiq" width="420" height="157">
   </footer>
 </div>
+
+<div class="miniplayer" id="miniPlayer" hidden></div>
 
 <div class="detailoverlay" id="detailOverlay">
   <div class="detailsheet" id="detailSheet"></div>
@@ -1706,6 +1743,7 @@
     if(b){ var set = b.getAttribute('data-set'); startFocus(progSets[set] || [], b.getAttribute('data-uji'), UJI_LABELS[set] || ''); }
   }
   function openSheetHtml(html){
+    lpSheetOpen = false;
     var sheet = document.getElementById('detailSheet');
     sheet.innerHTML = html;
     sheet.scrollTop = 0;
@@ -2062,6 +2100,7 @@
     var entry = DATA.find(function(e){ return e.id===id; });
     if(!entry) return;
     var box = getCard(id).box;
+    lpSheetOpen = false;
     document.getElementById('detailSheet').onclick = null;
     document.getElementById('detailSheet').innerHTML =
       '<button class="closebtn" id="closeDetail">&times;</button>' +
@@ -2087,6 +2126,7 @@
     if(bp) bp.onclick = function(){ fromProgress.open(); };
   }
   function closeDetail(){
+    if(typeof lpSheetOpen !== 'undefined' && lpSheetOpen){ lpSheetOpen = false; setTimeout(lpUpdateUI, 0); }
     if(document.getElementById('view-kemajuan').classList.contains('active')) renderKemajuan();
     document.getElementById('detailOverlay').classList.remove('active');
     document.body.classList.remove('sheet-open');
@@ -2395,6 +2435,235 @@
     renderBrowse(e.target.value);
   });
 
+  /* ---------------- LISTEN (audio player) ---------------- */
+  var LISTEN_KEY = 'falsafah200_listen_v1';
+  var lpSet = (function(){ try{ var s = JSON.parse(localStorage.getItem(LISTEN_KEY) || 'null'); if(s && s.repeat) return s; }catch(e){} return { repeat: 1, order: 'nombor' }; })();
+  function saveLpSet(){ try{ localStorage.setItem(LISTEN_KEY, JSON.stringify({ repeat: lpSet.repeat, order: lpSet.order })); }catch(e){} }
+  var LP = { ids: [], idx: 0, rep: 0, clip: 0, clips: null, active: false, loading: false, msg: '', from: null, to: null, token: 0 };
+  var lpAudio = new Audio();
+  lpAudio.preload = 'auto';
+  lpAudio.setAttribute('playsinline', '');
+  // a tiny silent clip, played inside the tap so iPhone allows the later, async plays
+  var SILENT = (function(){
+    var n = 800, buf = new Uint8Array(44 + n), dv = new DataView(buf.buffer);
+    var w = function(o, s){ for(var i = 0; i < s.length; i++) buf[o + i] = s.charCodeAt(i); };
+    w(0,'RIFF'); dv.setUint32(4, 36 + n, true); w(8,'WAVE'); w(12,'fmt '); dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
+    dv.setUint32(24,8000,true); dv.setUint32(28,8000,true); dv.setUint16(32,1,true); dv.setUint16(34,8,true); w(36,'data'); dv.setUint32(40,n,true);
+    for(var i = 0; i < n; i++) buf[44 + i] = 128;
+    var s = ''; for(var j = 0; j < buf.length; j++) s += String.fromCharCode(buf[j]);
+    return 'data:audio/wav;base64,' + btoa(s);
+  })();
+  function lpUnlock(){ try{ lpAudio.src = SILENT; var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
+
+  function lpPool(from, to){ return DATA.filter(function(e){ return e.noEnd >= from && e.noStart <= to; }).map(function(e){ return e.id; }); }
+  function lpEntry(){ return LP.active ? entryById(LP.ids[LP.idx]) : null; }
+
+  function lpStart(from, to){
+    var ids = lpPool(from, to);
+    if(!ids.length) return;
+    if(lpSet.order === 'rawak') ids = shuffle(ids.slice());
+    LP.ids = ids; LP.idx = 0; LP.active = true; LP.from = from; LP.to = to; LP.msg = '';
+    lpUnlock();
+    lpPlayItem();
+  }
+  function lpPlayItem(){
+    var entry = lpEntry();
+    if(!entry) return;
+    var token = ++LP.token;
+    LP.rep = 0; LP.clip = 0; LP.clips = null; LP.loading = true; LP.msg = '';
+    lpUpdateUI(); lpMeta(entry);
+    audioClips(entry).then(function(clips){
+      if(token !== LP.token) return;
+      LP.loading = false;
+      if(!clips.length) throw new Error('no audio');
+      LP.clips = clips;
+      lpPlayClip();
+      // fetch the next falsafah's details in the background
+      var nx = entryById(LP.ids[LP.idx + 1]); if(nx) audioClips(nx).catch(function(){});
+    }).catch(function(){
+      if(token !== LP.token) return;
+      LP.loading = false;
+      LP.msg = 'Audio tidak dapat dimuatkan (perlu internet). Beralih ke falsafah seterusnya…';
+      lpUpdateUI();
+      setTimeout(function(){ if(token === LP.token) lpNext(); }, 1500);
+    });
+  }
+  function lpPlayClip(){
+    var c = LP.clips[LP.clip];
+    var startAt = c.start || 0;
+    var go = function(){ try{ lpAudio.currentTime = startAt; }catch(e){} var p = lpAudio.play(); if(p && p.catch) p.catch(function(){ lpUpdateUI(); }); };
+    if(lpAudio.src !== c.url){
+      lpAudio.src = c.url;
+      lpAudio.addEventListener('loadedmetadata', function once(){ lpAudio.removeEventListener('loadedmetadata', once); go(); });
+      lpAudio.load();
+    } else go();
+    lpUpdateUI();
+  }
+  function lpAdvance(){
+    if(!LP.active || !LP.clips) return;
+    LP.clip++;
+    if(LP.clip >= LP.clips.length){
+      LP.clip = 0; LP.rep++;
+      if(LP.rep >= lpSet.repeat){ lpNext(); return; }
+    }
+    lpPlayClip();
+  }
+  function lpNext(){
+    if(!LP.active) return;
+    if(LP.idx + 1 >= LP.ids.length){
+      lpAudio.pause(); LP.msg = 'Selesai. Semua ' + LP.ids.length + ' falsafah dalam julat ini telah didengar.';
+      LP.clips = null; lpUpdateUI(); return;
+    }
+    LP.idx++; lpPlayItem();
+  }
+  function lpPrev(){
+    if(!LP.active) return;
+    if(lpAudio.currentTime > 3 || LP.idx === 0){ LP.rep = 0; LP.clip = 0; if(LP.clips) lpPlayClip(); return; }
+    LP.idx--; lpPlayItem();
+  }
+  function lpToggle(){
+    if(!LP.active) return;
+    if(!LP.clips){ if(LP.msg && LP.idx + 1 >= LP.ids.length){ LP.idx = 0; } lpUnlock(); lpPlayItem(); return; }
+    if(lpAudio.paused){ var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); } else lpAudio.pause();
+    lpUpdateUI();
+  }
+  function lpStop(){
+    LP.token++; LP.active = false; LP.clips = null; lpAudio.pause();
+    try{ lpAudio.removeAttribute('src'); lpAudio.load(); }catch(e){}
+    if('mediaSession' in navigator){ navigator.mediaSession.playbackState = 'none'; }
+    lpUpdateUI();
+  }
+  lpAudio.addEventListener('ended', function(){ if(lpAudio.src !== SILENT && LP.clips) lpAdvance(); });
+  lpAudio.addEventListener('timeupdate', function(){
+    if(!LP.clips) return;
+    var c = LP.clips[LP.clip];
+    if(c && c.end && lpAudio.currentTime >= c.end){ lpAudio.pause(); lpAdvance(); }
+  });
+  lpAudio.addEventListener('play', function(){ lpUpdateUI(); });
+  lpAudio.addEventListener('pause', function(){ lpUpdateUI(); });
+  lpAudio.addEventListener('error', function(){
+    if(!LP.active || !LP.clips || lpAudio.src === SILENT || !lpAudio.src) return;
+    LP.msg = 'Audio gagal dimainkan. Beralih ke falsafah seterusnya…'; lpUpdateUI();
+    var token = LP.token; setTimeout(function(){ if(token === LP.token) lpNext(); }, 1200);
+  });
+
+  function lpMeta(entry){
+    if(!('mediaSession' in navigator) || !window.MediaMetadata) return;
+    try{
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: entry.rangeLabel + ': ' + displayTitle(entry.title),
+        artist: 'Mishary Alafasy · ' + entry.surahDisplay,
+        album: 'Al-Fathun Nawa: Falsafah 1-200'
+      });
+    }catch(e){}
+  }
+  if('mediaSession' in navigator){
+    try{
+      navigator.mediaSession.setActionHandler('play', function(){ lpToggle(); });
+      navigator.mediaSession.setActionHandler('pause', function(){ lpAudio.pause(); });
+      navigator.mediaSession.setActionHandler('nexttrack', function(){ lpNext(); });
+      navigator.mediaSession.setActionHandler('previoustrack', function(){ lpPrev(); });
+      navigator.mediaSession.setActionHandler('stop', function(){ lpStop(); });
+    }catch(e){}
+  }
+
+  var lpSheetOpen = false;
+  function lpStatusText(){
+    if(!LP.active) return '';
+    var s = (LP.idx + 1) + '/' + LP.ids.length + ' falsafah';
+    if(lpSet.repeat > 1 && LP.clips) s += ' &middot; ulang ' + (LP.rep + 1) + '/' + lpSet.repeat;
+    if(LP.loading) s += ' &middot; memuatkan…';
+    return s;
+  }
+  function lpUpdateUI(){
+    var mp = document.getElementById('miniPlayer'), entry = lpEntry();
+    var playing = LP.active && LP.clips && !lpAudio.paused;
+    document.getElementById('listenBtn').classList.toggle('on', LP.active);
+    if('mediaSession' in navigator){ try{ navigator.mediaSession.playbackState = LP.active ? (playing ? 'playing' : 'paused') : 'none'; }catch(e){} }
+    if(!LP.active || !entry){ mp.hidden = true; document.body.classList.remove('has-miniplayer'); }
+    else {
+      mp.hidden = lpSheetOpen; document.body.classList.toggle('has-miniplayer', !lpSheetOpen);
+      mp.innerHTML =
+        '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + (playing ? '&#10074;&#10074;' : '&#9654;') + '</button>' +
+        '<div class="mp-info" data-lp="open"><div class="mp-t">' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</div>' +
+        '<div class="mp-s">&#127911; ' + lpStatusText() + '</div></div>' +
+        '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
+        '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&times;</button>';
+    }
+    var now = document.getElementById('lpNow');
+    if(lpSheetOpen && now) now.innerHTML = lpNowHtml();
+  }
+  function lpNowHtml(){
+    var entry = lpEntry();
+    if(!entry) return '';
+    var playing = LP.clips && !lpAudio.paused;
+    return '<div class="lp-now"><div class="lp-meta">Sedang dimainkan &middot; ' + lpStatusText() + '</div>' +
+      '<h4>' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</h4>' +
+      '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>' +
+      '<div class="lp-meta">' + escapeHtml(entry.surahDisplay) + '</div>' +
+      '<div class="lp-ctl"><button type="button" class="mp-btn" data-lp="prev" aria-label="Sebelum">&#9198;</button>' +
+      '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + (playing ? '&#10074;&#10074;' : '&#9654;') + '</button>' +
+      '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
+      '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&#9632;</button></div>' +
+      '<div class="lp-msg">' + escapeHtml(LP.msg || '') + '</div></div>';
+  }
+  function openListen(){
+    var from = LP.active ? LP.from : studyRange.from, to = LP.active ? LP.to : studyRange.to;
+    var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
+      '<h3 class="ptitle">&#127911; Dengar ayat</h3>' +
+      '<p class="psub">Bacaan Mishary Alafasy &middot; audio daripada Quran.com</p>' +
+      '<div id="lpNow"></div>' +
+      '<div class="lp-set"><label>Julat</label>' +
+        '<div class="lp-range">Dari <input id="lpFrom" type="number" min="1" max="200" inputmode="numeric" value="' + from + '"> hingga <input id="lpTo" type="number" min="1" max="200" inputmode="numeric" value="' + to + '"></div>' +
+        '<div class="lp-quick"><button type="button" data-r="' + studyRange.from + '-' + studyRange.to + '">Julat kaji saya</button><button type="button" data-r="1-100">Tahun 1</button><button type="button" data-r="101-200">Tahun 2</button><button type="button" data-r="1-200">Semua</button></div></div>' +
+      '<div class="lp-set"><label>Ulang setiap ayat</label><div class="lp-seg" id="lpRep">' +
+        [1,2,3].map(function(n){ return '<button type="button" data-rep="' + n + '" class="' + (lpSet.repeat === n ? 'active' : '') + '">' + n + '&times;</button>'; }).join('') + '</div></div>' +
+      '<div class="lp-set"><label>Turutan</label><div class="lp-seg" id="lpOrd">' +
+        '<button type="button" data-ord="nombor" class="' + (lpSet.order === 'nombor' ? 'active' : '') + '">Ikut nombor</button>' +
+        '<button type="button" data-ord="rawak" class="' + (lpSet.order === 'rawak' ? 'active' : '') + '">Rawak</button></div></div>' +
+      '<button type="button" class="lp-go" id="lpGo"></button>' +
+      '<p class="pnote">Selepas mula, anda boleh tutup panel ini dan terus guna aplikasi. Kawalan juga ada di skrin kunci dan butang kereta (Bluetooth / CarPlay). Perlu internet.</p></div>';
+    var sheet = document.getElementById('detailSheet');
+    sheet.innerHTML = html; sheet.scrollTop = 0;
+    lpSheetOpen = true;
+    var fromEl = document.getElementById('lpFrom'), toEl = document.getElementById('lpTo'), go = document.getElementById('lpGo');
+    function rangeVals(){ return { from: parseInt(fromEl.value, 10), to: parseInt(toEl.value, 10) }; }
+    function refreshGo(){
+      var r = rangeVals(), ok = r.from >= 1 && r.to <= 200 && r.from <= r.to, n = ok ? lpPool(r.from, r.to).length : 0;
+      go.disabled = !n;
+      go.innerHTML = !n ? 'Julat tidak sah' : (LP.active ? '&#8635; Mula semula dengan tetapan ini (' + n + ' falsafah)' : '&#9654; Mula dengar (' + n + ' falsafah)');
+    }
+    fromEl.oninput = toEl.oninput = refreshGo;
+    sheet.onclick = function(e){
+      var q = e.target.closest('[data-r]');
+      if(q){ var p = q.getAttribute('data-r').split('-'); fromEl.value = p[0]; toEl.value = p[1]; refreshGo(); return; }
+      var r = e.target.closest('[data-rep]');
+      if(r){ lpSet.repeat = +r.getAttribute('data-rep'); saveLpSet(); document.querySelectorAll('#lpRep button').forEach(function(b){ b.classList.toggle('active', b === r); }); lpUpdateUI(); return; }
+      var o = e.target.closest('[data-ord]');
+      if(o){ lpSet.order = o.getAttribute('data-ord'); saveLpSet(); document.querySelectorAll('#lpOrd button').forEach(function(b){ b.classList.toggle('active', b === o); }); return; }
+      if(e.target.closest('#lpGo')){ var v = rangeVals(); lpStart(v.from, v.to); refreshGo(); return; }
+      lpControl(e);
+    };
+    refreshGo();
+    lpUpdateUI();
+    document.querySelector('.app').style.transformOrigin = '50% ' + (window.scrollY + window.innerHeight / 2) + 'px';
+    document.body.classList.add('sheet-open');
+    document.getElementById('detailOverlay').classList.add('active');
+    document.getElementById('closeDetail').onclick = closeDetail;
+  }
+  function lpControl(e){
+    var b = e.target.closest('[data-lp]');
+    if(!b) return;
+    var a = b.getAttribute('data-lp');
+    if(a === 'toggle') lpToggle();
+    else if(a === 'next') lpNext();
+    else if(a === 'prev') lpPrev();
+    else if(a === 'stop') lpStop();
+    else if(a === 'open') openListen();
+  }
+  document.getElementById('miniPlayer').onclick = lpControl;
+  document.getElementById('listenBtn').onclick = openListen;
+
   window.FN_APP = { displayTitle: function(t){ return displayTitle(t); }, refreshProgress: function(){ renderKajiStats(); if(document.getElementById('view-kemajuan').classList.contains('active')) renderKemajuan(); } };
 
   function escapeHtml(s){
@@ -2426,21 +2695,25 @@
   }
   function fetchVerse(key){
     if(!wbwVerseCache[key]){
-      wbwVerseCache[key] = fetch(WBW_API + key + '?words=true&word_fields=text_uthmani&word_translation_language=en')
+      wbwVerseCache[key] = fetch(WBW_API + key + '?words=true&word_fields=text_uthmani&word_translation_language=en&audio=7')
         .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function(j){ return j.verse.words; })
+        .then(function(j){ return { key: key, words: j.verse.words, audio: j.verse.audio || null }; })
         .catch(function(err){ delete wbwVerseCache[key]; throw err; });
     }
     return wbwVerseCache[key];
   }
-  function wbwFor(entry){
-    if(wbwEntryCache[entry.id]) return Promise.resolve(wbwEntryCache[entry.id]);
+  // Finds the words of the ayat this falsafah quotes. Returns the verses plus
+  // the first/last index into the flattened word list (end markers included).
+  var alignCache = {};
+  function alignEntry(entry){
+    if(alignCache[entry.id]) return alignCache[entry.id];
     var parts = String(entry.ayahRange).split('-').map(Number), keys = [];
     for(var v = parts[0]; v <= (parts[1] || parts[0]); v++) keys.push(entry.surahNumber + ':' + v);
-    return Promise.all(keys.map(fetchVerse)).then(function(lists){
-      var W = [].concat.apply([], lists);
+    var p = Promise.all(keys.map(fetchVerse)).then(function(verses){
+      var W = [];
+      verses.forEach(function(vs){ vs.words.forEach(function(w){ W.push({ w: w, key: vs.key }); }); });
       var target = entry.arabic.split(/\s+/).map(arSkeleton).join('');
-      var sk = W.map(function(w){ return w.char_type_name === 'word' ? arSkeleton(w.text_uthmani) : ''; });
+      var sk = W.map(function(x){ return x.w.char_type_name === 'word' ? arSkeleton(x.w.text_uthmani) : ''; });
       var from = 0, to = W.length - 1, found = false;
       for(var s = 0; s < W.length && !found; s++){
         if(!sk[s]) continue;
@@ -2451,13 +2724,49 @@
           if(acc.length > target.length) break;
         }
       }
-      if(found && to + 1 < W.length && W[to + 1].char_type_name === 'end') to++;   // keep the ayah number after the last word
-      var out = W.slice(from, to + 1).map(function(w){
-        return { ar: w.char_type_name === 'end' ? '\uFD3F' + w.text_uthmani + '\uFD3E' : w.text_uthmani,
+      return { verses: verses, W: W, from: from, to: to, found: found };
+    });
+    p.catch(function(){ delete alignCache[entry.id]; });
+    alignCache[entry.id] = p;
+    return p;
+  }
+  function wbwFor(entry){
+    if(wbwEntryCache[entry.id]) return Promise.resolve(wbwEntryCache[entry.id]);
+    return alignEntry(entry).then(function(A){
+      var W = A.W, from = A.from, to = A.to;
+      if(A.found && to + 1 < W.length && W[to + 1].w.char_type_name === 'end') to++;   // keep the ayah number after the last word
+      var out = W.slice(from, to + 1).map(function(x){
+        var w = x.w;
+        return { ar: w.char_type_name === 'end' ? '﴿' + w.text_uthmani + '﴾' : w.text_uthmani,
                  en: w.char_type_name === 'end' ? '' : (w.translation && w.translation.text) || '', end: w.char_type_name === 'end' };
       });
       wbwEntryCache[entry.id] = out;
       return out;
+    });
+  }
+  // Audio clips for a falsafah: one per verse, trimmed to the quoted words when
+  // the falsafah quotes only part of an ayat (Quran.com word timings).
+  var AUDIO_BASE = 'https://verses.quran.com/';
+  function audioClips(entry){
+    return alignEntry(entry).then(function(A){
+      var clips = [];
+      A.verses.forEach(function(vs){
+        var idx = [];
+        A.W.forEach(function(x, i){ if(x.key === vs.key && x.w.char_type_name === 'word') idx.push(i); });
+        var inRange = idx.filter(function(i){ return i >= A.from && i <= A.to; });
+        if(!inRange.length || !vs.audio || !vs.audio.url) return;
+        var url = /^https?:/.test(vs.audio.url) ? vs.audio.url : AUDIO_BASE + vs.audio.url.replace(/^\/+/, '');
+        var clip = { url: url, start: null, end: null, key: vs.key };
+        if(inRange.length < idx.length && vs.audio.segments && vs.audio.segments.length){
+          var firstPos = A.W[inRange[0]].w.position, lastPos = A.W[inRange[inRange.length - 1]].w.position;
+          var seg = function(pos){ return vs.audio.segments.filter(function(g){ return g[1] === pos; })[0]; };
+          var a = seg(firstPos), b = seg(lastPos);
+          if(a) clip.start = Math.max(0, a[2] - 150) / 1000;
+          if(b) clip.end = (b[3] + 250) / 1000;
+        }
+        clips.push(clip);
+      });
+      return clips;
     });
   }
   function fillWbw(wrap){
