@@ -38,7 +38,7 @@
     --navy:#0F766E;
     --on-navy:#FFFFFF;
     --gold:#FF7F50;
-    --gold-ink:#10212B;
+    --gold-ink:#FFFFFF;
     --gold-soft:rgba(255,127,80,.14);
     --gold-cite:#0F766E;
     --re:#EA6A2A;
@@ -234,6 +234,17 @@
   .wbw .w{ display:flex; flex-direction:column; align-items:center; text-align:center; max-width:132px; }
   .wbw .w-ar{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:27px; line-height:1.75; color:var(--ink); }
   .wbw .w-en{ direction:ltr; font-size:12px; line-height:1.3; color:var(--muted); margin-top:2px; }
+  .wbw .w-id{ direction:ltr; font-size:12px; line-height:1.3; color:var(--gold-cite); margin-top:2px; font-style:italic; }
+  .wbw-src .k-id{ color:var(--gold-cite); font-style:italic; }
+  .wbw-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 10px; }
+  .wbw-head .wbw-toggle{ margin:0; }
+  .wbw-head .wbl-seg{ display:none; }
+  .wbw-on .wbw-head .wbl-seg{ display:inline-flex; }
+  .wbl-seg{ display:inline-flex; gap:2px; padding:3px; border-radius:100px; border:1px solid var(--border); background:var(--surface); }
+  .wbl-seg button{ border:0; background:transparent; color:var(--muted); font-family:inherit; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:100px; cursor:pointer; }
+  .wbl-seg button.active{ background:var(--gold); color:var(--gold-ink); }
+  body.wbl-en .w-id, body.wbl-en .k-id, body.wbl-id .w-en, body.wbl-id .k-en{ display:none !important; }
+  .lp-wbw-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:12px 0 2px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
   .wbw .w-end .w-ar{ color:var(--gold-cite); font-size:22px; }
   .wbw-src, .wbw-msg{ display:none; direction:ltr; text-align:left; font-size:10px; color:var(--muted); opacity:.75; margin:10px 0 0; }
   .wbw-on.wbw-ready .wbw-src{ display:block; }
@@ -1587,14 +1598,20 @@
   }
   function placeTour(){
     if(!tourTip || tourStep < 0 || !tourTarget || tourTip.hidden) return;
-    var r = tourTarget.getBoundingClientRect(), tw = tourTip.offsetWidth, th = tourTip.offsetHeight;
-    var below = r.bottom + 14 + th < window.innerHeight - 8 || r.top < th + 22;
-    var left = Math.min(Math.max(12, r.left + r.width / 2 - tw / 2), window.innerWidth - tw - 12);
+    // The page may be zoomed (phones); measure the real scale so the tip lines up in every browser
+    tourTip.style.left = '100px'; tourTip.style.top = '100px'; tourTip.style.transition = 'none'; tourTip.style.transform = 'none';
+    var probe = tourTip.getBoundingClientRect(), k = (probe.top / 100) || 1;
+    tourTip.style.transform = ''; void tourTip.offsetWidth; tourTip.style.transition = '';
+    var r = tourTarget.getBoundingClientRect(), tw = probe.width, th = probe.height;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var below = r.bottom + 14 + th < vh - 8 || r.top < th + 22;
+    var left = Math.min(Math.max(12, r.left + r.width / 2 - tw / 2), vw - tw - 12);
+    var top = below ? r.bottom + 14 : r.top - 14 - th;
     tourTip.classList.toggle('below', below); tourTip.classList.toggle('above', !below);
-    tourTip.style.left = left + 'px';
-    tourTip.style.top = (below ? r.bottom + 14 : r.top - 14 - th) + 'px';
+    tourTip.style.left = (left / k) + 'px';
+    tourTip.style.top = (top / k) + 'px';
     var arrow = tourTip.querySelector('.tt-arrow');
-    if(arrow) arrow.style.left = Math.min(Math.max(14, r.left + r.width / 2 - left - 6), tw - 26) + 'px';
+    if(arrow) arrow.style.left = (Math.min(Math.max(14, r.left + r.width / 2 - left - 6), tw - 26) / k) + 'px';
   }
   function endTour(){
     if(tourTarget) tourTarget.classList.remove('tour-hl');
@@ -2720,12 +2737,9 @@
   function lpWordsHtml(entry){
     var words = lpWbwCache[entry.id];
     if(!words) return '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>';
-    return '<div class="lp-wbw" lang="ar">' + words.map(function(w){
-      return '<div class="w' + (w.end ? ' w-end' : '') + '"><span class="w-ar">' + escapeHtml(w.ar) + '</span>' +
-        (w.en ? '<span class="w-en" lang="en">' + escapeHtml(w.en) + '</span>' : '') +
-        (w.id ? '<span class="w-id" lang="id">' + escapeHtml(w.id) + '</span>' : '') + '</div>';
-    }).join('') + '</div>' +
-    '<p class="lp-legend"><span class="k-en">English</span> &middot; <span class="k-id">Bahasa Indonesia</span> &middot; kata demi kata daripada Quran.com</p>';
+    return '<div class="lp-wbw-head"><span>Word by word</span>' + wblSeg() + '</div>' +
+    '<div class="lp-wbw" lang="ar">' + wordCells(words) + '</div>' +
+    '<p class="lp-legend">Quran.com &middot; <span class="k-en">English</span> &middot; <span class="k-id">Bahasa Indonesia</span></p>';
   }
   function openListen(){
     var from = LP.active ? LP.from : studyRange.from, to = LP.active ? LP.to : studyRange.to;
@@ -2801,11 +2815,11 @@
   function wbwOn(){ try{ return localStorage.getItem(WBW_KEY) === '1'; }catch(e){ return false; } }
   function renderArabic(entry){
     return '<div class="folio-arabic-wrap" data-wbw-id="' + entry.id + '">' +
-      '<button type="button" class="wbw-toggle"><span class="sw"></span>Word by word</button>' +
+      '<div class="wbw-head"><button type="button" class="wbw-toggle"><span class="sw"></span>Word by word</button>' + wblSeg() + '</div>' +
       '<p class="wbw-msg"></p>' +
       '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>' +
       '<div class="wbw" lang="ar"></div>' +
-      '<p class="wbw-src">Word by word (English): Quran.com</p>' +
+      '<p class="wbw-src">Word by word: Quran.com &middot; <span class="k-en">English</span> &middot; <span class="k-id">Bahasa Indonesia</span></p>' +
     '</div>';
   }
   function arSkeleton(s){
@@ -2927,17 +2941,43 @@
     var box = wrap.querySelector('.wbw'), msg = wrap.querySelector('.wbw-msg');
     if(!entry || wrap.classList.contains('wbw-ready')) return;
     msg.textContent = 'Memuatkan word by word…';
-    wbwFor(entry).then(function(words){
-      box.innerHTML = words.map(function(w){
-        return '<div class="w' + (w.end ? ' w-end' : '') + '"><span class="w-ar">' + escapeHtml(w.ar) + '</span>' +
-          (w.en ? '<span class="w-en" lang="en">' + escapeHtml(w.en) + '</span>' : '') + '</div>';
-      }).join('');
+    lpWbwFor(entry).then(function(words){
+      box.innerHTML = wordCells(words);
       msg.textContent = '';
       wrap.classList.add('wbw-ready');
     }).catch(function(){
       msg.textContent = 'Word by word perlukan internet. Cuba lagi sebentar nanti.';
     });
   }
+  // Which meaning lines show under each word: English, Indonesian or both (one setting for the whole app)
+  var WBL_KEY = 'falsafah200_wbwlang_v1';
+  var wbl = (function(){ try{ var v = localStorage.getItem(WBL_KEY); return (v === 'en' || v === 'id' || v === 'both') ? v : 'both'; }catch(e){ return 'both'; } })();
+  function applyWbl(){
+    document.body.classList.remove('wbl-en', 'wbl-id', 'wbl-both');
+    document.body.classList.add('wbl-' + wbl);
+    document.querySelectorAll('.wbl-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-wbl') === wbl); });
+  }
+  function wblSeg(){
+    return '<span class="wbl-seg" role="group" aria-label="Bahasa terjemahan">' +
+      [['en','EN'],['id','ID'],['both','Kedua']].map(function(o){ return '<button type="button" data-wbl="' + o[0] + '" class="' + (wbl === o[0] ? 'active' : '') + '">' + o[1] + '</button>'; }).join('') + '</span>';
+  }
+  function wordCells(words){
+    return words.map(function(w){
+      return '<div class="w' + (w.end ? ' w-end' : '') + '"><span class="w-ar">' + escapeHtml(w.ar) + '</span>' +
+        (w.en ? '<span class="w-en" lang="en">' + escapeHtml(w.en) + '</span>' : '') +
+        (w.id ? '<span class="w-id" lang="id">' + escapeHtml(w.id) + '</span>' : '') + '</div>';
+    }).join('');
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('[data-wbl]');
+    if(!b) return;
+    e.stopPropagation();
+    wbl = b.getAttribute('data-wbl');
+    try{ localStorage.setItem(WBL_KEY, wbl); }catch(err){}
+    applyWbl();
+  }, true);
+  applyWbl();
+
   function applyWbw(root){
     var on = wbwOn();
     (root || document).querySelectorAll('.folio-arabic-wrap[data-wbw-id]').forEach(function(w){
