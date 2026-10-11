@@ -133,12 +133,14 @@ function render() {
       <div class="acct-who"><b>${esc(profile?.name || '')}</b><span>@${esc(profile?.username || '')} · ${esc(user.email || '')}</span></div>
       <p class="acct-msg ok" id="acctMsg">Progress synced ✓ · ${t}</p>
       <button class="namebtn" id="acctSyncNow">Sync progress</button>
+      <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">Panduan aplikasi</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">Papan pentadbir</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">Log keluar</button><button class="namebtn acct-ghost" id="acctClose">Tutup</button></div>
       <p class="acct-note">Di telefon atau komputer lain, log masuk dengan nama pengguna & PIN yang sama untuk sambung kemajuan anda.</p>`;
     $('acctSyncNow').onclick = async () => { msg('Syncing…'); dirty = true; await push(); await pullMerge(true); msg('Progress synced ✓', 'ok'); };
     $('acctOut').onclick = logout; $('acctClose').onclick = closeSheet;
     if ($('acctAdmin')) $('acctAdmin').onclick = () => { closeSheet(); openAdmin(); };
+    $('acctTour').onclick = () => { closeSheet(); setTimeout(() => window.FN_APP && window.FN_APP.startTour(), 300); };
     return;
   }
   const reg = mode === 'register', last = lsGet(LAST_USER) || '';
@@ -208,7 +210,7 @@ async function register() {
     user = cred.user; profile = { name, username: u, email };
     try { await fb.F.setDoc(nameDoc(u), { uid: user.uid, email }); }
     catch (e) { await cred.user.delete().catch(() => {}); user = null; throw { code: 'username-taken' }; }   // someone took it a moment ago
-    lsSet(LAST_USER, u); lsSet(KEYS.username, name);
+    lsSet(LAST_USER, u); lsSet(KEYS.username, name); lsSet('falsafah200_tour_pending', '1');
     await fb.F.setDoc(userDoc(), { profile, data: localSnapshot(), createdAt: fb.F.serverTimestamp(), updatedAt: fb.F.serverTimestamp() });
     lastSync = new Date();
     afterLogin();
