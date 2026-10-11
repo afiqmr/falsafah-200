@@ -436,7 +436,10 @@
   }
   .kmj-head{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
   .kmj-head h2{ font-size:20px; margin:0; }
-  .kmj-tiles{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .kmj-tiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .kmj-tiles .k-ok-all{ order:1; }   /* wide screens: Perlu ulang sits under Perlu fokus */
+  .kmj-tiles .k-re-all{ order:2; }
+  .kmj-tiles .k-re-all b{ color:var(--re); } .kmj-tiles .k-ok-all b{ color:var(--emerald); }
   .kmj-tiles div{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; font-size:12px; color:var(--muted); }
   .kmj-tiles b{ display:block; font-size:24px; color:var(--ink); font-variant-numeric:tabular-nums; line-height:1.2; }
   .kmj-tiles small{ font-size:13px; color:var(--muted); font-weight:700; }
@@ -451,7 +454,7 @@
   .kmj-legend{ display:flex; gap:14px; font-size:11px; color:var(--muted); margin-top:8px; }
   .kmj-legend i{ display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:5px; }
   .kmj-legend i.ok{ background:var(--emerald); } .kmj-legend i.re{ background:var(--re); }
-  @media (max-width:600px){ .kmj-tiles{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px){ .kmj-tiles{ grid-template-columns:repeat(2,1fr); } .kmj-tiles .k-ok-all, .kmj-tiles .k-re-all{ order:0; } }
   .kmj-tiles [data-list], .lvl-grid [data-list]{ cursor:pointer; position:relative; transition:border-color .15s; }
   .kmj-tiles [data-list]:hover, .lvl-grid [data-list]:hover{ border-color:var(--gold); }
   .kmj-tiles [data-list]::after, .lvl-grid [data-list]::after{ content:"\203A"; position:absolute; right:10px; top:8px; font-size:16px; color:var(--muted); }
@@ -845,7 +848,7 @@
   footer.credit{
     text-align:center; color:var(--muted); font-size:12px; margin-top:36px; line-height:1.7;
   }
-  .feedback-link{ color:var(--gold-cite); font-weight:600; }
+  .feedback-link{ color:inherit; font-weight:600; }
   .credit-logo{ display:block; width:auto; height:46px; margin:22px auto 0; }
   .credit-divider{ border:0; border-top:1px solid var(--border); width:220px; max-width:60%; margin:14px auto; }
 
@@ -1145,7 +1148,7 @@
   <footer class="credit">
     <span class="feedback-link">Author of Al-Fathun Nawa: Philosopher D&rsquo;Outreach Professor Dr. HALO-N</span><br>
     Made for Students of Advanced Diploma in Al-Quranic Philosophy,<br>
-    Institut Falsafah Al-Quran, in collaboration with Yayasan Gual Periok and World Philosphical Forum (WPF) Malaysia<br>
+    Institut Falsafah Al-Quran, in collaboration with Yayasan Gual Periok and World Philosophical Forum (WPF) Malaysia<br>
     <hr class="credit-divider">
     <span class="feedback-link">Created by Afiq Rashdi</span> &middot; September 2026<br>
     Prototype-phase testing<br>
@@ -1907,7 +1910,7 @@
     return w;
   }
   var progSets = {};
-  var UJI_LABELS = { today: 'Perlu ulang hari ini', focus: 'Perlu fokus', kelas: 'Kelas minggu ini' };
+  var UJI_LABELS = { today: 'Perlu ulang hari ini', focus: 'Perlu fokus', kelas: 'Kelas minggu ini', allre: 'Perlu ulang' };
   var sheetBack = null;   // { label, open } for the sheet currently showing a list
   function progClick(e){
     var li = e.target.closest('[data-open]') || e.target.closest('.listcard[data-id]');
@@ -1964,11 +1967,19 @@
       .sort(function(a, b){ return (missesOf(b.id) - missesOf(a.id)) || (getCard(a.id).box - getCard(b.id).box) || (a.id - b.id); })
       .map(function(e){ return e.id; });
   }
+  // Across all days: the last answer decides. Belum ingat stays here until the student presses Ingat.
+  function recallAll(){
+    var re = [], ok = [];
+    DATA.forEach(function(e){ var c = getCard(e.id); if(!(c.seen||0)) return; (c.box === 0 ? re : ok).push(e.id); });
+    return { re: re, ok: ok };
+  }
   // Every list the Kemajuan tab can open: [title, ids, uji set or null, meta]
   function listDef(key){
     var L = todayLists(), lv = allLevels();
     if(key === 'today-re') return ['Perlu ulang hari ini', L.re, 'today'];
     if(key === 'today-ok') return ['Ingat hari ini', L.ok, null];
+    if(key === 'all-re') return ['Perlu ulang (semua hari)', recallAll().re, 'allre', function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }];
+    if(key === 'all-ok') return ['Sudah ingat', recallAll().ok, null, function(id){ return BOX_LABELS[getCard(id).box]; }];
     if(key === 'focus') return ['Perlu fokus', allFocus(), 'focus', function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }];
     if(key === 'studied') return ['Pernah dikaji', DATA.filter(function(e){ return (getCard(e.id).seen||0) > 0; }).map(function(e){ return e.id; }), null];
     if(key === 'unstudied') return ['Belum pernah dikaji', DATA.filter(function(e){ return !(getCard(e.id).seen||0); }).map(function(e){ return e.id; }), null];
@@ -2008,7 +2019,8 @@
     var stage = document.getElementById('kemajuanStage');
     if(!stage) return;
     var L = todayLists(), nToday = L.ok.length + L.re.length;
-    var F = allFocus(), W = classWeekly(), lv = allLevels(), total = DATA.length;
+    var F = allFocus(), W = classWeekly(), lv = allLevels(), total = DATA.length, RA = recallAll();
+    progSets.allre = RA.re;
     var studied = DATA.filter(function(e){ return (getCard(e.id).seen||0) > 0; }).length;
     progSets.focus = F; progSets.today = L.re;
     progSets.kelas = W ? W.top.map(function(x){ return x.id; }) : [];
@@ -2024,7 +2036,10 @@
         '<div data-list="studied"><b>' + studied + '<small>/' + total + '</small></b>Pernah dikaji</div>' +
         '<div data-list="focus"><b>' + F.length + '</b>Perlu fokus</div>' +
         '<div><b>' + activeDays + '<small>/14</small></b>Hari aktif</div>' +
-      '</div>';
+        '<div class="k-re-all" data-list="all-re"><b>' + RA.re.length + '</b>&#8635; Perlu ulang</div>' +
+        '<div class="k-ok-all" data-list="all-ok"><b>' + RA.ok.length + '</b>&#10003; Sudah ingat</div>' +
+      '</div>' +
+      '<p class="pnote" style="margin:8px 2px 0;">Perlu ulang dikira dari semua hari, dan kekal di situ sehingga anda tekan <b>Ingat</b>.</p>';
 
     // Hari ini
     html += '<div class="prog-sec card-sec"><h4>Hari ini &middot; <span class="cnt">' + nToday + '</span> dikaji</h4>' +
