@@ -212,7 +212,7 @@
 
   .divider{ height:1px; background:var(--border); margin:16px 0; border:0; }
 
-  /* Word by word (shown for entries that carry a wbw list) */
+  /* Word by word: Arabic words with English meanings from Quran.com */
   .wbw-toggle{
     display:inline-flex; align-items:center; gap:7px; margin:0 0 10px; padding:6px 12px; border-radius:100px;
     border:1px solid var(--border); background:var(--surface); color:var(--muted);
@@ -224,13 +224,15 @@
   .wbw-on .wbw-toggle .sw{ background:var(--emerald); }
   .wbw-on .wbw-toggle .sw::after{ transform:translateX(11px); }
   .wbw{ display:none; flex-wrap:wrap; direction:rtl; gap:14px 10px; padding:4px 0 2px; }
-  .wbw-on .wbw{ display:flex; }
-  .wbw-on .arabic-text.has-wbw{ display:none; }
+  .wbw-on.wbw-ready .wbw{ display:flex; }
+  .wbw-on.wbw-ready .arabic-text{ display:none; }
   .wbw .w{ display:flex; flex-direction:column; align-items:center; text-align:center; max-width:132px; }
   .wbw .w-ar{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:27px; line-height:1.75; color:var(--ink); }
   .wbw .w-en{ direction:ltr; font-size:12px; line-height:1.3; color:var(--muted); margin-top:2px; }
-  .wbw-src{ display:none; direction:ltr; text-align:left; font-size:10px; color:var(--muted); opacity:.75; margin:10px 0 0; }
-  .wbw-on .wbw-src{ display:block; }
+  .wbw .w-end .w-ar{ color:var(--gold-cite); font-size:22px; }
+  .wbw-src, .wbw-msg{ display:none; direction:ltr; text-align:left; font-size:10px; color:var(--muted); opacity:.75; margin:10px 0 0; }
+  .wbw-on.wbw-ready .wbw-src{ display:block; }
+  .wbw-on .wbw-msg:not(:empty){ display:block; font-size:12px; opacity:1; margin:0 0 8px; }
 
   .arabic-text{
     font-family:"Scheherazade New","Traditional Arabic",serif;
@@ -427,7 +429,7 @@
     position:relative;
     background:var(--surface); border-radius:28px 28px 0 0;
     max-width:760px; width:100%; padding:34px 24px 30px;
-    max-height:90vh; overflow-y:auto; overscroll-behavior:contain;
+    height:64vh; max-height:none; overflow-y:auto; overscroll-behavior:contain;
     border-top:1px solid var(--border);
     box-shadow:0 -12px 40px -12px rgba(0,0,0,.35);
     transform:translateY(calc(100% + 40px));
@@ -436,6 +438,7 @@
   }
   .detailoverlay.active .detailsheet{ transform:translateY(0); }
   .detailsheet.dragging{ transition:none; }
+  @media (max-width:600px){ .detailsheet{ height:86vh; } }
   .detailsheet::before{
     content:""; position:absolute; top:10px; left:50%; width:40px; height:5px; margin-left:-20px;
     border-radius:3px; background:var(--muted); opacity:.45;
@@ -1513,6 +1516,7 @@
           '<button class="gradebtn good" data-g="1"><span class="g-label">Ingat</span><span class="g-sub">+' + BOX_INTERVALS[Math.min(BOX_INTERVALS.length-1,getCard(entry.id).box+1)] + ' hari</span></button>' +
         '</div>' +
         renderExtras(entry);
+      applyWbw(el);
       var btns = el.querySelectorAll('.gradebtn');
       btns.forEach(function(b){
         b.onclick = function(){
@@ -1663,6 +1667,7 @@
       '<div class="lc-surah" style="margin-top:14px;">'+escapeHtml(entry.surahDisplay)+'</div>' +
       renderExtras(entry);
     var sheet = document.getElementById('detailSheet');
+    applyWbw(sheet);
     sheet.scrollTop = 0;
     // Shrink the page behind towards the middle of what is on screen, like an iOS sheet
     document.querySelector('.app').style.transformOrigin = '50% ' + (window.scrollY + window.innerHeight / 2) + 'px';
@@ -1973,29 +1978,92 @@
   }
   function escapeAttr(s){ return escapeHtml(s); }
 
-  // Arabic block for the reveal and detail views; adds a word-by-word view when the entry has one.
-  var WBW_KEY = 'falsafah200_wbw_v1';
-  function wbwOn(){ try{ return localStorage.getItem(WBW_KEY) !== '0'; }catch(e){ return true; } }
+  // Arabic block for the reveal and detail views, with a Word by word switch.
+  // Word-by-word data comes from the Quran.com API when the switch is on, and is
+  // trimmed to the part of the ayat this falsafah quotes.
+  var WBW_KEY = 'falsafah200_wbw_v1', WBW_API = 'https://api.quran.com/api/v4/verses/by_key/';
+  var wbwVerseCache = {}, wbwEntryCache = {};
+  function wbwOn(){ try{ return localStorage.getItem(WBW_KEY) === '1'; }catch(e){ return false; } }
   function renderArabic(entry){
-    if(!entry.wbw || !entry.wbw.length){
-      return '<div class="folio-arabic-wrap"><p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p></div>';
-    }
-    return '<div class="folio-arabic-wrap' + (wbwOn() ? ' wbw-on' : '') + '">' +
-      '<button type="button" class="wbw-toggle" aria-label="Kata demi kata"><span class="sw"></span>Kata demi kata</button>' +
-      '<p class="arabic-text has-wbw" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>' +
-      '<div class="wbw" lang="ar">' + entry.wbw.map(function(w){
-        return '<div class="w"><span class="w-ar">' + escapeHtml(w.ar) + '</span><span class="w-en" lang="en">' + escapeHtml(w.en) + '</span></div>';
-      }).join('') + '</div>' +
-      '<p class="wbw-src">Terjemahan kata demi kata (Inggeris): Quran.com</p>' +
+    return '<div class="folio-arabic-wrap" data-wbw-id="' + entry.id + '">' +
+      '<button type="button" class="wbw-toggle"><span class="sw"></span>Word by word</button>' +
+      '<p class="wbw-msg"></p>' +
+      '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>' +
+      '<div class="wbw" lang="ar"></div>' +
+      '<p class="wbw-src">Word by word (English): Quran.com</p>' +
     '</div>';
+  }
+  function arSkeleton(s){
+    return s.normalize('NFKD').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\u0640]/g, '')
+      .replace(/[\u0671\u0623\u0625\u0622]/g, '\u0627').replace(/[\u06CC\u0649]/g, '\u064A')
+      .replace(/\u06A9/g, '\u0643').replace(/\u0629/g, '\u0647').replace(/[^\u0621-\u064A]/g, '');
+  }
+  function fetchVerse(key){
+    if(!wbwVerseCache[key]){
+      wbwVerseCache[key] = fetch(WBW_API + key + '?words=true&word_fields=text_uthmani&word_translation_language=en')
+        .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function(j){ return j.verse.words; })
+        .catch(function(err){ delete wbwVerseCache[key]; throw err; });
+    }
+    return wbwVerseCache[key];
+  }
+  function wbwFor(entry){
+    if(wbwEntryCache[entry.id]) return Promise.resolve(wbwEntryCache[entry.id]);
+    var parts = String(entry.ayahRange).split('-').map(Number), keys = [];
+    for(var v = parts[0]; v <= (parts[1] || parts[0]); v++) keys.push(entry.surahNumber + ':' + v);
+    return Promise.all(keys.map(fetchVerse)).then(function(lists){
+      var W = [].concat.apply([], lists);
+      var target = entry.arabic.split(/\s+/).map(arSkeleton).join('');
+      var sk = W.map(function(w){ return w.char_type_name === 'word' ? arSkeleton(w.text_uthmani) : ''; });
+      var from = 0, to = W.length - 1, found = false;
+      for(var s = 0; s < W.length && !found; s++){
+        if(!sk[s]) continue;
+        var acc = '';
+        for(var t2 = s; t2 < W.length; t2++){
+          acc += sk[t2];
+          if(acc === target){ from = s; to = t2; found = true; break; }
+          if(acc.length > target.length) break;
+        }
+      }
+      if(found && to + 1 < W.length && W[to + 1].char_type_name === 'end') to++;   // keep the ayah number after the last word
+      var out = W.slice(from, to + 1).map(function(w){
+        return { ar: w.char_type_name === 'end' ? '\uFD3F' + w.text_uthmani + '\uFD3E' : w.text_uthmani,
+                 en: w.char_type_name === 'end' ? '' : (w.translation && w.translation.text) || '', end: w.char_type_name === 'end' };
+      });
+      wbwEntryCache[entry.id] = out;
+      return out;
+    });
+  }
+  function fillWbw(wrap){
+    var id = +wrap.getAttribute('data-wbw-id');
+    var entry = DATA.find(function(e){ return e.id === id; });
+    var box = wrap.querySelector('.wbw'), msg = wrap.querySelector('.wbw-msg');
+    if(!entry || wrap.classList.contains('wbw-ready')) return;
+    msg.textContent = 'Memuatkan word by word…';
+    wbwFor(entry).then(function(words){
+      box.innerHTML = words.map(function(w){
+        return '<div class="w' + (w.end ? ' w-end' : '') + '"><span class="w-ar">' + escapeHtml(w.ar) + '</span>' +
+          (w.en ? '<span class="w-en" lang="en">' + escapeHtml(w.en) + '</span>' : '') + '</div>';
+      }).join('');
+      msg.textContent = '';
+      wrap.classList.add('wbw-ready');
+    }).catch(function(){
+      msg.textContent = 'Word by word perlukan internet. Cuba lagi sebentar nanti.';
+    });
+  }
+  function applyWbw(root){
+    var on = wbwOn();
+    (root || document).querySelectorAll('.folio-arabic-wrap[data-wbw-id]').forEach(function(w){
+      w.classList.toggle('wbw-on', on);
+      if(on) fillWbw(w);
+    });
   }
   document.addEventListener('click', function(e){
     var b = e.target.closest && e.target.closest('.wbw-toggle');
     if(!b) return;
     e.stopPropagation();
-    var on = !wbwOn();
-    try{ localStorage.setItem(WBW_KEY, on ? '1' : '0'); }catch(err){}
-    document.querySelectorAll('.folio-arabic-wrap').forEach(function(w){ if(w.querySelector('.wbw')) w.classList.toggle('wbw-on', on); });
+    try{ localStorage.setItem(WBW_KEY, wbwOn() ? '0' : '1'); }catch(err){}
+    applyWbw();
   });
 
   function renderExtras(entry){
