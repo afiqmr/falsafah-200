@@ -1572,6 +1572,7 @@
   ];
   var tourStep = -1, tourTip = null, tourTarget = null;
   function startTour(){
+    try{ document.dispatchEvent(new Event('fn-tour-start')); }catch(e){}
     var study = document.querySelector('nav.tabs button[data-view="study"]');
     if(study && !study.classList.contains('active')) study.click();
     tourStep = -1;

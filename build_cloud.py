@@ -26,9 +26,27 @@ sub('<p>Sila nyatakan nama atau panggilan anda untuk mula menggunakan pembantu h
 sub('<title>الفتح النوى - Falsafah 200</title>', '<title>الفتح النوى - Falsafah 200 (Test)</title>')
 # index.html is a page fragment; give it a doctype so it renders in standards mode.
 # Phones a little smaller (10%); laptops at full size.
-src = ('<!doctype html>' + nl + '<meta charset="utf-8">' + nl
+head = nl.join([
+    '<link rel="manifest" href="manifest.webmanifest">',
+    '<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">',
+    '<link rel="icon" type="image/png" href="icons/favicon-32.png">',
+    '<meta name="theme-color" content="#4C0305">',
+    '<meta name="mobile-web-app-capable" content="yes">',
+    '<meta name="apple-mobile-web-app-capable" content="yes">',
+    '<meta name="apple-mobile-web-app-title" content="Falsafah 200">',
+    '<meta name="apple-mobile-web-app-status-bar-style" content="default">',
+    # Android's install prompt can fire early; keep it for the "Pasang sekarang" button
+    '<script>window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__bip=e;document.dispatchEvent(new Event("fn-bip"));});'
+    'if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>',
+])
+src = ('<!doctype html>' + nl + '<meta charset="utf-8">' + nl + head + nl
        + '<style>@media (max-width:600px){ html{ zoom:.9; } }</style>' + nl + src + nl + ui + nl)
 
 os.makedirs('cloud-test', exist_ok=True)
 open('cloud-test/index.html', 'w', encoding='utf-8', newline='').write(src)
+# home-screen app files
+import shutil
+shutil.copytree('cloud/icons', 'cloud-test/icons', dirs_exist_ok=True)
+for f in ('manifest.webmanifest', 'sw.js'):
+    shutil.copy('cloud/' + f, 'cloud-test/' + f)
 print('cloud-test/index.html', len(src))

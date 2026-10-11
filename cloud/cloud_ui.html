@@ -37,6 +37,15 @@
   #acctCard .nameskip{ margin:10px auto 0; }
   .acct-links{ display:flex; justify-content:space-between; gap:10px; }
   .acct-links .nameskip{ margin:10px 0 0 !important; }
+  .inst-logo{ display:block; width:88px; height:88px; margin:2px auto 10px; filter:drop-shadow(0 6px 16px rgba(0,0,0,.28)); }
+  .inst-steps{ list-style:none; margin:4px 0 12px; padding:0; counter-reset:st; }
+  .inst-steps li{ counter-increment:st; display:flex; gap:12px; align-items:flex-start; padding:10px 2px; border-bottom:1px solid var(--border); font-size:14px; line-height:1.5; }
+  .inst-steps li:last-child{ border-bottom:0; }
+  .inst-steps li::before{ content:counter(st); flex:none; width:24px; height:24px; border-radius:50%; background:var(--gold); color:var(--gold-ink); font-weight:800; font-size:13px; display:grid; place-items:center; margin-top:1px; }
+  .inst-ico{ display:inline-grid; place-items:center; width:22px; height:22px; border-radius:6px; background:var(--surface-2); border:1px solid var(--border); vertical-align:-5px; margin:0 2px; color:#0A84FF; font-weight:900; }
+  .inst-ico svg{ width:14px; height:14px; }
+  .inst-box{ background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.55; margin:0 0 12px; }
+  .inst-box b{ color:var(--ink); }
   .acct-spin{ width:26px; height:26px; margin:18px auto 6px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--gold); animation:acctSpin .8s linear infinite; }
   @keyframes acctSpin{ to{ transform:rotate(360deg); } }
   /* ---------- Admin ---------- */
@@ -93,7 +102,8 @@ const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', usernam
 const ADMIN_EMAILS = ['afiqmonsieur@gmail.com'];   // must match the Firestore rules
 const isAdminUser = () => !!(user && ADMIN_EMAILS.includes((user.email || '').toLowerCase()));
 const SYNCED = new Set(Object.values(KEYS));
-const LAST_USER = 'falsafah200_last_user_v1';   // remembered on this device so the username is filled in
+const LAST_USER = 'falsafah200_last_user_v1';
+const TOUR_KEY = 'falsafah200_tour_pending';   // the welcome tour; also kept in the cloud so the installed app shows it   // remembered on this device so the username is filled in
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const origSet = Storage.prototype.setItem;
@@ -127,12 +137,14 @@ const userInput = v => `<input id="fUser" maxlength="20" autocapitalize="none" a
 function render() {
   if (!CFG) { card.innerHTML = BRAND + '<h3>Akaun</h3><p class="sub">Log masuk belum disediakan untuk versi ini.</p>'; return; }
   if (mode === 'wait') { card.innerHTML = BRAND + '<h3>Selamat datang</h3><div class="acct-spin"></div><p class="sub">Memuatkan…</p>'; return; }
+  if (mode === 'install') { renderInstall(); return; }
   if (mode === 'account' && user) {
     const t = lastSync ? lastSync.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' }) : '—';
     card.innerHTML = `<h3>Akaun anda</h3>
       <div class="acct-who"><b>${esc(profile?.name || '')}</b><span>@${esc(profile?.username || '')} · ${esc(user.email || '')}</span></div>
       <p class="acct-msg ok" id="acctMsg">Progress synced ✓ · ${t}</p>
       <button class="namebtn" id="acctSyncNow">Sync progress</button>
+      ${!isStandalone() && installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">Pasang di skrin utama</button>' : ''}
       <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">Panduan aplikasi</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">Papan pentadbir</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">Log keluar</button><button class="namebtn acct-ghost" id="acctClose">Tutup</button></div>
@@ -140,6 +152,7 @@ function render() {
     $('acctSyncNow').onclick = async () => { msg('Syncing…'); dirty = true; await push(); await pullMerge(true); msg('Progress synced ✓', 'ok'); };
     $('acctOut').onclick = logout; $('acctClose').onclick = closeSheet;
     if ($('acctAdmin')) $('acctAdmin').onclick = () => { closeSheet(); openAdmin(); };
+    if ($('acctInstall')) $('acctInstall').onclick = () => openInstall(false);
     $('acctTour').onclick = () => { closeSheet(); setTimeout(() => window.FN_APP && window.FN_APP.startTour(), 300); };
     return;
   }
@@ -180,6 +193,82 @@ const ERR = c => ({
   'permission-denied': 'Pangkalan data menolak akses. Semak peraturan Firestore.'
 }[c] || 'Ralat: ' + c);
 
+// ---------- Add to home screen ----------
+const UA = navigator.userAgent;
+const isIOS = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/i.test(UA);
+const inAppBrowser = /FBAN|FBAV|FB_IAB|Instagram|Line\/|MicroMessenger|TikTok|musical_ly|Snapchat|Telegram|; wv\)/i.test(UA);
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+let installFromReg = false, installDone = false, installNote = '';
+function installKind() {
+  if (isStandalone()) return 'done';
+  if (inAppBrowser && (isIOS || isAndroid)) return 'inapp';
+  if (window.__bip) return 'prompt';
+  if (isIOS) return 'ios';
+  if (isAndroid) return 'android';
+  return 'none';
+}
+const ICO_SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1"/></svg>';
+const ICO_ADD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/></svg>';
+function renderInstall() {
+  const k = installDone ? 'done' : installKind();
+  const later = installFromReg ? 'Nanti, teruskan dahulu' : 'Tutup';
+  const uname = esc(profile?.username || lsGet(LAST_USER) || '');
+  let body = '', main = '';
+  if (k === 'done') {
+    body = '<p class="sub">Siap! Ikon <b>Falsafah 200</b> kini di skrin utama telefon anda. Buka dari situ bila-bila masa.</p>';
+    main = `<button class="namebtn" id="instLater">${installFromReg ? 'Teruskan' : 'Tutup'}</button>`;
+  } else if (k === 'prompt') {
+    body = '<p class="sub">Satu tekan sahaja. Buka Falsafah 200 terus dari skrin telefon, penuh skrin, tanpa bar pelayar.</p>';
+    main = `<button class="namebtn" id="instGo">Pasang sekarang</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
+  } else if (k === 'ios') {
+    body = `<p class="sub">Apple tidak benarkan pasang dengan satu tekan. Ikut 3 langkah ini (10 saat):</p>
+      <ol class="inst-steps">
+        <li><span>Tekan ikon Kongsi <span class="inst-ico">${ICO_SHARE}</span> pada bar Safari. Jika tiada, tekan <span class="inst-ico">&middot;&middot;&middot;</span> dahulu, kemudian Kongsi.</span></li>
+        <li><span>Leret ke bawah, pilih <b>Tambah ke Skrin Utama</b> <span class="inst-ico">${ICO_ADD}</span> (<i>Add to Home Screen</i>).</span></li>
+        <li><span>Tekan <b>Tambah</b> (<i>Add</i>) di penjuru atas.</span></li>
+      </ol>
+      <div class="inst-box">Kemudian buka ikon <b>Falsafah 200</b> di skrin utama dan log masuk sekali lagi dengan nama pengguna <b>${uname}</b> dan PIN anda. Kemajuan anda tetap selamat.</div>`;
+    main = `<button class="namebtn" id="instIosDone">Saya sudah pasang</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
+  } else if (k === 'android') {
+    body = `<ol class="inst-steps">
+        <li><span>Tekan menu <span class="inst-ico">&#8942;</span> di penjuru atas pelayar.</span></li>
+        <li><span>Pilih <b>Pasang aplikasi</b> atau <b>Tambah ke skrin utama</b> (<i>Install app / Add to Home screen</i>).</span></li>
+        <li><span>Tekan <b>Pasang</b> (<i>Install</i>).</span></li>
+      </ol>`;
+    main = `<button class="namebtn" id="instLater">${installFromReg ? 'Teruskan' : 'Tutup'}</button>`;
+  } else if (k === 'inapp') {
+    body = `<p class="sub">Anda membuka pautan ini di dalam aplikasi lain (cth. WhatsApp, Instagram). Pemasangan hanya boleh dibuat di ${isIOS ? 'Safari' : 'Chrome'}.</p>
+      <ol class="inst-steps">
+        <li><span>Tekan <b>Salin pautan</b> di bawah.</span></li>
+        <li><span>Buka <b>${isIOS ? 'Safari' : 'Chrome'}</b>, tampal pautan, dan log masuk dengan nama pengguna <b>${uname}</b>.</span></li>
+        <li><span>Di sana, buka <b>Akaun &rsaquo; Pasang di skrin utama</b>.</span></li>
+      </ol>`;
+    main = `<button class="namebtn" id="instCopy">Salin pautan</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
+  }
+  card.innerHTML = `<img class="inst-logo" src="icons/logo-240.png" alt="">
+    <h3>${k === 'done' ? 'Berjaya dipasang' : 'Pasang di skrin utama'}</h3>${body}
+    <p class="acct-msg ok" id="acctMsg">${esc(installNote)}</p>${main}`;
+  const later_ = () => { installNote = ''; if (installFromReg) { installFromReg = false; afterLogin(); } else closeSheet(); };
+  $('instLater').onclick = later_;
+  if ($('instGo')) $('instGo').onclick = async () => {
+    const e = window.__bip; if (!e) { render(); return; }
+    window.__bip = null;
+    try { e.prompt(); const r = await e.userChoice; if (r && r.outcome === 'accepted') installDone = true; else installNote = 'Tidak mengapa. Anda boleh pasang kemudian di menu Akaun.'; } catch (err) {}
+    render();
+  };
+  if ($('instIosDone')) $('instIosDone').onclick = () => { installNote = 'Bagus! Sekarang tutup Safari dan buka ikon Falsafah 200 di skrin utama.'; render(); };
+  if ($('instCopy')) $('instCopy').onclick = async () => {
+    const url = location.origin + location.pathname;
+    try { await navigator.clipboard.writeText(url); installNote = 'Pautan disalin. Tampal di ' + (isIOS ? 'Safari' : 'Chrome') + '.'; }
+    catch (err) { installNote = url; }
+    render();
+  };
+}
+function openInstall(fromReg) { installFromReg = !!fromReg; installNote = ''; gated = !!fromReg; openSheet('install'); }
+document.addEventListener('fn-bip', () => { if (mode === 'install' && overlay.classList.contains('active')) render(); });
+window.addEventListener('appinstalled', () => { installDone = true; if (mode === 'install' && overlay.classList.contains('active')) render(); });
+
 // ---------- Firebase ----------
 async function loadFb() {
   if (fb) return fb;
@@ -211,9 +300,10 @@ async function register() {
     try { await fb.F.setDoc(nameDoc(u), { uid: user.uid, email }); }
     catch (e) { await cred.user.delete().catch(() => {}); user = null; throw { code: 'username-taken' }; }   // someone took it a moment ago
     lsSet(LAST_USER, u); lsSet(KEYS.username, name); lsSet('falsafah200_tour_pending', '1');
-    await fb.F.setDoc(userDoc(), { profile, data: localSnapshot(), createdAt: fb.F.serverTimestamp(), updatedAt: fb.F.serverTimestamp() });
+    await fb.F.setDoc(userDoc(), { profile, data: localSnapshot(), tourPending: true, createdAt: fb.F.serverTimestamp(), updatedAt: fb.F.serverTimestamp() });
     lastSync = new Date();
-    afterLogin();
+    if (['done', 'none'].includes(installKind())) afterLogin();
+    else openInstall(true);   // registering stays true so the sign-in listener leaves this screen alone
   } catch (e) {
     registering = false;
     msg(e.code === 'username-taken' ? 'Nama pengguna ini sudah digunakan. Cuba nama lain.' : ERR(e.code || e.message), 'err');
@@ -259,6 +349,10 @@ function afterLogin() {
   loadWeekly();
   setBtn('on', firstName(profile?.name));
   closeSheet();
+  if (lsGet(KEYS.range) && lsGet(TOUR_KEY) === '1') {
+    lsDel(TOUR_KEY);
+    setTimeout(() => window.FN_APP && window.FN_APP.startTour(), 700);
+  }
   if (!lsGet(KEYS.range)) {
     setTimeout(() => {
       $('greetBtn')?.click();                                   // opens the app's own setup sheet (julat)
@@ -314,6 +408,7 @@ async function pullMerge(force) {
   const snap = await fb.F.getDoc(userDoc());
   const remote = snap.exists() ? (snap.data().data || {}) : {};
   profile = (snap.exists() && snap.data().profile) || profile;
+  if (snap.exists() && snap.data().tourPending === true) lsSet(TOUR_KEY, '1');
   const local = localSnapshot();
   const merged = merge(local, remote);
   if (!merged.username && profile?.name) merged.username = profile.name;
@@ -477,6 +572,10 @@ async function openAdmin() {
   $('admSearch').oninput = e => { const q = e.target.value.trim().toLowerCase(); panel.querySelectorAll('.stu').forEach(c => { c.style.display = !q || c.dataset.q.includes(q) ? '' : 'none'; }); };
 }
 function closeAdmin() { panel.classList.remove('active'); document.body.style.overflow = ''; }
+
+document.addEventListener('fn-tour-start', () => {
+  if (user && fb) fb.F.setDoc(userDoc(), { tourPending: false }, { merge: true }).catch(() => {});
+});
 
 // ---------- start: nothing is usable until the student is signed in ----------
 document.getElementById('nameOverlay')?.classList.remove('active');
