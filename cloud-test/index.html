@@ -6,6 +6,7 @@
 <meta name="description" content="Kaji dan hafaz 200 Falsafah Al Quran dari Al Fathun Nawa Jilid 7, dengan ayat asal, ulang kaji jarak masa, kuiz dan penjejakan kemajuan.">
 <style>
   :root{
+    --ios-curve:cubic-bezier(.32,.72,0,1);
     --bg:#0F172A;
     --surface:#0D1A33;
     --surface-2:#12244A;
@@ -223,11 +224,16 @@
     border:1px solid var(--border); background:var(--surface); color:var(--muted);
     font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;
   }
-  .wbw-toggle .sw{ width:26px; height:15px; border-radius:100px; background:var(--border); position:relative; transition:background .2s; }
-  .wbw-toggle .sw::after{ content:""; position:absolute; top:2px; left:2px; width:11px; height:11px; border-radius:50%; background:#fff; transition:transform .2s; }
+  .wbw-toggle{ -webkit-tap-highlight-color:transparent; transition:color .3s var(--ios-curve), transform .2s var(--ios-curve); }
+  .wbw-toggle:active{ transform:scale(.97); }
+  .wbw-toggle .sw{ width:34px; height:20px; border-radius:100px; background:color-mix(in srgb, var(--muted) 35%, transparent); position:relative; transition:background-color .3s var(--ios-curve); flex:none; }
+  .wbw-toggle .sw::after{ content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff;
+    box-shadow:0 2px 4px rgba(0,0,0,.18), 0 0 0 .5px rgba(0,0,0,.04); transition:transform .38s var(--ios-curve), width .2s var(--ios-curve); }
+  .wbw-toggle:active .sw::after{ width:20px; }
+  .wbw-on .wbw-toggle:active .sw::after{ transform:translateX(10px); }
   .wbw-on .wbw-toggle{ color:var(--ink); }
   .wbw-on .wbw-toggle .sw{ background:var(--emerald); }
-  .wbw-on .wbw-toggle .sw::after{ transform:translateX(11px); }
+  .wbw-on .wbw-toggle .sw::after{ transform:translateX(14px); }
   .wbw{ display:none; flex-wrap:wrap; direction:rtl; gap:14px 10px; padding:4px 0 2px; }
   .wbw-on.wbw-ready .wbw{ display:flex; }
   .wbw-on.wbw-ready .arabic-text{ display:none; }
@@ -241,8 +247,20 @@
   .wbw-head .wbl-seg{ display:none; }
   .wbw-on .wbw-head .wbl-seg{ display:inline-flex; }
   .wbl-seg{ display:inline-flex; gap:2px; padding:3px; border-radius:100px; border:1px solid var(--border); background:var(--surface); }
-  .wbl-seg button{ border:0; background:transparent; color:var(--muted); font-family:inherit; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:100px; cursor:pointer; }
+  .wbl-seg button{ border:0; background:transparent; color:var(--muted); font-family:inherit; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:100px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent; transition:background-color .3s var(--ios-curve), color .3s var(--ios-curve), transform .2s var(--ios-curve); }
+  .wbl-seg button:active{ transform:scale(.92); }
+  .wbl-seg button:focus:not(:focus-visible){ outline:none; box-shadow:none; }
   .wbl-seg button.active{ background:var(--gold); color:var(--gold-ink); }
+  /* word-by-word appears and leaves with a soft fade and lift (iOS curve) */
+  @keyframes wbwIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+  @keyframes lineIn{ from{ opacity:0; transform:translateY(-3px); } to{ opacity:1; transform:none; } }
+  .wbw-anim .wbw, .wbw-anim .arabic-text, .wbw-anim .wbw-src{ animation:wbwIn .45s var(--ios-curve) both; }
+  .w-en, .w-id{ transition:opacity .18s ease; }
+  .k-en, .k-id{ transition:opacity .18s ease; }
+  .w-line-out{ opacity:0 !important; }
+  .w-line-in{ animation:lineIn .38s var(--ios-curve) .06s both; }
+  @media (prefers-reduced-motion: reduce){ .wbw-anim .wbw, .wbw-anim .arabic-text, .wbw-anim .wbw-src, .w-line-in{ animation:none; } .wbw-toggle .sw::after{ transition:none; } }
   body.wbl-en .w-id, body.wbl-en .k-id, body.wbl-id .w-en, body.wbl-id .k-en{ display:none !important; }
   .lp-wbw-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:12px 0 2px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
   .wbw .w-end .w-ar{ color:var(--gold-cite); font-size:22px; }
@@ -2564,20 +2582,24 @@
   var LISTEN_KEY = 'falsafah200_listen_v1';
   var lpSet = (function(){ try{ var s = JSON.parse(localStorage.getItem(LISTEN_KEY) || 'null'); if(s && s.repeat) return s; }catch(e){} return { repeat: 1, order: 'nombor' }; })();
   function saveLpSet(){ try{ localStorage.setItem(LISTEN_KEY, JSON.stringify({ repeat: lpSet.repeat, order: lpSet.order })); }catch(e){} }
-  var LP = { ids: [], idx: 0, rep: 0, clip: 0, clips: null, active: false, loading: false, msg: '', from: null, to: null, token: 0 };
+  var LP = { ids: [], idx: 0, rep: 0, clip: 0, clips: null, active: false, loading: false, msg: '', from: null, to: null, token: 0, gap: false, gapLeft: 0 };
   var lpAudio = new Audio();
   lpAudio.preload = 'auto';
   lpAudio.setAttribute('playsinline', '');
   // a tiny silent clip, played inside the tap so iPhone allows the later, async plays
-  var SILENT = (function(){
-    var n = 800, buf = new Uint8Array(44 + n), dv = new DataView(buf.buffer);
+  function silentWav(n){
+    var buf = new Uint8Array(44 + n), dv = new DataView(buf.buffer);
     var w = function(o, s){ for(var i = 0; i < s.length; i++) buf[o + i] = s.charCodeAt(i); };
     w(0,'RIFF'); dv.setUint32(4, 36 + n, true); w(8,'WAVE'); w(12,'fmt '); dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
     dv.setUint32(24,8000,true); dv.setUint32(28,8000,true); dv.setUint16(32,1,true); dv.setUint16(34,8,true); w(36,'data'); dv.setUint32(40,n,true);
     for(var i = 0; i < n; i++) buf[44 + i] = 128;
     var s = ''; for(var j = 0; j < buf.length; j++) s += String.fromCharCode(buf[j]);
     return 'data:audio/wav;base64,' + btoa(s);
-  })();
+  }
+  var SILENT = silentWav(800);
+  // 5 seconds of silence between falsafah; played as real audio so the lock screen and car keep the session alive
+  var GAP_SECS = 5, GAP_SRC = null;
+  function gapSrc(){ return GAP_SRC || (GAP_SRC = silentWav(8000 * GAP_SECS)); }
   function lpUnlock(){ try{ lpAudio.src = SILENT; var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
 
   function lpPool(from, to){ return DATA.filter(function(e){ return e.noEnd >= from && e.noStart <= to; }).map(function(e){ return e.id; }); }
@@ -2595,6 +2617,7 @@
     var entry = lpEntry();
     if(!entry) return;
     var token = ++LP.token;
+    LP.gap = false;
     LP.rep = 0; LP.clip = 0; LP.clips = null; LP.loading = true; LP.msg = '';
     lpUpdateUI(); lpMeta(entry);
     lpWbwFor(entry).then(function(){ if(token === LP.token) lpUpdateUI(); }).catch(function(){});
@@ -2630,9 +2653,21 @@
     LP.clip++;
     if(LP.clip >= LP.clips.length){
       LP.clip = 0; LP.rep++;
-      if(LP.rep >= lpSet.repeat){ lpNext(); return; }
+      if(LP.rep >= lpSet.repeat){ if(LP.idx + 1 < LP.ids.length) lpGap(); else lpNext(); return; }
     }
     lpPlayClip();
+  }
+  function lpGap(){
+    LP.gap = true; LP.gapLeft = GAP_SECS;
+    lpAudio.src = gapSrc();
+    var p = lpAudio.play(); if(p && p.catch) p.catch(function(){ lpUpdateUI(); });
+    lpUpdateUI();
+  }
+  function lpGapTick(){
+    var left = Math.max(1, Math.ceil(GAP_SECS - (lpAudio.currentTime || 0)));
+    if(left === LP.gapLeft) return;
+    LP.gapLeft = left;
+    document.querySelectorAll('.lp-status').forEach(function(el){ el.innerHTML = lpStatusText(); });
   }
   function lpNext(){
     if(!LP.active) return;
@@ -2644,23 +2679,29 @@
   }
   function lpPrev(){
     if(!LP.active) return;
+    if(LP.gap){ LP.gap = false; LP.rep = 0; LP.clip = 0; if(LP.clips) lpPlayClip(); return; }
     if(lpAudio.currentTime > 3 || LP.idx === 0){ LP.rep = 0; LP.clip = 0; if(LP.clips) lpPlayClip(); return; }
     LP.idx--; lpPlayItem();
   }
   function lpToggle(){
     if(!LP.active) return;
+    if(LP.gap){ if(lpAudio.paused){ var g = lpAudio.play(); if(g && g.catch) g.catch(function(){}); } else lpAudio.pause(); lpUpdateUI(); return; }
     if(!LP.clips){ if(LP.msg && LP.idx + 1 >= LP.ids.length){ LP.idx = 0; } lpUnlock(); lpPlayItem(); return; }
     if(lpAudio.paused){ var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); } else lpAudio.pause();
     lpUpdateUI();
   }
   function lpStop(){
-    LP.token++; LP.active = false; LP.clips = null; lpAudio.pause();
+    LP.token++; LP.active = false; LP.clips = null; LP.gap = false; lpAudio.pause();
     try{ lpAudio.removeAttribute('src'); lpAudio.load(); }catch(e){}
     if('mediaSession' in navigator){ navigator.mediaSession.playbackState = 'none'; }
     lpUpdateUI();
   }
-  lpAudio.addEventListener('ended', function(){ if(lpAudio.src !== SILENT && LP.clips) lpAdvance(); });
+  lpAudio.addEventListener('ended', function(){
+    if(LP.gap){ LP.gap = false; lpNext(); return; }
+    if(lpAudio.src !== SILENT && LP.clips) lpAdvance();
+  });
   lpAudio.addEventListener('timeupdate', function(){
+    if(LP.gap){ lpGapTick(); return; }
     if(!LP.clips) return;
     var c = LP.clips[LP.clip];
     if(c && c.end && lpAudio.currentTime >= c.end){ lpAudio.pause(); lpAdvance(); }
@@ -2668,7 +2709,7 @@
   lpAudio.addEventListener('play', function(){ lpUpdateUI(); });
   lpAudio.addEventListener('pause', function(){ lpUpdateUI(); });
   lpAudio.addEventListener('error', function(){
-    if(!LP.active || !LP.clips || lpAudio.src === SILENT || !lpAudio.src) return;
+    if(!LP.active || !LP.clips || LP.gap || lpAudio.src === SILENT || !lpAudio.src) return;
     LP.msg = 'Audio gagal dimainkan. Beralih ke falsafah seterusnya…'; lpUpdateUI();
     var token = LP.token; setTimeout(function(){ if(token === LP.token) lpNext(); }, 1200);
   });
@@ -2697,6 +2738,7 @@
   function lpStatusText(){
     if(!LP.active) return '';
     var s = (LP.idx + 1) + '/' + LP.ids.length + ' falsafah';
+    if(LP.gap) return s + ' &middot; seterusnya dalam ' + LP.gapLeft + 's';
     if(lpSet.repeat > 1 && LP.clips) s += ' &middot; ulang ' + (LP.rep + 1) + '/' + lpSet.repeat;
     if(LP.loading) s += ' &middot; memuatkan…';
     return s;
@@ -2712,7 +2754,7 @@
       mp.innerHTML =
         '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + (playing ? '&#10074;&#10074;' : '&#9654;') + '</button>' +
         '<div class="mp-info" data-lp="open"><div class="mp-t">' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</div>' +
-        '<div class="mp-s">&#127911; ' + lpStatusText() + '</div></div>' +
+        '<div class="mp-s">&#127911; <span class="lp-status">' + lpStatusText() + '</span></div></div>' +
         '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
         '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&times;</button>';
     }
@@ -2723,7 +2765,7 @@
     var entry = lpEntry();
     if(!entry) return '';
     var playing = LP.clips && !lpAudio.paused;
-    return '<div class="lp-now"><div class="lp-meta">Sedang dimainkan &middot; ' + lpStatusText() + '</div>' +
+    return '<div class="lp-now"><div class="lp-meta">Sedang dimainkan &middot; <span class="lp-status">' + lpStatusText() + '</span></div>' +
       '<h4>' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</h4>' +
       '<div class="lp-ctl"><button type="button" class="mp-btn" data-lp="prev" aria-label="Sebelum">&#9198;</button>' +
       '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + (playing ? '&#10074;&#10074;' : '&#9654;') + '</button>' +
@@ -2756,7 +2798,7 @@
         '<button type="button" data-ord="nombor" class="' + (lpSet.order === 'nombor' ? 'active' : '') + '">Ikut nombor</button>' +
         '<button type="button" data-ord="rawak" class="' + (lpSet.order === 'rawak' ? 'active' : '') + '">Rawak</button></div></div>' +
       '<button type="button" class="lp-go" id="lpGo"></button>' +
-      '<p class="pnote">Selepas mula, anda boleh tutup panel ini dan terus guna aplikasi. Kawalan juga ada di skrin kunci dan butang kereta (Bluetooth / CarPlay). Perlu internet.</p></div>';
+      '<p class="pnote">Selepas mula, anda boleh tutup panel ini dan terus guna aplikasi. Ada jeda 5 saat antara setiap falsafah. Kawalan juga ada di skrin kunci dan butang kereta (Bluetooth / CarPlay). Perlu internet.</p></div>';
     var sheet = document.getElementById('detailSheet');
     sheet.innerHTML = html; sheet.scrollTop = 0;
     lpSheetOpen = true;
@@ -2977,10 +3019,47 @@
     var en = wbl === 'both' || wbl === 'en', id = wbl === 'both' || wbl === 'id';
     if(l === 'en') en = !en; else id = !id;
     if(!en && !id) return;   // keep the last language on
-    wbl = en && id ? 'both' : (en ? 'en' : 'id');
-    try{ localStorage.setItem(WBL_KEY, wbl); }catch(err){}
-    applyWbl();
+    var next = en && id ? 'both' : (en ? 'en' : 'id');
+    try{ localStorage.setItem(WBL_KEY, next); }catch(err){}
+    swapWbl(next);
   }, true);
+  // iOS-style change: pills react at once, old lines fade, words glide to new spots, new lines fade up
+  var wblTimer = null;
+  function swapWbl(next){
+    var prev = wbl;
+    wbl = next;
+    document.querySelectorAll('.wbl-seg button').forEach(function(b){ var l = b.getAttribute('data-wbl'); b.classList.toggle('active', wbl === 'both' || wbl === l); b.setAttribute('aria-pressed', String(wbl === 'both' || wbl === l)); });
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var hasEn = function(v){ return v === 'both' || v === 'en'; }, hasId = function(v){ return v === 'both' || v === 'id'; };
+    var sel = function(arr){ return arr.length ? document.querySelectorAll(arr.join(',')) : []; };
+    var goingOut = [], comingIn = [];
+    if(hasEn(prev) && !hasEn(next)) goingOut.push('.w-en', '.k-en'); else if(!hasEn(prev) && hasEn(next)) comingIn.push('.w-en', '.k-en');
+    if(hasId(prev) && !hasId(next)) goingOut.push('.w-id', '.k-id'); else if(!hasId(prev) && hasId(next)) comingIn.push('.w-id', '.k-id');
+    clearTimeout(wblTimer);
+    document.querySelectorAll('.w-line-out, .w-line-in').forEach(function(el){ el.classList.remove('w-line-out', 'w-line-in'); });
+    if(reduce){ applyWbl(); return; }
+    var finish = function(){
+      var cells = Array.prototype.filter.call(document.querySelectorAll('.wbw .w, .lp-wbw .w'), function(el){ return el.offsetParent !== null; });
+      var before = cells.map(function(el){ return el.getBoundingClientRect(); });
+      sel(goingOut).forEach(function(el){ el.classList.remove('w-line-out'); });
+      applyWbl();
+      cells.forEach(function(el, i){
+        var a = before[i], b = el.getBoundingClientRect();
+        var dx = a.left - b.left, dy = a.top - b.top;
+        if((Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) && el.animate){
+          el.animate([{ transform:'translate(' + dx + 'px,' + dy + 'px)' }, { transform:'none' }], { duration:420, easing:'cubic-bezier(.32,.72,0,1)' });
+        }
+      });
+      var ins = sel(comingIn);
+      Array.prototype.forEach.call(ins, function(el){ el.classList.add('w-line-in'); });
+      wblTimer = setTimeout(function(){ Array.prototype.forEach.call(ins, function(el){ el.classList.remove('w-line-in'); }); }, 520);
+    };
+    var outs = sel(goingOut);
+    if(outs.length){
+      Array.prototype.forEach.call(outs, function(el){ el.classList.add('w-line-out'); });
+      wblTimer = setTimeout(finish, 170);
+    } else finish();
+  }
   applyWbl();
 
   function applyWbw(root){
@@ -2995,7 +3074,10 @@
     if(!b) return;
     e.stopPropagation();
     try{ localStorage.setItem(WBW_KEY, wbwOn() ? '0' : '1'); }catch(err){}
+    var wraps = document.querySelectorAll('.folio-arabic-wrap[data-wbw-id]');
+    wraps.forEach(function(w){ w.classList.remove('wbw-anim'); void w.offsetWidth; w.classList.add('wbw-anim'); });
     applyWbw();
+    setTimeout(function(){ wraps.forEach(function(w){ w.classList.remove('wbw-anim'); }); }, 600);
   });
 
   function renderExtras(entry){
