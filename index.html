@@ -929,8 +929,16 @@
   .tour-tip .tt-row{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px; }
   .tour-tip .tt-skip{ border:0; background:none; color:var(--muted); font-family:inherit; font-size:12px; cursor:pointer; text-decoration:underline; padding:0; }
   .tour-tip .tt-next{ border:0; background:var(--gold); color:var(--gold-ink); font-family:inherit; font-size:13px; font-weight:800; padding:8px 16px; border-radius:100px; cursor:pointer; }
-  .tour-hl{ position:relative; z-index:2; box-shadow:0 0 0 3px var(--gold), 0 0 0 8px color-mix(in srgb, var(--gold) 30%, transparent) !important; border-radius:100px; animation:tourPulse 1.6s ease-out infinite; }
-  @keyframes tourPulse{ 50%{ box-shadow:0 0 0 3px var(--gold), 0 0 0 12px color-mix(in srgb, var(--gold) 10%, transparent); } }
+  /* Spotlight: everything except the feature is dimmed; the hole glides between steps */
+  .tour-block{ position:fixed; inset:0; z-index:93; background:transparent; }
+  .tour-spot{ position:fixed; z-index:94; pointer-events:none; border-radius:14px; opacity:0;
+    box-shadow:0 0 0 3px var(--gold), 0 0 0 200vmax rgba(6,10,16,.66); transition:opacity .3s ease; }
+  body[data-theme="light"] .tour-spot{ box-shadow:0 0 0 3px var(--gold), 0 0 0 200vmax rgba(18,26,34,.55); }
+  .tour-spot.show{ opacity:1; }
+  .tour-spot.moving{ transition:opacity .3s ease, top .48s var(--ios-curve), left .48s var(--ios-curve), width .48s var(--ios-curve), height .48s var(--ios-curve), border-radius .48s var(--ios-curve); }
+  .tour-spot::after{ content:""; position:absolute; inset:-3px; border-radius:inherit; box-shadow:0 0 0 0 color-mix(in srgb, var(--gold) 55%, transparent); animation:tourPulse 1.8s ease-out infinite; }
+  @keyframes tourPulse{ 0%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--gold) 55%, transparent); } 70%,100%{ box-shadow:0 0 0 10px transparent; } }
+  @media (prefers-reduced-motion: reduce){ .tour-spot.moving{ transition:opacity .3s ease; } .tour-spot::after{ animation:none; } }
   body[data-theme="light"] .theme-tip b{ color:var(--coral-deep); }
 
   /* ---------- Light theme structural overrides ---------- */
@@ -1570,7 +1578,7 @@
     { sel:'#listenBtn', title:'Dengar', text:'Dengar bacaan ayat ikut julat, ulang 1&ndash;3 kali. Sesuai semasa memandu; kawalan ada di skrin kunci.' },
     { sel:'nav.tabs button[data-view="kemajuan"]', title:'Progres', text:'Kemajuan keseluruhan 200 falsafah: tahap hafalan, <b>Perlu fokus</b>, carta 14 hari dan sejarah harian.' }
   ];
-  var tourStep = -1, tourTip = null, tourTarget = null;
+  var tourStep = -1, tourTip = null, tourTarget = null, tourSpot = null, tourBlock = null, tourMoveT = null;
   function startTour(){
     try{ document.dispatchEvent(new Event('fn-tour-start')); }catch(e){}
     var study = document.querySelector('nav.tabs button[data-view="study"]');
@@ -1584,10 +1592,15 @@
         if(e.target.closest('.tt-next')) tourGo(tourStep + 1);
         else if(e.target.closest('.tt-skip')) endTour();
       });
+      tourSpot = document.createElement('div'); tourSpot.className = 'tour-spot'; tourSpot.setAttribute('aria-hidden', 'true');
+      tourBlock = document.createElement('div'); tourBlock.className = 'tour-block';
+      document.body.appendChild(tourBlock); document.body.appendChild(tourSpot);
       window.addEventListener('resize', placeTour);
       window.addEventListener('scroll', placeTour, { passive:true });
     }
+    tourBlock.hidden = false; tourSpot.hidden = false; tourSpot.classList.remove('moving');
     tourGo(0);
+    requestAnimationFrame(function(){ tourSpot.classList.add('show'); });
   }
   function tourGo(i){
     if(tourTarget) tourTarget.classList.remove('tour-hl');
@@ -1597,6 +1610,7 @@
     tourTarget = document.querySelector(s.sel);
     if(!tourTarget){ tourGo(i + 1); return; }
     tourTarget.classList.add('tour-hl');
+    if(i > 0){ tourSpot.classList.add('moving'); clearTimeout(tourMoveT); tourMoveT = setTimeout(function(){ tourSpot.classList.remove('moving'); }, 900); }
     tourTip.classList.remove('show');
     tourTip.innerHTML = '<span class="tt-arrow"></span><span class="tt-num">' + (i + 1) + ' / ' + TOUR.length + '</span>' +
       '<h5>' + s.title + '</h5><p>' + s.text + '</p>' +
@@ -1624,6 +1638,10 @@
     var left = Math.min(Math.max(12, r.left + r.width / 2 - tw / 2), vw - tw - 12);
     var top = below ? r.bottom + 14 : r.top - 14 - th;
     tourTip.classList.toggle('below', below); tourTip.classList.toggle('above', !below);
+    var pad = 6, rad = parseFloat(getComputedStyle(tourTarget).borderTopLeftRadius) || 10;
+    tourSpot.style.left = ((r.left - pad) / k) + 'px'; tourSpot.style.top = ((r.top - pad) / k) + 'px';
+    tourSpot.style.width = ((r.width + pad * 2) / k) + 'px'; tourSpot.style.height = ((r.height + pad * 2) / k) + 'px';
+    tourSpot.style.borderRadius = (Math.min(rad + pad, (r.height + pad * 2) / 2) / k) + 'px';
     tourTip.style.left = (left / k) + 'px';
     tourTip.style.top = (top / k) + 'px';
     var arrow = tourTip.querySelector('.tt-arrow');
@@ -1633,6 +1651,7 @@
     if(tourTarget) tourTarget.classList.remove('tour-hl');
     tourTarget = null; tourStep = -1;
     if(tourTip){ tourTip.classList.remove('show'); setTimeout(function(){ tourTip.hidden = true; }, 250); }
+    if(tourSpot){ tourSpot.classList.remove('show'); tourBlock.hidden = true; setTimeout(function(){ if(tourStep < 0) tourSpot.hidden = true; }, 320); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(showThemeTip, 600);
   }
