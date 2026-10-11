@@ -2955,11 +2955,11 @@
   function applyWbl(){
     document.body.classList.remove('wbl-en', 'wbl-id', 'wbl-both');
     document.body.classList.add('wbl-' + wbl);
-    document.querySelectorAll('.wbl-seg button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-wbl') === wbl); });
+    document.querySelectorAll('.wbl-seg button').forEach(function(b){ var l = b.getAttribute('data-wbl'); b.classList.toggle('active', wbl === 'both' || wbl === l); b.setAttribute('aria-pressed', String(wbl === 'both' || wbl === l)); });
   }
   function wblSeg(){
     return '<span class="wbl-seg" role="group" aria-label="Bahasa terjemahan">' +
-      [['en','EN'],['id','ID'],['both','Kedua']].map(function(o){ return '<button type="button" data-wbl="' + o[0] + '" class="' + (wbl === o[0] ? 'active' : '') + '">' + o[1] + '</button>'; }).join('') + '</span>';
+      [['en','EN'],['id','ID']].map(function(o){ var on = wbl === 'both' || wbl === o[0]; return '<button type="button" data-wbl="' + o[0] + '" aria-pressed="' + on + '" class="' + (on ? 'active' : '') + '">' + o[1] + '</button>'; }).join('') + '</span>';
   }
   function wordCells(words){
     return words.map(function(w){
@@ -2972,7 +2972,12 @@
     var b = e.target.closest && e.target.closest('[data-wbl]');
     if(!b) return;
     e.stopPropagation();
-    wbl = b.getAttribute('data-wbl');
+    // EN and ID are separate on/off switches; at least one stays on
+    var l = b.getAttribute('data-wbl');
+    var en = wbl === 'both' || wbl === 'en', id = wbl === 'both' || wbl === 'id';
+    if(l === 'en') en = !en; else id = !id;
+    if(!en && !id) return;   // keep the last language on
+    wbl = en && id ? 'both' : (en ? 'en' : 'id');
     try{ localStorage.setItem(WBL_KEY, wbl); }catch(err){}
     applyWbl();
   }, true);
