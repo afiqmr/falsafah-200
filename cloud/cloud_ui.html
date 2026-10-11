@@ -348,7 +348,7 @@ const dayStr = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2,
 const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return dayStr(d); };
 async function loadWeekly() {
   try {
-    if (isAdminUser() && user.emailVerified) { const st = await loadStudents(); await publishWeekly(st); }
+    if (isAdminUser() && user.emailVerified) { await user.getIdToken(true); const st = await loadStudents(); await publishWeekly(st); }
     const s = await fb.F.getDoc(fb.F.doc(fb.db, 'stats', 'weekly'));
     if (!s.exists()) return;
     const w = s.data();
@@ -425,9 +425,16 @@ async function openAdmin() {
   panel.innerHTML = `<div class="adm"><div class="adm-top"><h2>Papan pentadbir</h2><button id="admClose">Tutup</button></div><div class="acct-spin"></div><p class="adm-sub" style="text-align:center">Memuatkan data pelajar…</p></div>`;
   $('admClose').onclick = closeAdmin;
   let students;
-  try { students = await loadStudents(); }
+  try {
+    // the sign-in token caches "email verified" for up to an hour; refresh it so the rules see the latest
+    await user.getIdToken(true);
+    students = await loadStudents();
+  }
   catch (e) {
-    panel.innerHTML = `<div class="adm"><div class="adm-top"><h2>Papan pentadbir</h2><button id="admClose">Tutup</button></div><div class="adm-sec"><h3>Tidak dapat membaca data pelajar</h3><p class="hint">${esc(ERR(e.code || e.message))} Pastikan peraturan Firestore terbaharu sudah diterbitkan.</p></div></div>`;
+    const denied = /permission/i.test(e.code || e.message || '');
+    panel.innerHTML = `<div class="adm"><div class="adm-top"><h2>Papan pentadbir</h2><button id="admClose">Tutup</button></div><div class="adm-sec"><h3>Tidak dapat membaca data pelajar</h3>
+      <p class="hint">${denied ? 'Firebase menolak akses pentadbir. Semak dua perkara: (1) peraturan Firestore baharu (dengan isAdmin) sudah ditampal dan Publish ditekan, dan (2) emel ' + esc(user.email) + ' sudah disahkan.' : esc(ERR(e.code || e.message))}</p>
+      <p class="hint">Kod ralat: ${esc(e.code || e.message || '')}</p></div></div>`;
     $('admClose').onclick = closeAdmin; return;
   }
   let w = weeklyFrom(students);
