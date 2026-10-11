@@ -447,9 +447,7 @@
   }
   .kmj-head{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
   .kmj-head h2{ font-size:20px; margin:0; }
-  .kmj-tiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .kmj-tiles .k-ok-all{ order:1; }   /* wide screens: Perlu ulang sits under Perlu fokus */
-  .kmj-tiles .k-re-all{ order:2; }
+  .kmj-tiles{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
   .kmj-tiles .k-re-all b{ color:var(--re); } .kmj-tiles .k-ok-all b{ color:var(--emerald); }
   .kmj-tiles div{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; font-size:12px; color:var(--muted); }
   .kmj-tiles b{ display:block; font-size:24px; color:var(--ink); font-variant-numeric:tabular-nums; line-height:1.2; }
@@ -465,7 +463,6 @@
   .kmj-legend{ display:flex; gap:14px; font-size:11px; color:var(--muted); margin-top:8px; }
   .kmj-legend i{ display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:5px; }
   .kmj-legend i.ok{ background:var(--emerald); } .kmj-legend i.re{ background:var(--re); }
-  @media (max-width:600px){ .kmj-tiles{ grid-template-columns:repeat(2,1fr); } .kmj-tiles .k-ok-all, .kmj-tiles .k-re-all{ order:0; } }
   .kmj-tiles [data-list], .lvl-grid [data-list]{ cursor:pointer; position:relative; transition:border-color .15s; }
   .kmj-tiles [data-list]:hover, .lvl-grid [data-list]:hover{ border-color:var(--gold); }
   .kmj-tiles [data-list]::after, .lvl-grid [data-list]::after{ content:"\203A"; position:absolute; right:10px; top:8px; font-size:16px; color:var(--muted); }
@@ -1337,6 +1334,27 @@
     while(days.length > 120){ delete kajiHistory[days.shift()]; }
     try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(kajiHistory)); }catch(e){}
   }
+  // Fill gaps in the daily history from the cards themselves. Each card keeps its last answer, and its due
+  // date tells the day it was answered (Belum ingat = due that day; Ingat = due minus the box interval).
+  // Only adds what is missing; anything already logged stays as it is.
+  function backfillHistory(){
+    var where = {};
+    Object.keys(kajiHistory).forEach(function(d){ var h = kajiHistory[d] || {}; (h.g||[]).concat(h.a||[]).forEach(function(id){ if(!where[id] || where[id] < d) where[id] = d; }); });
+    var changed = false, today = todayStr();
+    Object.keys(srs).forEach(function(k){
+      var id = +k, c = srs[k];
+      if(!c || !(c.seen||0) || !entryById(id) || !c.due) return;
+      var again = c.box === 0, day = again ? c.due : addDays(c.due, -(BOX_INTERVALS[c.box] || 0));
+      if(!day || day > today) return;
+      if(where[id] && where[id] >= day) return;          // a newer or same-day record already exists
+      var h = kajiHistory[day] || (kajiHistory[day] = { g:[], a:[], m:[] });
+      h.g = h.g || []; h.a = h.a || []; h.m = h.m || [];
+      (again ? h.a : h.g).push(id);
+      if(again && h.m.indexOf(id) === -1) h.m.push(id);
+      changed = true;
+    });
+    if(changed){ try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(kajiHistory)); }catch(e){} }
+  }
   function todayLists(){
     var ok = [], re = [];
     daily.kajiIds.forEach(function(id){ (daily.results[id] === 'again' ? re : ok).push(id); });
@@ -2029,6 +2047,7 @@
     rolloverDailyIfNeeded();
     var stage = document.getElementById('kemajuanStage');
     if(!stage) return;
+    backfillHistory();
     var L = todayLists(), nToday = L.ok.length + L.re.length;
     var F = allFocus(), W = classWeekly(), lv = allLevels(), total = DATA.length, RA = recallAll();
     progSets.allre = RA.re;
@@ -2043,24 +2062,12 @@
     var html = '<div class="prog kmj">' +
       '<div class="kmj-head"><h2>Progres anda</h2><span class="psub">Semua 200 falsafah</span></div>' +
       '<div class="kmj-tiles">' +
-        '<div data-list="lv5"><b>' + lv[5].length + '<small>/' + total + '</small></b>Dikuasai</div>' +
-        '<div data-list="studied"><b>' + studied + '<small>/' + total + '</small></b>Pernah dikaji</div>' +
         '<div data-list="focus"><b>' + F.length + '</b>Perlu fokus</div>' +
-        '<div><b>' + activeDays + '<small>/14</small></b>Hari aktif</div>' +
+        '<div data-list="lv5"><b>' + lv[5].length + '<small>/' + total + '</small></b>Dikuasai</div>' +
         '<div class="k-re-all" data-list="all-re"><b>' + RA.re.length + '</b>&#8635; Perlu ulang</div>' +
         '<div class="k-ok-all" data-list="all-ok"><b>' + RA.ok.length + '</b>&#10003; Sudah ingat</div>' +
       '</div>' +
       '<p class="pnote" style="margin:8px 2px 0;">Perlu ulang dikira dari semua hari, dan kekal di situ sehingga anda tekan <b>Ingat</b>.</p>';
-
-    // Hari ini
-    html += '<div class="prog-sec card-sec"><h4>Hari ini &middot; <span class="cnt">' + nToday + '</span> dikaji</h4>' +
-      (nToday ? '<div class="ks-bar" style="height:8px;"><span class="ok" style="width:' + (L.ok.length/nToday*100) + '%"></span><span class="re" style="width:' + (L.re.length/nToday*100) + '%"></span></div>' : '') +
-      '<div class="kmj-today">' +
-        '<button type="button" class="t-re" data-list="today-re"><b>' + L.re.length + '</b>&#8635; Perlu ulang &rsaquo;</button>' +
-        '<button type="button" class="t-ok" data-list="today-ok"><b>' + L.ok.length + '</b>&#10003; Ingat &rsaquo;</button>' +
-      '</div>' +
-      (L.re.length ? ujiRow('today', L.re.length) : '') +
-      (nToday ? '' : '<p class="pnote">Belum ada falsafah dikaji hari ini.</p>') + '</div>';
 
     // Tahap hafalan
     html += '<div class="prog-sec card-sec"><h4>Tahap hafalan &middot; tekan untuk lihat senarai</h4>' +
