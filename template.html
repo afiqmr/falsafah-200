@@ -2552,7 +2552,7 @@
     try{
       navigator.mediaSession.metadata = new MediaMetadata({
         title: entry.rangeLabel + ': ' + displayTitle(entry.title),
-        artist: 'Mishary Alafasy · ' + entry.surahDisplay,
+        artist: RECITER_NAME + ' · ' + entry.surahDisplay,
         album: 'Al-Fathun Nawa: Falsafah 1-200'
       });
     }catch(e){}
@@ -2611,7 +2611,7 @@
     var from = LP.active ? LP.from : studyRange.from, to = LP.active ? LP.to : studyRange.to;
     var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
       '<h3 class="ptitle">&#127911; Dengar ayat</h3>' +
-      '<p class="psub">Bacaan Mishary Alafasy &middot; audio daripada Quran.com</p>' +
+      '<p class="psub">Bacaan ' + RECITER_NAME + ' (murattal) &middot; audio daripada Quran.com</p>' +
       '<div id="lpNow"></div>' +
       '<div class="lp-set"><label>Julat</label>' +
         '<div class="lp-range">Dari <input id="lpFrom" type="number" min="1" max="200" inputmode="numeric" value="' + from + '"> hingga <input id="lpTo" type="number" min="1" max="200" inputmode="numeric" value="' + to + '"></div>' +
@@ -2695,7 +2695,7 @@
   }
   function fetchVerse(key){
     if(!wbwVerseCache[key]){
-      wbwVerseCache[key] = fetch(WBW_API + key + '?words=true&word_fields=text_uthmani&word_translation_language=en&audio=7')
+      wbwVerseCache[key] = fetch(WBW_API + key + '?words=true&word_fields=text_uthmani&word_translation_language=en&audio=' + RECITER_ID)
         .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
         .then(function(j){ return { key: key, words: j.verse.words, audio: j.verse.audio || null }; })
         .catch(function(err){ delete wbwVerseCache[key]; throw err; });
@@ -2747,6 +2747,7 @@
   // Audio clips for a falsafah: one per verse, trimmed to the quoted words when
   // the falsafah quotes only part of an ayat (Quran.com word timings).
   var AUDIO_BASE = 'https://verses.quran.com/';
+  var RECITER_ID = 5, RECITER_NAME = 'Hani ar-Rifai';   // Quran.com recitation id (murattal)
   function audioClips(entry){
     return alignEntry(entry).then(function(A){
       var clips = [];
