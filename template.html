@@ -694,14 +694,19 @@
   .lp-seg{ display:flex; gap:6px; flex-wrap:wrap; }
   .lp-seg button.active{ background:var(--gold); color:var(--gold-ink); border-color:transparent; }
   .lp-go{ width:100%; margin-top:18px; padding:13px; border-radius:12px; border:0; background:var(--gold); color:var(--gold-ink); font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; }
-  /* Dengar: soft fade when the falsafah changes; mini player rises in */
-  #lpNow, .miniplayer .mp-info{ transition:opacity .26s cubic-bezier(.32,.72,0,1), transform .26s cubic-bezier(.32,.72,0,1); }
-  #lpNow.lp-out, .miniplayer .mp-info.lp-out{ opacity:0; transform:translateY(6px); transition-duration:.17s; }
-  .miniplayer:not([hidden]){ animation:mpIn .38s cubic-bezier(.32,.72,0,1); }
-  @keyframes mpIn{ from{ opacity:0; transform:translate(-50%, 16px); } to{ opacity:1; transform:translate(-50%, 0); } }
+  /* Dengar: Spotify-style slides between falsafah, progress line, mini player rises in */
+  .lp-car{ position:relative; }
+  .miniplayer .mp-info, #lpCarTop{ touch-action:pan-y; overflow:hidden; }
+  .lp-prog, .mp-prog{ height:3px; border-radius:3px; background:var(--border); overflow:hidden; }
+  .lp-prog{ margin:10px 0 4px; }
+  .mp-prog{ position:absolute; left:18px; right:18px; bottom:5px; height:2px; pointer-events:none; }
+  .lp-prog i, .mp-prog i{ display:block; height:100%; background:var(--gold); transform-origin:left center; transform:scaleX(0); }
+  .miniplayer{ padding-bottom:11px !important; }
+  .miniplayer:not([hidden]){ animation:mpIn .42s cubic-bezier(.2,.8,.2,1); }
+  @keyframes mpIn{ from{ opacity:0; transform:translate(-50%, 18px); } to{ opacity:1; transform:translate(-50%, 0); } }
   .mp-btn{ transition:transform .15s ease, background-color .2s ease; }
   .mp-btn:active{ transform:scale(.92); }
-  @media (prefers-reduced-motion: reduce){ #lpNow, .miniplayer .mp-info, .mp-btn{ transition:none; } .miniplayer:not([hidden]){ animation:none; } }
+  @media (prefers-reduced-motion: reduce){ .mp-btn{ transition:none; } .miniplayer:not([hidden]){ animation:none; } }
   .lp-now{ margin-top:18px; border:1px solid var(--border); border-radius:16px; padding:14px; background:var(--surface-2); }
   .lp-now .lp-meta{ font-size:12px; color:var(--muted); }
   .lp-now h4{ margin:4px 0 6px; font-size:17px; }
@@ -2731,8 +2736,7 @@
   }
   // a user skip fades the current voice out first
   function lpSkip(fn){
-    if(lpPlaying() && !lpAudio.paused && !LP.gap && !document.hidden){ lpFade(0, 150, function(){ LP.ending = false; fn(); }); }
-    else fn();
+    lpCancelFade(); fn();   // Spotify changes at once; the new recitation fades in
   }
 
   function lpPool(from, to){
@@ -2753,7 +2757,7 @@
     var ids = lpPool(from, to);
     if(!ids.length) return;
     if(lpSet.order === 'rawak') ids = shuffle(ids.slice());
-    LP.ids = ids; LP.idx = 0; LP.active = true; LP.from = from; LP.to = to; LP.msg = '';
+    LP.ids = ids; LP.idx = 0; LP.dir = 0; LP.active = true; LP.from = from; LP.to = to; LP.msg = '';
     lpUnlock();
     lpPlayItem();
   }
@@ -2772,6 +2776,7 @@
     if(!entry) return;
     var token = ++LP.token;
     clearTimeout(LP.endT); LP.gap = false; LP.done = false; LP.userPaused = false; LP.switching = true; LP.loadSlow = false;
+    if(!lpAudio.paused && lpAudio.src !== SILENT) lpAudio.pause();   // the old voice stops as the new card slides in
     LP.rep = 0; LP.clip = 0; LP.clips = null; LP.loading = true; LP.msg = '';
     lpUpdateUI(); lpMeta(entry);
     // say "memuatkan" only when loading is slow, so quick changes stay quiet
@@ -2843,13 +2848,14 @@
       LP.msg = 'Selesai. Semua ' + LP.ids.length + ' falsafah dalam julat ini telah didengar.';
       LP.clips = null; LP.gap = false; lpUpdateUI(); return;
     }
-    LP.idx++; lpPlayItem();
+    LP.dir = 1; LP.idx++; lpPlayItem();
   }
-  function lpPrev(){
+  function lpPrev(force){
     if(!LP.active) return;
+    if(force === true && LP.idx > 0){ LP.dir = -1; LP.idx--; lpPlayItem(); return; }
     if(LP.gap){ LP.gap = false; LP.rep = 0; LP.clip = 0; LP.userPaused = false; if(LP.clips) lpPlayClip(); return; }
     if(lpAudio.currentTime > 3 || LP.idx === 0){ LP.rep = 0; LP.clip = 0; LP.userPaused = false; if(LP.clips) lpPlayClip(); return; }
-    LP.idx--; lpPlayItem();
+    LP.dir = -1; LP.idx--; lpPlayItem();
   }
   function lpToggle(){
     if(!LP.active) return;
@@ -2924,36 +2930,56 @@
     var h = LP.clips ? !!(LP.clips[0] && LP.clips[0].halon) : (lpVoice() !== 'rifai' && hasHalon(entry.id));
     return 'Suara: ' + (h ? '<b>Dr. HALO-N</b>' : RECITER_NAME);
   }
-  // iOS-style change: the old falsafah fades out, the new one fades in, and the card glides to its new height.
-  // When the falsafah is the same, only the small parts (status, icon) are updated in place.
-  var LP_EASE = 'cubic-bezier(.32,.72,0,1)';
-  function lpSwap(el, key, build, patch, glide){
-    if(el._key === key){ if(!el._swapT) patch(el); return; }
-    el._key = key;
-    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(!el.firstElementChild || reduce || document.hidden){ clearTimeout(el._swapT); el._swapT = null; el.innerHTML = build(); return; }
-    if(el._swapT) return;   // already fading; it builds the newest content when it lands
-    el.classList.add('lp-out');
-    el._swapT = setTimeout(function(){
-      el._swapT = null;
-      var h0 = el.offsetHeight;
-      el.innerHTML = build();
-      if(glide){
-        var h1 = el.scrollHeight;
-        if(Math.abs(h1 - h0) > 2){
-          el.style.overflow = 'hidden'; el.style.height = h0 + 'px'; void el.offsetHeight;
-          el.style.transition = 'height .36s ' + LP_EASE + ', opacity .26s ' + LP_EASE + ', transform .26s ' + LP_EASE;
-          el.style.height = h1 + 'px';
-          clearTimeout(el._glideT);
-          el._glideT = setTimeout(function(){ el.style.height = ''; el.style.overflow = ''; el.style.transition = ''; }, 380);
-        }
-      }
-      el.classList.remove('lp-out');
-    }, 170);
+  // Spotify-style track change: the old falsafah slides out while the new one slides in from the
+  // same side (left for next, right for previous); the controls and progress bar stay still.
+  var LP_EASE = 'cubic-bezier(.2,.8,.2,1)', LP_DUR = 440;
+  function lpReduce(){ return document.hidden || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function lpCarousel(el, key, html, dir){
+    if(el._key === key) return false;
+    var had = el._key != null && el.firstElementChild; el._key = key;
+    if(!had || lpReduce() || !el.animate){ el.innerHTML = '<div class="lp-slide">' + html + '</div>'; el._drag = 0; return true; }
+    // a slide still moving out is dropped; the one on screen becomes the old slide
+    var slides = el.querySelectorAll('.lp-slide');
+    for(var i = 0; i < slides.length - 1; i++) slides[i].remove();
+    var old = slides[slides.length - 1];
+    var h0 = el.offsetHeight, from = el._drag || 0; el._drag = 0;
+    var nw = document.createElement('div'); nw.className = 'lp-slide'; nw.innerHTML = html;
+    old.style.position = 'absolute'; old.style.left = '0'; old.style.right = '0'; old.style.top = '0';
+    old.style.pointerEvents = 'none';
+    el.appendChild(nw);
+    var h1 = el.offsetHeight, w = el.offsetWidth || 300;
+    var shift = dir ? dir * (w + 24) : 0;   // side by side, like cards pushed along a row
+    el.style.overflow = 'hidden';
+    var opt = { duration: dir ? LP_DUR : 300, easing: LP_EASE };
+    old.animate([{ transform: 'translateX(' + from + 'px)', opacity: 1 }, { transform: 'translateX(' + (from - shift) + 'px)', opacity: dir ? .35 : 0 }], Object.assign({ fill: 'forwards' }, opt));
+    nw.animate([{ transform: 'translateX(' + (dir ? from + shift : 0) + 'px)', opacity: dir ? .35 : 0 }, { transform: 'translateX(0)', opacity: 1 }], opt);
+    if(Math.abs(h1 - h0) > 2) el.animate([{ height: h0 + 'px' }, { height: h1 + 'px' }], opt);
+    clearTimeout(el._carT);
+    el._carT = setTimeout(function(){ if(old.parentNode) old.remove(); el.style.overflow = ''; }, opt.duration + 40);
+    return true;
+  }
+  // thin progress line through the whole falsafah (every ayat and ulangan)
+  var lpProgVal = 0;
+  function lpProgFrac(){
+    if(!LP.active || !LP.clips) return 0;
+    if(LP.gap || LP.switching) return lpProgVal;
+    var n = LP.clips.length, c = LP.clips[LP.clip], st = c.start || 0, en = c.end || lpAudio.duration;
+    var within = en > st && isFinite(en) ? Math.min(1, Math.max(0, (lpAudio.currentTime - st) / (en - st))) : 0;
+    return Math.min(1, (LP.rep * n + LP.clip + within) / (lpSet.repeat * n));
+  }
+  function lpProgPaint(){
+    lpProgVal = lpProgFrac();
+    document.querySelectorAll('.lp-prog i, .mp-prog i').forEach(function(i){ i.style.transform = 'scaleX(' + lpProgVal.toFixed(4) + ')'; });
+  }
+  (function loop(){ if(LP.active && !document.hidden) lpProgPaint(); requestAnimationFrame(loop); })();
+  function lpTitleHtml(e){ return '<h4>' + e.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(e.title)) + '</h4><div class="lp-meta lp-voice">' + lpVoiceHtml(e) + '</div>'; }
+  function lpBodyHtml(e){
+    return lpWordsHtml(e) + '<div class="lp-maksud"><span>Maksud</span>' + escapeHtml(e.text) + '</div>' +
+      '<div class="lp-meta">' + escapeHtml(e.surahDisplay) + '</div>';
   }
   function lpUpdateUI(){
     var mp = document.getElementById('miniPlayer'), entry = lpEntry();
-    var playing = lpPlaying();
+    var playing = lpPlaying(), dir = LP.dir || 0;
     document.getElementById('listenBtn').classList.toggle('on', LP.active);
     if('mediaSession' in navigator){ try{ navigator.mediaSession.playbackState = LP.active ? (playing ? 'playing' : 'paused') : 'none'; }catch(e){} }
     if(!LP.active || !entry){ mp.hidden = true; document.body.classList.remove('has-miniplayer'); mp.innerHTML = ''; }
@@ -2962,43 +2988,72 @@
       if(!mp.firstElementChild){
         mp.innerHTML =
           '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda"></button>' +
-          '<div class="mp-info" data-lp="open"></div>' +
+          '<div class="mp-info lp-car" data-lp="open"></div>' +
           '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
-          '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&times;</button>';
+          '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&times;</button>' +
+          '<div class="mp-prog"><i></i></div>';
+        lpSwipe(mp.querySelector('.mp-info'));
       }
       mp.querySelector('[data-lp="toggle"]').innerHTML = lpIcon();
-      lpSwap(mp.querySelector('.mp-info'), entry.id, function(){
-        var e = lpEntry(); if(!e) return '';
-        return '<div class="mp-t">' + e.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(e.title)) + '</div>' +
-          '<div class="mp-s">&#127911; <span class="lp-status">' + lpStatusText() + '</span></div>';
-      }, function(el){ var s = el.querySelector('.lp-status'); if(s) s.innerHTML = lpStatusText(); });
+      lpCarousel(mp.querySelector('.mp-info'), entry.id,
+        '<div class="mp-t">' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</div>' +
+        '<div class="mp-s">&#127911; <span class="lp-status"></span></div>', dir);
     }
     var now = document.getElementById('lpNow');
     if(lpSheetOpen && now){
-      if(!entry){ now.innerHTML = ''; now._key = null; }
-      else lpSwap(now, entry.id + (lpWbwCache[entry.id] ? ':w' : ''), lpNowHtml, function(el){
-        var e = lpEntry(); if(!e) return;
-        el.querySelectorAll('.lp-status').forEach(function(s){ s.innerHTML = lpStatusText(); });
-        var t = el.querySelector('[data-lp="toggle"]'); if(t) t.innerHTML = lpIcon();
-        var v = el.querySelector('.lp-voice'); if(v) v.innerHTML = lpVoiceHtml(e);
-        var m = el.querySelector('.lp-msg'); if(m) m.textContent = LP.msg || '';
-      }, true);
+      if(!entry){ now.innerHTML = ''; }
+      else {
+        if(!now.firstElementChild){
+          now.innerHTML = '<div class="lp-now"><div class="lp-meta">Sedang dimainkan &middot; <span class="lp-status"></span></div>' +
+            '<div class="lp-car" id="lpCarTop"></div>' +
+            '<div class="lp-prog"><i></i></div>' +
+            '<div class="lp-ctl"><button type="button" class="mp-btn" data-lp="prev" aria-label="Sebelum">&#9198;</button>' +
+            '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda"></button>' +
+            '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
+            '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&#9632;</button></div>' +
+            '<div class="lp-msg"></div>' +
+            '<div class="lp-car" id="lpCarBody"></div></div>';
+          lpSwipe(document.getElementById('lpCarTop'));
+        }
+        lpCarousel(document.getElementById('lpCarTop'), entry.id, lpTitleHtml(entry), dir);
+        // words arriving for the same falsafah just cross-fade in place
+        var top = document.getElementById('lpCarTop'), body = document.getElementById('lpCarBody');
+        lpCarousel(body, entry.id + (lpWbwCache[entry.id] ? ':w' : ''), lpBodyHtml(entry), String(body._key).split(':')[0] === String(entry.id) ? 0 : dir);
+        now.querySelector('[data-lp="toggle"]').innerHTML = lpIcon();
+        now.querySelector('.lp-msg').textContent = LP.msg || '';
+        var v = top.querySelector('.lp-slide:last-child .lp-voice'); if(v) v.innerHTML = lpVoiceHtml(entry);
+      }
     }
+    document.querySelectorAll('.lp-status').forEach(function(s){ s.innerHTML = lpStatusText(); });
+    lpProgPaint();
   }
-  function lpNowHtml(){
-    var entry = lpEntry();
-    if(!entry) return '';
-    return '<div class="lp-now"><div class="lp-meta">Sedang dimainkan &middot; <span class="lp-status">' + lpStatusText() + '</span></div>' +
-      '<h4>' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</h4>' +
-      '<div class="lp-meta lp-voice">' + lpVoiceHtml(entry) + '</div>' +
-      '<div class="lp-ctl"><button type="button" class="mp-btn" data-lp="prev" aria-label="Sebelum">&#9198;</button>' +
-      '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + lpIcon() + '</button>' +
-      '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
-      '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&#9632;</button></div>' +
-      '<div class="lp-msg">' + escapeHtml(LP.msg || '') + '</div>' +
-      lpWordsHtml(entry) +
-      '<div class="lp-maksud"><span>Maksud</span>' + escapeHtml(entry.text) + '</div>' +
-      '<div class="lp-meta">' + escapeHtml(entry.surahDisplay) + '</div></div>';
+  // swipe the mini player left for next, right for previous (like Spotify)
+  function lpSwipe(el){
+    var x0 = null, y0 = 0, dx = 0, lock = null;
+    el.addEventListener('touchstart', function(e){ if(!LP.active) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0; lock = null; }, { passive: true });
+    el.addEventListener('touchmove', function(e){
+      if(x0 == null) return;
+      var mx = e.touches[0].clientX - x0, my = e.touches[0].clientY - y0;
+      if(lock == null && (Math.abs(mx) > 8 || Math.abs(my) > 8)) lock = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+      if(lock !== 'x') return;
+      dx = mx; var s = el.querySelector('.lp-slide:last-child');
+      if(s){ s.style.transform = 'translateX(' + dx + 'px)'; s.style.opacity = String(Math.max(.25, 1 - Math.abs(dx) / 260)); }
+    }, { passive: true });
+    el.addEventListener('touchend', function(){
+      if(x0 == null) return; x0 = null;
+      if(lock !== 'x') return;
+      el._swiped = Date.now();
+      var s = el.querySelector('.lp-slide:last-child');
+      var go = dx < -60 ? 1 : dx > 60 ? -1 : 0;
+      if(go && (go > 0 ? LP.idx + 1 < LP.ids.length : LP.idx > 0)){
+        if(s){ s.style.transform = ''; s.style.opacity = ''; }
+        el._drag = dx;
+        if(go > 0) lpNext(); else lpPrev(true);
+      } else if(s){
+        s.animate([{ transform: 'translateX(' + dx + 'px)', opacity: s.style.opacity || 1 }, { transform: 'translateX(0)', opacity: 1 }], { duration: 300, easing: LP_EASE });
+        s.style.transform = ''; s.style.opacity = '';
+      }
+    });
   }
   function lpWordsHtml(entry){
     var words = lpWbwCache[entry.id];
@@ -3081,6 +3136,7 @@
     var b = e.target.closest('[data-lp]');
     if(!b) return;
     var a = b.getAttribute('data-lp');
+    if(a === 'open' && b._swiped && Date.now() - b._swiped < 500) return;   // that was a swipe, not a tap
     if(a === 'toggle') lpToggle();
     else if(a === 'next') lpSkip(lpNext);
     else if(a === 'prev') lpSkip(lpPrev);
