@@ -696,6 +696,7 @@
   .lp-go{ width:100%; margin-top:18px; padding:13px; border-radius:12px; border:0; background:var(--gold); color:var(--gold-ink); font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; }
   /* Dengar: Spotify-style slides between falsafah, progress line, mini player rises in */
   .lp-car{ position:relative; }
+  .sl-meta .pulih{ color:var(--emerald); }
   .miniplayer .mp-info, #lpCarTop{ touch-action:pan-y; overflow:hidden; }
   .lp-prog, .mp-prog{ height:3px; border-radius:3px; background:var(--border); overflow:hidden; }
   .lp-prog{ margin:10px 0 4px; }
@@ -1936,8 +1937,16 @@
   // ---------- shared helpers for Butiran (Kaji) and the Kemajuan tab ----------
   var LEVEL_COLORS = ['var(--border)','var(--lv1)','var(--lv2)','var(--lv3)','var(--lv4)','var(--lv5)'];
   function missesOf(id){ var c = srs[id]; return c ? Math.max(0, (c.seen||0) - (c.correct||0)) : 0; }
+  // Perlu fokus: forgotten 2+ times and not yet recovered. It leaves after 2 Ingat in a row
+  // (box counts Ingat since the last miss); one more Belum ingat sends it back to 0/2.
+  var FOCUS_CLEAR = 2;
+  function inFocus(id){ return missesOf(id) >= 2 && (getCard(id).box || 0) < FOCUS_CLEAR; }
+  function focusMeta(id){
+    var b = getCard(id).box || 0;
+    return 'terlupa ' + missesOf(id) + '&times;' + (b > 0 ? ' &middot; <span class="pulih">pulih ' + b + '/' + FOCUS_CLEAR + '</span>' : '');
+  }
   function focusList(){
-    return STUDY_POOL.filter(function(e){ return missesOf(e.id) >= 2; })
+    return STUDY_POOL.filter(function(e){ return inFocus(e.id); })
       .sort(function(a, b){ return (missesOf(b.id) - missesOf(a.id)) || (getCard(a.id).box - getCard(b.id).box) || (a.id - b.id); })
       .map(function(e){ return e.id; });
   }
@@ -2019,7 +2028,7 @@
     return lv;
   }
   function allFocus(){
-    return DATA.filter(function(e){ return missesOf(e.id) >= 2; })
+    return DATA.filter(function(e){ return inFocus(e.id); })
       .sort(function(a, b){ return (missesOf(b.id) - missesOf(a.id)) || (getCard(a.id).box - getCard(b.id).box) || (a.id - b.id); })
       .map(function(e){ return e.id; });
   }
@@ -2036,7 +2045,7 @@
     if(key === 'today-ok') return ['Ingat hari ini', L.ok, null];
     if(key === 'all-re') return ['Perlu ulang (semua hari)', recallAll().re, 'allre', function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }];
     if(key === 'all-ok') return ['Sudah ingat', recallAll().ok, null, function(id){ return BOX_LABELS[getCard(id).box]; }];
-    if(key === 'focus') return ['Perlu fokus', allFocus(), 'focus', function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }];
+    if(key === 'focus') return ['Perlu fokus', allFocus(), 'focus', focusMeta];
     if(key === 'studied') return ['Pernah dikaji', DATA.filter(function(e){ return (getCard(e.id).seen||0) > 0; }).map(function(e){ return e.id; }), null];
     if(key === 'unstudied') return ['Belum pernah dikaji', DATA.filter(function(e){ return !(getCard(e.id).seen||0); }).map(function(e){ return e.id; }), null];
     if(key === 'kelas'){ var W = classWeekly(); return ['Kelas minggu ini', W ? W.top.map(function(x){ return x.id; }) : [], 'kelas']; }
@@ -2104,10 +2113,11 @@
 
     // Perlu fokus
     html += '<div class="prog-sec card-sec"><h4>Perlu fokus &middot; <span class="cnt">' + F.length + '</span></h4>' +
-      (F.length ? progItems(F.slice(0, 5), function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }) +
+      (F.length ? progItems(F.slice(0, 5), focusMeta) +
+                  '<p class="pnote" style="margin:8px 2px 0;">Keluar dari senarai selepas 2 kali Ingat berturut-turut.</p>' +
                   (F.length > 5 ? '<button type="button" class="backbtn" data-list="focus" style="margin:10px 0 0;">Lihat semua ' + F.length + ' &rsaquo;</button>' : '') +
                   ujiRow('focus', F.length)
-                : '<p class="pnote">Belum ada. Falsafah yang terlupa 2 kali atau lebih akan muncul di sini.</p>') +
+                : '<p class="pnote">Belum ada. Falsafah yang terlupa 2 kali atau lebih akan muncul di sini, dan keluar selepas 2 kali Ingat berturut-turut.</p>') +
       '</div>';
 
     // Kelas minggu ini (Fridays)

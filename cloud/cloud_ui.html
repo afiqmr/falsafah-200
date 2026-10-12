@@ -532,7 +532,8 @@ async function loadStudents() {
     const pool = DATA.filter(e => e.noEnd >= range.from && e.noStart <= range.to);
     const levels = [0, 0, 0, 0, 0, 0]; pool.forEach(e => { levels[(srs[e.id] && srs[e.id].box) || 0]++; });
     const misses = id => srs[id] ? Math.max(0, (srs[id].seen || 0) - (srs[id].correct || 0)) : 0;
-    const focus = pool.filter(e => misses(e.id) >= 2).sort((a, b) => misses(b.id) - misses(a.id)).map(e => ({ id: e.id, n: misses(e.id) }));
+    const focus = pool.filter(e => misses(e.id) >= 2 && ((srs[e.id] && srs[e.id].box) || 0) < 2)   // same rule as the app: out after 2 Ingat in a row
+     .sort((a, b) => misses(b.id) - misses(a.id)).map(e => ({ id: e.id, n: misses(e.id) }));
     let today = null;
     if (daily && daily.date === dayStr(new Date())) {
       const ids = daily.kajiIds || [], r = daily.results || {};
