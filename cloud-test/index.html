@@ -253,6 +253,16 @@
   .wbw .w-id{ direction:ltr; font-size:12px; line-height:1.3; color:var(--gold-cite); margin-top:2px; font-style:italic; }
   .wbw-src .k-id{ color:var(--gold-cite); font-style:italic; }
   .wbw-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 10px; }
+  /* Dr. HALO-N's own recitation (signed-in students only) */
+  .halon-btn{ display:inline-flex; align-items:center; gap:7px; padding:6px 13px 6px 7px; border-radius:100px; border:1px solid var(--gold);
+    background:color-mix(in srgb, var(--gold) 12%, var(--surface)); color:var(--ink); font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;
+    -webkit-tap-highlight-color:transparent; transition:transform .2s var(--ios-curve), background-color .3s var(--ios-curve); }
+  .halon-btn:active{ transform:scale(.96); }
+  .halon-btn .hb-ico{ width:22px; height:22px; border-radius:50%; background:var(--gold); color:var(--gold-ink); display:grid; place-items:center; font-size:9px; flex:none; }
+  .halon-btn.playing{ background:color-mix(in srgb, var(--gold) 26%, var(--surface)); }
+  .halon-btn.loading .hb-ico{ animation:hbPulse 1s ease-in-out infinite; }
+  @keyframes hbPulse{ 50%{ opacity:.35; } }
+  .lp-set.dim .lp-range, .lp-set.dim .lp-quick{ opacity:.4; pointer-events:none; }
   .wbw-head .wbw-toggle{ margin:0; }
   .wbw-head .wbl-seg{ display:none; }
   .wbw-on .wbw-head .wbl-seg{ display:inline-flex; }
@@ -2647,8 +2657,9 @@
 
   /* ---------------- LISTEN (audio player) ---------------- */
   var LISTEN_KEY = 'falsafah200_listen_v1';
-  var lpSet = (function(){ try{ var s = JSON.parse(localStorage.getItem(LISTEN_KEY) || 'null'); if(s && s.repeat) return s; }catch(e){} return { repeat: 1, order: 'nombor' }; })();
-  function saveLpSet(){ try{ localStorage.setItem(LISTEN_KEY, JSON.stringify({ repeat: lpSet.repeat, order: lpSet.order })); }catch(e){} }
+  var lpSet = (function(){ try{ var s = JSON.parse(localStorage.getItem(LISTEN_KEY) || 'null'); if(s && s.repeat){ if(!s.voice) s.voice = 'campur'; return s; } }catch(e){} return { repeat: 1, order: 'nombor', voice: 'campur' }; })();
+  function saveLpSet(){ try{ localStorage.setItem(LISTEN_KEY, JSON.stringify({ repeat: lpSet.repeat, order: lpSet.order, voice: lpSet.voice })); }catch(e){} }
+  function lpVoice(){ return halonIds().length ? lpSet.voice : 'rifai'; }
   var LP = { ids: [], idx: 0, rep: 0, clip: 0, clips: null, active: false, loading: false, msg: '', from: null, to: null, token: 0, gap: false, gapLeft: 0 };
   var lpAudio = new Audio();
   lpAudio.preload = 'auto';
@@ -2669,7 +2680,17 @@
   function gapSrc(){ return GAP_SRC || (GAP_SRC = silentWav(8000 * GAP_SECS)); }
   function lpUnlock(){ try{ lpAudio.src = SILENT; var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
 
-  function lpPool(from, to){ return DATA.filter(function(e){ return e.noEnd >= from && e.noStart <= to; }).map(function(e){ return e.id; }); }
+  function lpPool(from, to){
+    if(lpVoice() === 'halon') return halonIds().filter(function(id){ return entryById(id); });   // all of his recordings, any julat
+    return DATA.filter(function(e){ return e.noEnd >= from && e.noStart <= to; }).map(function(e){ return e.id; });
+  }
+  function lpClipsFor(entry){
+    if(lpVoice() !== 'rifai' && hasHalon(entry.id)){
+      return window.FN_HALON.get(entry.id).then(function(url){ return [{ url: url, start: null, end: null, halon: true }]; },
+        function(err){ if(lpVoice() === 'halon') throw err; return audioClips(entry); });
+    }
+    return audioClips(entry);
+  }
   function lpEntry(){ return LP.active ? entryById(LP.ids[LP.idx]) : null; }
 
   function lpStart(from, to){
@@ -2688,14 +2709,16 @@
     LP.rep = 0; LP.clip = 0; LP.clips = null; LP.loading = true; LP.msg = '';
     lpUpdateUI(); lpMeta(entry);
     lpWbwFor(entry).then(function(){ if(token === LP.token) lpUpdateUI(); }).catch(function(){});
-    audioClips(entry).then(function(clips){
+    lpClipsFor(entry).then(function(clips){
       if(token !== LP.token) return;
       LP.loading = false;
       if(!clips.length) throw new Error('no audio');
       LP.clips = clips;
+      lpMeta(entry);
+      if(!hpAudio.paused) hpAudio.pause();   // one voice at a time
       lpPlayClip();
       // fetch the next falsafah's details in the background
-      var nx = entryById(LP.ids[LP.idx + 1]); if(nx) audioClips(nx).catch(function(){});
+      var nx = entryById(LP.ids[LP.idx + 1]); if(nx) lpClipsFor(nx).catch(function(){});
     }).catch(function(){
       if(token !== LP.token) return;
       LP.loading = false;
@@ -2786,7 +2809,7 @@
     try{
       navigator.mediaSession.metadata = new MediaMetadata({
         title: entry.rangeLabel + ': ' + displayTitle(entry.title),
-        artist: RECITER_NAME + ' · ' + entry.surahDisplay,
+        artist: (LP.clips && LP.clips[0] && LP.clips[0].halon ? 'Dr. HALO-N' : RECITER_NAME) + ' · ' + entry.surahDisplay,
         album: 'Al-Fathun Nawa: Falsafah 1-200'
       });
     }catch(e){}
@@ -2834,6 +2857,7 @@
     var playing = LP.clips && !lpAudio.paused;
     return '<div class="lp-now"><div class="lp-meta">Sedang dimainkan &middot; <span class="lp-status">' + lpStatusText() + '</span></div>' +
       '<h4>' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</h4>' +
+      (LP.clips ? '<div class="lp-meta">Suara: ' + (LP.clips[0] && LP.clips[0].halon ? '<b>Dr. HALO-N</b>' : RECITER_NAME) + '</div>' : '') +
       '<div class="lp-ctl"><button type="button" class="mp-btn" data-lp="prev" aria-label="Sebelum">&#9198;</button>' +
       '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + (playing ? '&#10074;&#10074;' : '&#9654;') + '</button>' +
       '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
@@ -2851,12 +2875,15 @@
     '<p class="lp-legend">Quran.com &middot; <span class="k-en">English</span> &middot; <span class="k-id">Bahasa Indonesia</span></p>';
   }
   function openListen(){
-    var from = LP.active ? LP.from : studyRange.from, to = LP.active ? LP.to : studyRange.to;
+    var from = LP.active ? LP.from : studyRange.from, to = LP.active ? LP.to : studyRange.to, H = halonIds().length;
     var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
       '<h3 class="ptitle">&#127911; Dengar ayat</h3>' +
-      '<p class="psub">Bacaan ' + RECITER_NAME + ' (murattal) &middot; audio daripada Quran.com</p>' +
+      '<p class="psub">' + (H ? 'Bacaan Dr. HALO-N (' + H + ' falsafah, khas untuk pelajar) dan ' : 'Bacaan ') + RECITER_NAME + ' (murattal, Quran.com)</p>' +
       '<div id="lpNow"></div>' +
-      '<div class="lp-set"><label>Julat</label>' +
+      (H ? '<div class="lp-set"><label>Suara</label><div class="lp-seg" id="lpVoice">' +
+        [['campur','Campur'],['rifai','Hani ar-Rifai'],['halon','Dr. HALO-N sahaja']].map(function(v){ return '<button type="button" data-voice="' + v[0] + '" class="' + (lpVoice() === v[0] ? 'active' : '') + '">' + v[1] + '</button>'; }).join('') +
+        '</div><p class="pnote" id="lpVoiceNote" style="margin:6px 2px 0;"></p></div>' : '') +
+      '<div class="lp-set" id="lpRangeSet"><label>Julat</label>' +
         '<div class="lp-range">Dari <input id="lpFrom" type="number" min="1" max="200" inputmode="numeric" value="' + from + '"> hingga <input id="lpTo" type="number" min="1" max="200" inputmode="numeric" value="' + to + '"></div>' +
         '<div class="lp-quick"><button type="button" data-r="' + studyRange.from + '-' + studyRange.to + '">Julat kaji saya</button><button type="button" data-r="1-100">Tahun 1</button><button type="button" data-r="101-200">Tahun 2</button><button type="button" data-r="1-200">Semua</button></div></div>' +
       '<div class="lp-set"><label>Ulang setiap ayat</label><div class="lp-seg" id="lpRep">' +
@@ -2873,6 +2900,10 @@
     function rangeVals(){ return { from: parseInt(fromEl.value, 10), to: parseInt(toEl.value, 10) }; }
     function refreshGo(){
       var r = rangeVals(), ok = r.from >= 1 && r.to <= 200 && r.from <= r.to, n = ok ? lpPool(r.from, r.to).length : 0;
+      var v = lpVoice(), note = document.getElementById('lpVoiceNote');
+      document.getElementById('lpRangeSet').classList.toggle('dim', v === 'halon');
+      if(note) note.innerHTML = v === 'halon' ? 'Semua ' + H + ' rakaman Dr. HALO-N dimainkan (Falsafah ' + halonIds().join(', ') + '). Julat tidak digunakan.'
+        : v === 'campur' ? 'Suara Dr. HALO-N bagi falsafah yang ada rakamannya; selebihnya ' + RECITER_NAME + '.' : 'Semua falsafah dengan suara ' + RECITER_NAME + '.';
       go.disabled = !n;
       go.innerHTML = !n ? 'Julat tidak sah' : (LP.active ? '&#8635; Mula semula dengan tetapan ini (' + n + ' falsafah)' : '&#9654; Mula dengar (' + n + ' falsafah)');
     }
@@ -2882,6 +2913,8 @@
       if(q){ var p = q.getAttribute('data-r').split('-'); fromEl.value = p[0]; toEl.value = p[1]; refreshGo(); return; }
       var r = e.target.closest('[data-rep]');
       if(r){ lpSet.repeat = +r.getAttribute('data-rep'); saveLpSet(); document.querySelectorAll('#lpRep button').forEach(function(b){ b.classList.toggle('active', b === r); }); lpUpdateUI(); return; }
+      var vb = e.target.closest('[data-voice]');
+      if(vb){ lpSet.voice = vb.getAttribute('data-voice'); saveLpSet(); document.querySelectorAll('#lpVoice button').forEach(function(b){ b.classList.toggle('active', b === vb); }); refreshGo(); return; }
       var o = e.target.closest('[data-ord]');
       if(o){ lpSet.order = o.getAttribute('data-ord'); saveLpSet(); document.querySelectorAll('#lpOrd button').forEach(function(b){ b.classList.toggle('active', b === o); }); return; }
       if(e.target.closest('#lpGo')){ var v = rangeVals(); lpStart(v.from, v.to); refreshGo(); return; }
@@ -2922,9 +2955,51 @@
   var WBW_KEY = 'falsafah200_wbw_v1', WBW_API = 'https://api.quran.com/api/v4/verses/by_key/';
   var wbwVerseCache = {}, wbwEntryCache = {};
   function wbwOn(){ try{ return localStorage.getItem(WBW_KEY) === '1'; }catch(e){ return false; } }
+  // Dr. HALO-N recordings: provided by the signed-in cloud layer as window.FN_HALON = { ids:[...], get(id) -> Promise<url> }
+  function halonIds(){ return (window.FN_HALON && window.FN_HALON.ids) || []; }
+  function hasHalon(id){ return halonIds().indexOf(id) >= 0; }
+  var hpAudio = new Audio(), hpId = null;
+  hpAudio.setAttribute('playsinline', '');
+  function halonBtnHtml(id){
+    var on = hpId === id && !hpAudio.paused;
+    return '<button type="button" class="halon-btn' + (on ? ' playing' : '') + '" data-halon="' + id + '"><span class="hb-ico">' + (on ? '&#10074;&#10074;' : '&#9654;') + '</span>Dr. HALO-N</button>';
+  }
+  function hpSync(){
+    document.querySelectorAll('.halon-btn').forEach(function(b){
+      var id = +b.getAttribute('data-halon'), on = hpId === id && !hpAudio.paused;
+      b.classList.toggle('playing', on); b.querySelector('.hb-ico').innerHTML = on ? '&#10074;&#10074;' : '&#9654;';
+    });
+  }
+  ['play','pause','ended'].forEach(function(ev){ hpAudio.addEventListener(ev, hpSync); });
+  function hpToggle(id, btn){
+    if(hpId === id && hpAudio.src){ if(hpAudio.paused){ hpAudio.play().catch(function(){}); } else hpAudio.pause(); return; }
+    if(LP.active && !lpAudio.paused) lpAudio.pause();   // one voice at a time
+    hpId = id; hpAudio.pause();
+    btn.classList.add('loading');
+    window.FN_HALON.get(id).then(function(url){
+      btn.classList.remove('loading');
+      if(hpId !== id) return;
+      hpAudio.src = url;
+      var p = hpAudio.play(); if(p && p.catch) p.catch(function(){ hpSync(); });
+    }).catch(function(){ btn.classList.remove('loading'); hpId = null; hpSync(); });
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('[data-halon]');
+    if(!b) return;
+    e.stopPropagation();
+    hpToggle(+b.getAttribute('data-halon'), b);
+  }, true);
+  function addHalonBtns(){
+    document.querySelectorAll('.folio-arabic-wrap[data-wbw-id]').forEach(function(w){
+      var id = +w.getAttribute('data-wbw-id'), head = w.querySelector('.wbw-head');
+      if(head && hasHalon(id) && !head.querySelector('.halon-btn')) head.insertAdjacentHTML('afterbegin', halonBtnHtml(id));
+    });
+  }
+  document.addEventListener('fn-halon', function(){ addHalonBtns(); if(lpSheetOpen) openListen(); });
+
   function renderArabic(entry){
     return '<div class="folio-arabic-wrap" data-wbw-id="' + entry.id + '">' +
-      '<div class="wbw-head"><button type="button" class="wbw-toggle"><span class="sw"></span>Word by word</button>' + wblSeg() + '</div>' +
+      '<div class="wbw-head">' + (hasHalon(entry.id) ? halonBtnHtml(entry.id) : '') + '<button type="button" class="wbw-toggle"><span class="sw"></span>Word by word</button>' + wblSeg() + '</div>' +
       '<p class="wbw-msg"></p>' +
       '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>' +
       '<div class="wbw" lang="ar"></div>' +
@@ -3534,6 +3609,7 @@ async function logout() {
 function afterLogin() {
   registering = false; gated = false;
   loadWeekly();
+  loadHalon();
   setBtn('on', firstName(profile?.name));
   closeSheet();
   if (lsGet(KEYS.range) && lsGet(TOUR_KEY) === '1') {
@@ -3630,6 +3706,54 @@ const byId = id => DATA.find(e => e.id === +id);
 const title = e => (window.FN_APP && e ? window.FN_APP.displayTitle(e.title) : (e ? e.title : ''));
 const dayStr = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return dayStr(d); };
+// ---------- Dr. HALO-N recordings: kept in Firestore so only signed-in students can play them ----------
+// stats/halon-index { ids:[149,...] } and stats/halon-<no> { data: base64 mp3 }. The admin uploads them in Papan pentadbir.
+const HALON_MAX = 740 * 1024;   // a Firestore document holds up to 1 MB; base64 adds a third
+const halonUrls = {};
+function halonUrl(id) {
+  if (!halonUrls[id]) {
+    halonUrls[id] = fb.F.getDoc(fb.F.doc(fb.db, 'stats', 'halon-' + id)).then(s => {
+      if (!s.exists()) throw new Error('missing');
+      const d = s.data(), bin = atob(d.data), u8 = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      return URL.createObjectURL(new Blob([u8], { type: d.mime || 'audio/mpeg' }));
+    }).catch(e => { delete halonUrls[id]; throw e; });
+  }
+  return halonUrls[id];
+}
+async function loadHalon() {
+  try {
+    const s = await fb.F.getDoc(fb.F.doc(fb.db, 'stats', 'halon-index'));
+    const ids = s.exists() ? (s.data().ids || []).map(Number).filter(n => n >= 1 && n <= 200).sort((a, b) => a - b) : [];
+    window.FN_HALON = { ids, get: halonUrl };
+    document.dispatchEvent(new Event('fn-halon'));
+  } catch (e) {}
+}
+function toBase64(buf) {
+  const u8 = new Uint8Array(buf); let s = '';
+  for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+async function uploadHalon(files, out) {
+  const done = [], bad = [];
+  for (const f of files) {
+    const m = /(\d{1,3})/.exec(f.name || ''), id = m ? +m[1] : 0;
+    if (!(id >= 1 && id <= 200)) { bad.push(f.name + ' (tiada nombor falsafah dalam nama fail)'); continue; }
+    if (f.size > HALON_MAX) { bad.push(f.name + ' (terlalu besar: ' + Math.round(f.size / 1024) + ' KB, had 740 KB)'); continue; }
+    out('Memuat naik ' + f.name + '…');
+    await fb.F.setDoc(fb.F.doc(fb.db, 'stats', 'halon-' + id), { data: toBase64(await f.arrayBuffer()), mime: 'audio/mpeg', size: f.size, name: f.name, updatedAt: fb.F.serverTimestamp() });
+    delete halonUrls[id];
+    done.push(id);
+  }
+  if (done.length) {
+    const cur = (window.FN_HALON && window.FN_HALON.ids) || [];
+    const ids = [...new Set([...cur, ...done])].sort((a, b) => a - b);
+    await fb.F.setDoc(fb.F.doc(fb.db, 'stats', 'halon-index'), { ids, updatedAt: fb.F.serverTimestamp() });
+    await loadHalon();
+  }
+  return { done, bad };
+}
+
 async function loadWeekly() {
   try {
     if (isAdminUser() && user.emailVerified) { await user.getIdToken(true); const st = await loadStudents(); await publishWeekly(st); }
@@ -3750,11 +3874,26 @@ async function openAdmin() {
     <div class="adm-sec"><h3>Kelas minggu ini · paling kerap terlupa</h3>
       <p class="hint">${w.from} hingga ${w.to}. Bilangan pelajar yang terlupa setiap falsafah sekurang-kurangnya sekali. Senarai ini dikemas kini setiap kali anda membuka papan ini atau log masuk, dan dipaparkan kepada pelajar dalam tab Progres setiap Jumaat.</p>
       ${rows(w.top, x => x.students + ' pelajar')}</div>
+    <div class="adm-sec"><h3>Audio Dr. HALO-N</h3>
+      <p class="hint">Hanya pelajar yang log masuk boleh mendengar rakaman ini. Pilih fail MP3 yang dinamakan ikut nombor falsafah (cth. F149.mp3), had 740 KB setiap fail. Fail dengan nombor yang sama akan menggantikan rakaman lama.</p>
+      <p class="hint" id="admHalonNow">Ada sekarang: ${(window.FN_HALON && window.FN_HALON.ids.length) ? 'Falsafah ' + window.FN_HALON.ids.join(', ') : 'tiada'}</p>
+      <label class="adm-btn" style="display:inline-block">Pilih fail MP3<input type="file" id="admHalon" accept="audio/mpeg,.mp3" multiple hidden></label>
+      <p class="acct-msg" id="admHalonMsg" style="text-align:left"></p></div>
     <input class="adm-search" id="admSearch" placeholder="Cari nama, nama pengguna atau emel…">
     <div id="admList">${students.map(card).join('') || '<p class="hint">Belum ada pelajar berdaftar.</p>'}</div>
   </div>`;
   $('admClose').onclick = closeAdmin;
   $('admRefresh').onclick = openAdmin;
+  $('admHalon').onchange = async e => {
+    const files = [...e.target.files]; e.target.value = '';
+    const out = (t, k) => { $('admHalonMsg').textContent = t; $('admHalonMsg').className = 'acct-msg ' + (k || ''); };
+    try {
+      await user.getIdToken(true);
+      const r = await uploadHalon(files, out);
+      out((r.done.length ? 'Berjaya: Falsafah ' + r.done.join(', ') + '. ' : '') + (r.bad.length ? 'Tidak dimuat naik: ' + r.bad.join('; ') : ''), r.bad.length ? 'err' : 'ok');
+      $('admHalonNow').textContent = 'Ada sekarang: ' + (window.FN_HALON.ids.length ? 'Falsafah ' + window.FN_HALON.ids.join(', ') : 'tiada');
+    } catch (err) { out(ERR(err.code || err.message), 'err'); }
+  };
   $('admList').onclick = e => { const c = e.target.closest('.stu'); if (c) c.classList.toggle('open'); };
   $('admSearch').oninput = e => { const q = e.target.value.trim().toLowerCase(); panel.querySelectorAll('.stu').forEach(c => { c.style.display = !q || c.dataset.q.includes(q) ? '' : 'none'; }); };
 }

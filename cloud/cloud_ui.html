@@ -347,6 +347,7 @@ async function logout() {
 function afterLogin() {
   registering = false; gated = false;
   loadWeekly();
+  loadHalon();
   setBtn('on', firstName(profile?.name));
   closeSheet();
   if (lsGet(KEYS.range) && lsGet(TOUR_KEY) === '1') {
@@ -443,6 +444,54 @@ const byId = id => DATA.find(e => e.id === +id);
 const title = e => (window.FN_APP && e ? window.FN_APP.displayTitle(e.title) : (e ? e.title : ''));
 const dayStr = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return dayStr(d); };
+// ---------- Dr. HALO-N recordings: kept in Firestore so only signed-in students can play them ----------
+// stats/halon-index { ids:[149,...] } and stats/halon-<no> { data: base64 mp3 }. The admin uploads them in Papan pentadbir.
+const HALON_MAX = 740 * 1024;   // a Firestore document holds up to 1 MB; base64 adds a third
+const halonUrls = {};
+function halonUrl(id) {
+  if (!halonUrls[id]) {
+    halonUrls[id] = fb.F.getDoc(fb.F.doc(fb.db, 'stats', 'halon-' + id)).then(s => {
+      if (!s.exists()) throw new Error('missing');
+      const d = s.data(), bin = atob(d.data), u8 = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      return URL.createObjectURL(new Blob([u8], { type: d.mime || 'audio/mpeg' }));
+    }).catch(e => { delete halonUrls[id]; throw e; });
+  }
+  return halonUrls[id];
+}
+async function loadHalon() {
+  try {
+    const s = await fb.F.getDoc(fb.F.doc(fb.db, 'stats', 'halon-index'));
+    const ids = s.exists() ? (s.data().ids || []).map(Number).filter(n => n >= 1 && n <= 200).sort((a, b) => a - b) : [];
+    window.FN_HALON = { ids, get: halonUrl };
+    document.dispatchEvent(new Event('fn-halon'));
+  } catch (e) {}
+}
+function toBase64(buf) {
+  const u8 = new Uint8Array(buf); let s = '';
+  for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+async function uploadHalon(files, out) {
+  const done = [], bad = [];
+  for (const f of files) {
+    const m = /(\d{1,3})/.exec(f.name || ''), id = m ? +m[1] : 0;
+    if (!(id >= 1 && id <= 200)) { bad.push(f.name + ' (tiada nombor falsafah dalam nama fail)'); continue; }
+    if (f.size > HALON_MAX) { bad.push(f.name + ' (terlalu besar: ' + Math.round(f.size / 1024) + ' KB, had 740 KB)'); continue; }
+    out('Memuat naik ' + f.name + '…');
+    await fb.F.setDoc(fb.F.doc(fb.db, 'stats', 'halon-' + id), { data: toBase64(await f.arrayBuffer()), mime: 'audio/mpeg', size: f.size, name: f.name, updatedAt: fb.F.serverTimestamp() });
+    delete halonUrls[id];
+    done.push(id);
+  }
+  if (done.length) {
+    const cur = (window.FN_HALON && window.FN_HALON.ids) || [];
+    const ids = [...new Set([...cur, ...done])].sort((a, b) => a - b);
+    await fb.F.setDoc(fb.F.doc(fb.db, 'stats', 'halon-index'), { ids, updatedAt: fb.F.serverTimestamp() });
+    await loadHalon();
+  }
+  return { done, bad };
+}
+
 async function loadWeekly() {
   try {
     if (isAdminUser() && user.emailVerified) { await user.getIdToken(true); const st = await loadStudents(); await publishWeekly(st); }
@@ -563,11 +612,26 @@ async function openAdmin() {
     <div class="adm-sec"><h3>Kelas minggu ini · paling kerap terlupa</h3>
       <p class="hint">${w.from} hingga ${w.to}. Bilangan pelajar yang terlupa setiap falsafah sekurang-kurangnya sekali. Senarai ini dikemas kini setiap kali anda membuka papan ini atau log masuk, dan dipaparkan kepada pelajar dalam tab Progres setiap Jumaat.</p>
       ${rows(w.top, x => x.students + ' pelajar')}</div>
+    <div class="adm-sec"><h3>Audio Dr. HALO-N</h3>
+      <p class="hint">Hanya pelajar yang log masuk boleh mendengar rakaman ini. Pilih fail MP3 yang dinamakan ikut nombor falsafah (cth. F149.mp3), had 740 KB setiap fail. Fail dengan nombor yang sama akan menggantikan rakaman lama.</p>
+      <p class="hint" id="admHalonNow">Ada sekarang: ${(window.FN_HALON && window.FN_HALON.ids.length) ? 'Falsafah ' + window.FN_HALON.ids.join(', ') : 'tiada'}</p>
+      <label class="adm-btn" style="display:inline-block">Pilih fail MP3<input type="file" id="admHalon" accept="audio/mpeg,.mp3" multiple hidden></label>
+      <p class="acct-msg" id="admHalonMsg" style="text-align:left"></p></div>
     <input class="adm-search" id="admSearch" placeholder="Cari nama, nama pengguna atau emel…">
     <div id="admList">${students.map(card).join('') || '<p class="hint">Belum ada pelajar berdaftar.</p>'}</div>
   </div>`;
   $('admClose').onclick = closeAdmin;
   $('admRefresh').onclick = openAdmin;
+  $('admHalon').onchange = async e => {
+    const files = [...e.target.files]; e.target.value = '';
+    const out = (t, k) => { $('admHalonMsg').textContent = t; $('admHalonMsg').className = 'acct-msg ' + (k || ''); };
+    try {
+      await user.getIdToken(true);
+      const r = await uploadHalon(files, out);
+      out((r.done.length ? 'Berjaya: Falsafah ' + r.done.join(', ') + '. ' : '') + (r.bad.length ? 'Tidak dimuat naik: ' + r.bad.join('; ') : ''), r.bad.length ? 'err' : 'ok');
+      $('admHalonNow').textContent = 'Ada sekarang: ' + (window.FN_HALON.ids.length ? 'Falsafah ' + window.FN_HALON.ids.join(', ') : 'tiada');
+    } catch (err) { out(ERR(err.code || err.message), 'err'); }
+  };
   $('admList').onclick = e => { const c = e.target.closest('.stu'); if (c) c.classList.toggle('open'); };
   $('admSearch').oninput = e => { const q = e.target.value.trim().toLowerCase(); panel.querySelectorAll('.stu').forEach(c => { c.style.display = !q || c.dataset.q.includes(q) ? '' : 'none'; }); };
 }
