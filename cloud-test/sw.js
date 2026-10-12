@@ -1,6 +1,6 @@
 // Falsafah 200: lets the app install to the home screen and open faster.
 // Network first, so students always get the newest version; the saved copy is used only when offline.
-const CACHE = 'fn200-v1';
+const CACHE = 'fn200-v2';
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', e => {
