@@ -11,28 +11,30 @@
 <style>@media (max-width:600px){ html{ zoom:.9; } }</style>
 <title>الفتح النوى - Falsafah 200 (Test)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0F172A">
-<script>try{ if(localStorage.getItem('falsafah200_theme_v1') === 'light'){ document.querySelector('meta[name="theme-color"]').setAttribute('content', '#FAF5EC'); document.documentElement.style.backgroundColor = '#FAF5EC'; } else document.documentElement.style.backgroundColor = '#0F172A'; }catch(e){}</script>
+<meta name="theme-color" content="#121316">
+<script>try{ if(localStorage.getItem('falsafah200_theme_v1') === 'light'){ document.querySelector('meta[name="theme-color"]').setAttribute('content', '#FAF5EC'); document.documentElement.style.backgroundColor = '#FAF5EC'; } else document.documentElement.style.backgroundColor = '#121316'; }catch(e){}</script>
 <meta name="description" content="Kaji dan hafaz 200 Falsafah Al Quran dari Al Fathun Nawa Jilid 7, dengan ayat asal, ulang kaji jarak masa, kuiz dan penjejakan kemajuan.">
 <style>
   :root{
     --ios-curve:cubic-bezier(.32,.72,0,1);
-    --bg:#0F172A;
-    --surface:#0D1A33;
-    --surface-2:#12244A;
-    --ink:#EAF2FF;
-    --muted:#8FA6CC;
-    --border:rgba(148,197,255,.14);
-    --gold:#D4AF37;
-    --gold-ink:#0B0F17;
-    --gold-soft:rgba(212,175,55,.14);
-    --gold-cite:#FBBF24;
-    --re:#F59E0B;
-    --emerald:#34D399;
-    --emerald-soft:rgba(52,211,153,.14);
-    --rose:#F87171;
-    --rose-soft:rgba(248,113,113,.14);
-    --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 32px -14px rgba(0,0,0,.65);
+    /* Dark theme: warm neutral greys, one softer gold family, calmer accents (easier on the eyes at night) */
+    --bg:#121316;
+    --surface:#1E2026;
+    --surface-2:#262932;
+    --ink:#DEDFE2;
+    --muted:#9DA3AE;
+    --border:#2E323D;
+    --gold:#C9A85C;
+    --gold-ink:#17150F;
+    --gold-soft:rgba(201,168,92,.12);
+    --gold-cite:#D4B46A;
+    --re:#D9975B;
+    --emerald:#7CC4A4;
+    --emerald-soft:rgba(124,196,164,.12);
+    --rose:#D98C86;
+    --rose-soft:rgba(217,140,134,.12);
+    --lv1:#C9A85C; --lv2:#B8994F; --lv3:#8FB5A6; --lv4:#7CC4A4; --lv5:#5FA88A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 28px -14px rgba(0,0,0,.55);
     --radius:16px;
     --ios-ease:cubic-bezier(.32,.72,0,1);
     --ios-spring:cubic-bezier(.34,1.3,.64,1);
@@ -59,6 +61,7 @@
     --emerald-soft:rgba(15,118,110,.12);
     --rose:#B42318;
     --rose-soft:rgba(180,35,24,.10);
+    --lv1:#E9B949; --lv2:#D4AF37; --lv3:#7FB7A6; --lv4:#34D399; --lv5:#0F9F74;
     --shadow:0 1px 2px rgba(16,33,43,.05),0 14px 32px -16px rgba(16,33,43,.18);
     color-scheme:light;
   }
@@ -106,7 +109,7 @@
   }
   .wordmark{ display:flex; flex-direction:column; gap:1px; }
   .wordmark-top{ display:flex; align-items:baseline; gap:8px; }
-  .wordmark .mark{ font-weight:800; font-size:21px; color:var(--gold); letter-spacing:-.01em; }
+  .wordmark .mark{ font-weight:700; font-size:21px; color:var(--gold); letter-spacing:-.01em; }
   .wordmark .sub{
     font-size:13px; color:var(--muted); letter-spacing:.02em; font-weight:600;
     background:none; border:0; padding:0; cursor:pointer; font-family:inherit; text-align:left;
@@ -121,9 +124,9 @@
     font-family:"Scheherazade New","Traditional Arabic",serif;
     direction:rtl; unicode-bidi:isolate;
     text-align:center;
-    color:var(--gold);
+    color:var(--gold-cite);
     font-size:1.35rem;
-    font-weight:700;
+    font-weight:400;
     line-height:1.8;
   }
   .header-ayat-cite{
@@ -137,15 +140,15 @@
 
   /* Liquid-glass tab bar: frosted translucent track + a glossy bubble that slides to the active tab */
   nav.tabs{
-    --glass-tint:linear-gradient(135deg, rgba(212,175,55,.10), rgba(59,130,246,.10) 55%, rgba(212,175,55,.06)),
-      color-mix(in srgb, var(--surface-2) 55%, transparent);
-    --glass-edge:rgba(212,175,55,.28);
-    --glass-hi:rgba(255,255,255,.12);
-    --glass-shadow:0 10px 30px -12px rgba(0,0,0,.6), 0 0 24px -10px rgba(212,175,55,.35);
-    --bubble-top:rgba(253,224,138,.95);
-    --bubble-bottom:rgba(212,175,55,.88);
-    --bubble-edge:rgba(255,236,170,.75);
-    --bubble-glow:rgba(212,175,55,.55);
+    --glass-tint:color-mix(in srgb, var(--surface-2) 75%, transparent);
+    --glass-edge:rgba(201,168,92,.20);
+    --glass-hi:rgba(255,255,255,.05);
+    --glass-shadow:0 10px 26px -14px rgba(0,0,0,.6);
+    --bubble-top:#D3B672;
+    --bubble-bottom:#BF9F57;
+    --bubble-edge:rgba(225,200,140,.40);
+    --bubble-glow:rgba(201,168,92,.18);
+    --bubble-sheen:rgba(255,255,255,.16);
     --bubble-text:var(--gold-ink);
     position:relative; isolation:isolate;
     display:flex; gap:4px; padding:5px;
@@ -158,7 +161,7 @@
     position:absolute; z-index:0; top:5px; bottom:5px; left:0; width:0;
     border-radius:100px; pointer-events:none;
     background:
-      linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0) 48%),
+      linear-gradient(180deg, var(--bubble-sheen, rgba(255,255,255,.55)), rgba(255,255,255,0) 48%),
       linear-gradient(180deg, var(--bubble-top), var(--bubble-bottom));
     border:1px solid var(--bubble-edge);
     box-shadow:inset 0 1px 1px rgba(255,255,255,.7), inset 0 -3px 6px rgba(0,0,0,.14),
@@ -339,7 +342,7 @@
   .folio-top{
     display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px;
   }
-  .rangepill{ font-weight:800; font-size:14px; color:var(--gold-cite); }
+  .rangepill{ font-weight:700; font-size:14px; color:var(--gold-cite); }
   .folio-title{
     font-size:24px; line-height:1.3; margin-bottom:2px; color:var(--ink);
   }
@@ -889,7 +892,7 @@
   }
   .missionbar .mi{ text-align:center; padding:0 4px; }
   .missionbar .mi + .mi{ border-left:1px solid var(--border); }
-  .missionbar .mi-num{ font-size:19px; font-weight:800; color:var(--gold-cite); font-variant-numeric:tabular-nums; line-height:1.1; }
+  .missionbar .mi-num{ font-size:19px; font-weight:700; color:var(--gold-cite); font-variant-numeric:tabular-nums; line-height:1.1; }
   .missionbar .mi-num.mi-done{ color:var(--emerald); }
   .missionbar .mi-lbl{ font-size:10px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; font-weight:700; margin-top:3px; }
   .missionbar .mi-track{
@@ -988,6 +991,7 @@
     --bubble-bottom:rgba(228,87,46,.92);
     --bubble-edge:rgba(255,200,175,.9);
     --bubble-glow:rgba(228,87,46,.45);
+    --bubble-sheen:rgba(255,255,255,.55);
     --bubble-text:#FFFFFF;
   }
   body[data-theme="light"] nav.tabs button:not(.active){ color:#5B6B6B; }
@@ -1505,7 +1509,7 @@
   try{ var savedTheme = localStorage.getItem(THEME_KEY); if(savedTheme==='light'||savedTheme==='dark') theme = savedTheme; }catch(e){}
   var SUN_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
   var MOON_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-  var THEME_BG = { light:'#FAF5EC', dark:'#0F172A' };
+  var THEME_BG = { light:'#FAF5EC', dark:'#121316' };
   function applyTheme(){
     document.body.setAttribute('data-theme', theme);
     // Keep the phone's status bar / browser bar the same colour as the page (iPhone and Android read these)
@@ -1928,7 +1932,7 @@
   }
 
   // ---------- shared helpers for Butiran (Kaji) and the Kemajuan tab ----------
-  var LEVEL_COLORS = ['var(--border)','#E9B949','#D4AF37','#7FB7A6','#34D399','#0F9F74'];
+  var LEVEL_COLORS = ['var(--border)','var(--lv1)','var(--lv2)','var(--lv3)','var(--lv4)','var(--lv5)'];
   function missesOf(id){ var c = srs[id]; return c ? Math.max(0, (c.seen||0) - (c.correct||0)) : 0; }
   function focusList(){
     return STUDY_POOL.filter(function(e){ return missesOf(e.id) >= 2; })
