@@ -717,6 +717,14 @@
   .lp-seg{ display:flex; gap:6px; flex-wrap:wrap; }
   .lp-seg button.active{ background:var(--gold); color:var(--gold-ink); border-color:transparent; }
   .lp-go{ width:100%; margin-top:18px; padding:13px; border-radius:12px; border:0; background:var(--gold); color:var(--gold-ink); font-family:inherit; font-size:15px; font-weight:800; cursor:pointer; }
+  /* Dengar: soft fade when the falsafah changes; mini player rises in */
+  #lpNow, .miniplayer .mp-info{ transition:opacity .26s cubic-bezier(.32,.72,0,1), transform .26s cubic-bezier(.32,.72,0,1); }
+  #lpNow.lp-out, .miniplayer .mp-info.lp-out{ opacity:0; transform:translateY(6px); transition-duration:.17s; }
+  .miniplayer:not([hidden]){ animation:mpIn .38s cubic-bezier(.32,.72,0,1); }
+  @keyframes mpIn{ from{ opacity:0; transform:translate(-50%, 16px); } to{ opacity:1; transform:translate(-50%, 0); } }
+  .mp-btn{ transition:transform .15s ease, background-color .2s ease; }
+  .mp-btn:active{ transform:scale(.92); }
+  @media (prefers-reduced-motion: reduce){ #lpNow, .miniplayer .mp-info, .mp-btn{ transition:none; } .miniplayer:not([hidden]){ animation:none; } }
   .lp-now{ margin-top:18px; border:1px solid var(--border); border-radius:16px; padding:14px; background:var(--surface-2); }
   .lp-now .lp-meta{ font-size:12px; color:var(--muted); }
   .lp-now h4{ margin:4px 0 6px; font-size:17px; }
@@ -2687,7 +2695,8 @@
   var lpSet = (function(){ try{ var s = JSON.parse(localStorage.getItem(LISTEN_KEY) || 'null'); if(s && s.repeat){ if(!s.voice) s.voice = 'campur'; if(!s.pause) s.pause = 5; if(!s.halonSkip) s.halonSkip = []; return s; } }catch(e){} return { repeat: 1, order: 'nombor', voice: 'campur', pause: 5, halonSkip: [] }; })();
   function saveLpSet(){ try{ localStorage.setItem(LISTEN_KEY, JSON.stringify({ repeat: lpSet.repeat, order: lpSet.order, voice: lpSet.voice, pause: lpSet.pause, halonSkip: lpSet.halonSkip })); }catch(e){} }
   function lpVoice(){ return halonIds().length ? lpSet.voice : 'rifai'; }
-  var LP = { ids: [], idx: 0, rep: 0, clip: 0, clips: null, active: false, loading: false, msg: '', from: null, to: null, token: 0, gap: false, gapLeft: 0 };
+  var LP = { ids: [], idx: 0, rep: 0, clip: 0, clips: null, active: false, loading: false, msg: '', from: null, to: null, token: 0, gap: false, gapLeft: 0,
+             userPaused: false, done: false, switching: false, ending: false, loadSlow: false, endT: null, fadeI: null, warm: null };
   var lpAudio = new Audio();
   lpAudio.preload = 'auto';
   lpAudio.setAttribute('playsinline', '');
@@ -2706,7 +2715,48 @@
   var GAP_OPTS = [3, 5, 7, 10], GAP_SRCS = {};
   function gapSecs(){ return GAP_OPTS.indexOf(lpSet.pause) >= 0 ? lpSet.pause : 5; }
   function gapSrc(){ var n = gapSecs(); return GAP_SRCS[n] || (GAP_SRCS[n] = silentWav(8000 * n)); }
-  function lpUnlock(){ try{ lpAudio.src = SILENT; var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
+  function lpUnlock(){ LP.switching = true; try{ lpAudio.src = SILENT; var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
+  // what the student asked for (playing or paused), so the icon does not flicker while clips change
+  function lpPlaying(){ return LP.active && !LP.userPaused && !LP.done; }
+  function lpPlayNow(){
+    var p = lpAudio.play();
+    if(p && p.catch) p.catch(function(err){ if(err && err.name === 'AbortError') return; LP.switching = false; LP.userPaused = true; lpUpdateUI(); });
+  }
+  // short volume ramps so recitations start and stop softly (phones that lock volume simply skip the ramp)
+  var FADE_OUT = 0.18;
+  function lpFade(to, ms, cb){
+    clearInterval(LP.fadeI);
+    if(ms <= 0 || document.hidden){ try{ lpAudio.volume = to; }catch(e){} if(cb) cb(); return; }
+    var from = lpAudio.volume, t0 = performance.now();
+    LP.fadeI = setInterval(function(){
+      var k = Math.min(1, (performance.now() - t0) / ms);
+      try{ lpAudio.volume = from + (to - from) * k * (2 - k); }catch(e){}
+      if(k >= 1){ clearInterval(LP.fadeI); if(cb) cb(); }
+    }, 16);
+  }
+  function lpCancelFade(){ clearInterval(LP.fadeI); LP.ending = false; try{ lpAudio.volume = 1; }catch(e){} }
+  // a trimmed clip stops right at its last word, fading out instead of cutting into the next word
+  function lpArmEnd(){
+    clearTimeout(LP.endT);
+    var c = !LP.gap && LP.clips && LP.clips[LP.clip];
+    if(!c || !c.end) return;
+    LP.endT = setTimeout(lpClipEnd, Math.max(0, (c.end - FADE_OUT - lpAudio.currentTime) * 1000 / (lpAudio.playbackRate || 1)));
+  }
+  function lpClipEnd(){
+    if(LP.ending || LP.gap || !LP.clips) return;
+    LP.ending = true;
+    var tok = LP.token, ci = LP.clip, rp = LP.rep;
+    lpFade(0, FADE_OUT * 1000, function(){
+      LP.ending = false;
+      if(tok !== LP.token || ci !== LP.clip || rp !== LP.rep) return;
+      LP.switching = true; lpAudio.pause(); lpAdvance();
+    });
+  }
+  // a user skip fades the current voice out first
+  function lpSkip(fn){
+    if(lpPlaying() && !lpAudio.paused && !LP.gap && !document.hidden){ lpFade(0, 150, function(){ LP.ending = false; fn(); }); }
+    else fn();
+  }
 
   function lpPool(from, to){
     // his recordings the student ticked (all by default; new uploads are included automatically), any julat
@@ -2730,13 +2780,25 @@
     lpUnlock();
     lpPlayItem();
   }
+  function lpPrefetch(nx){
+    // the next falsafah's words and audio, so it starts at once when its turn comes
+    lpWbwFor(nx).catch(function(){});
+    lpClipsFor(nx).then(function(cl){
+      var u = cl && cl[0] && cl[0].url;
+      if(!u || /^blob:/.test(u)) return;
+      if(!LP.warm){ LP.warm = new Audio(); LP.warm.preload = 'auto'; LP.warm.muted = true; }
+      if(LP.warm.src !== u){ LP.warm.src = u; try{ LP.warm.load(); }catch(e){} }
+    }).catch(function(){});
+  }
   function lpPlayItem(){
     var entry = lpEntry();
     if(!entry) return;
     var token = ++LP.token;
-    LP.gap = false;
+    clearTimeout(LP.endT); LP.gap = false; LP.done = false; LP.userPaused = false; LP.switching = true; LP.loadSlow = false;
     LP.rep = 0; LP.clip = 0; LP.clips = null; LP.loading = true; LP.msg = '';
     lpUpdateUI(); lpMeta(entry);
+    // say "memuatkan" only when loading is slow, so quick changes stay quiet
+    setTimeout(function(){ if(token === LP.token && LP.loading){ LP.loadSlow = true; lpUpdateUI(); } }, 700);
     lpWbwFor(entry).then(function(){ if(token === LP.token) lpUpdateUI(); }).catch(function(){});
     lpClipsFor(entry).then(function(clips){
       if(token !== LP.token) return;
@@ -2746,11 +2808,10 @@
       lpMeta(entry);
       if(!hpAudio.paused) hpAudio.pause();   // one voice at a time
       lpPlayClip();
-      // fetch the next falsafah's details in the background
-      var nx = entryById(LP.ids[LP.idx + 1]); if(nx) lpClipsFor(nx).catch(function(){});
+      var nx = entryById(LP.ids[LP.idx + 1]); if(nx) lpPrefetch(nx);
     }).catch(function(){
       if(token !== LP.token) return;
-      LP.loading = false;
+      LP.loading = false; LP.switching = false;
       LP.msg = 'Audio tidak dapat dimuatkan (perlu internet). Beralih ke falsafah seterusnya…';
       lpUpdateUI();
       setTimeout(function(){ if(token === LP.token) lpNext(); }, 1500);
@@ -2759,7 +2820,15 @@
   function lpPlayClip(){
     var c = LP.clips[LP.clip];
     var startAt = c.start || 0;
-    var go = function(){ try{ lpAudio.currentTime = startAt; }catch(e){} var p = lpAudio.play(); if(p && p.catch) p.catch(function(){ lpUpdateUI(); }); };
+    var tok = LP.token;
+    var go = function(){
+      if(tok !== LP.token) return;
+      try{ lpAudio.currentTime = startAt; }catch(e){}
+      if(LP.userPaused){ LP.switching = false; try{ lpAudio.volume = 1; }catch(e){} lpUpdateUI(); return; }
+      try{ lpAudio.volume = document.hidden ? 1 : 0; }catch(e){}
+      lpPlayNow(); lpFade(1, 120);
+    };
+    clearTimeout(LP.endT); LP.switching = true; LP.ending = false;
     if(lpAudio.src !== c.url){
       lpAudio.src = c.url;
       lpAudio.addEventListener('loadedmetadata', function once(){ lpAudio.removeEventListener('loadedmetadata', once); go(); });
@@ -2778,9 +2847,10 @@
     lpPlayClip();
   }
   function lpGap(then){
-    LP.gap = true; LP.gapThen = then; LP.gapLeft = gapSecs();
+    clearTimeout(LP.endT); lpCancelFade();
+    LP.gap = true; LP.gapThen = then; LP.gapLeft = gapSecs(); LP.switching = true;
     lpAudio.src = gapSrc();
-    var p = lpAudio.play(); if(p && p.catch) p.catch(function(){ lpUpdateUI(); });
+    if(LP.userPaused) LP.switching = false; else lpPlayNow();
     lpUpdateUI();
   }
   function lpGapTick(){
@@ -2792,26 +2862,27 @@
   function lpNext(){
     if(!LP.active) return;
     if(LP.idx + 1 >= LP.ids.length){
-      lpAudio.pause(); LP.msg = 'Selesai. Semua ' + LP.ids.length + ' falsafah dalam julat ini telah didengar.';
-      LP.clips = null; lpUpdateUI(); return;
+      LP.done = true; clearTimeout(LP.endT); lpAudio.pause(); lpCancelFade();
+      LP.msg = 'Selesai. Semua ' + LP.ids.length + ' falsafah dalam julat ini telah didengar.';
+      LP.clips = null; LP.gap = false; lpUpdateUI(); return;
     }
     LP.idx++; lpPlayItem();
   }
   function lpPrev(){
     if(!LP.active) return;
-    if(LP.gap){ LP.gap = false; LP.rep = 0; LP.clip = 0; if(LP.clips) lpPlayClip(); return; }
-    if(lpAudio.currentTime > 3 || LP.idx === 0){ LP.rep = 0; LP.clip = 0; if(LP.clips) lpPlayClip(); return; }
+    if(LP.gap){ LP.gap = false; LP.rep = 0; LP.clip = 0; LP.userPaused = false; if(LP.clips) lpPlayClip(); return; }
+    if(lpAudio.currentTime > 3 || LP.idx === 0){ LP.rep = 0; LP.clip = 0; LP.userPaused = false; if(LP.clips) lpPlayClip(); return; }
     LP.idx--; lpPlayItem();
   }
   function lpToggle(){
     if(!LP.active) return;
-    if(LP.gap){ if(lpAudio.paused){ var g = lpAudio.play(); if(g && g.catch) g.catch(function(){}); } else lpAudio.pause(); lpUpdateUI(); return; }
-    if(!LP.clips){ if(LP.msg && LP.idx + 1 >= LP.ids.length){ LP.idx = 0; } lpUnlock(); lpPlayItem(); return; }
-    if(lpAudio.paused){ var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); } else lpAudio.pause();
+    if(!LP.clips && !LP.loading){ if(LP.done || (LP.msg && LP.idx + 1 >= LP.ids.length)){ LP.idx = 0; } lpUnlock(); lpPlayItem(); return; }
+    if(lpPlaying()){ LP.userPaused = true; clearTimeout(LP.endT); lpCancelFade(); lpAudio.pause(); }
+    else { LP.userPaused = false; if(!LP.loading) lpPlayNow(); }   // still loading: it starts by itself when ready
     lpUpdateUI();
   }
   function lpStop(){
-    LP.token++; LP.active = false; LP.clips = null; LP.gap = false; lpAudio.pause();
+    LP.token++; LP.active = false; LP.clips = null; LP.gap = false; LP.done = false; clearTimeout(LP.endT); lpAudio.pause(); lpCancelFade();
     try{ lpAudio.removeAttribute('src'); lpAudio.load(); }catch(e){}
     if('mediaSession' in navigator){ navigator.mediaSession.playbackState = 'none'; }
     lpUpdateUI();
@@ -2822,12 +2893,20 @@
   });
   lpAudio.addEventListener('timeupdate', function(){
     if(LP.gap){ lpGapTick(); return; }
-    if(!LP.clips) return;
+    if(!LP.clips || LP.switching) return;
     var c = LP.clips[LP.clip];
-    if(c && c.end && lpAudio.currentTime >= c.end){ lpAudio.pause(); lpAdvance(); }
+    // backup for the timer (timers slow down when the screen is locked)
+    if(c && c.end && lpAudio.currentTime >= c.end - FADE_OUT) lpClipEnd();
   });
-  lpAudio.addEventListener('play', function(){ lpUpdateUI(); });
-  lpAudio.addEventListener('pause', function(){ lpUpdateUI(); });
+  lpAudio.addEventListener('play', function(){ if(LP.active && !LP.done) LP.userPaused = false; lpUpdateUI(); });
+  lpAudio.addEventListener('playing', function(){ LP.switching = false; lpArmEnd(); });
+  lpAudio.addEventListener('seeked', function(){ if(!lpAudio.paused) lpArmEnd(); });
+  lpAudio.addEventListener('pause', function(){
+    clearTimeout(LP.endT);
+    // pauses from clip changes or the end of a clip are not the student's pause
+    if(LP.active && !LP.switching && !LP.ending && !lpAudio.ended) LP.userPaused = true;
+    lpUpdateUI();
+  });
   lpAudio.addEventListener('error', function(){
     if(!LP.active || !LP.clips || LP.gap || lpAudio.src === SILENT || !lpAudio.src) return;
     LP.msg = 'Audio gagal dimainkan. Beralih ke falsafah seterusnya…'; lpUpdateUI();
@@ -2846,10 +2925,10 @@
   }
   if('mediaSession' in navigator){
     try{
-      navigator.mediaSession.setActionHandler('play', function(){ lpToggle(); });
-      navigator.mediaSession.setActionHandler('pause', function(){ lpAudio.pause(); });
-      navigator.mediaSession.setActionHandler('nexttrack', function(){ lpNext(); });
-      navigator.mediaSession.setActionHandler('previoustrack', function(){ lpPrev(); });
+      navigator.mediaSession.setActionHandler('play', function(){ if(!lpPlaying()) lpToggle(); });
+      navigator.mediaSession.setActionHandler('pause', function(){ if(lpPlaying()) lpToggle(); });
+      navigator.mediaSession.setActionHandler('nexttrack', function(){ lpSkip(lpNext); });
+      navigator.mediaSession.setActionHandler('previoustrack', function(){ lpSkip(lpPrev); });
       navigator.mediaSession.setActionHandler('stop', function(){ lpStop(); });
     }catch(e){}
   }
@@ -2860,36 +2939,83 @@
     var s = (LP.idx + 1) + '/' + LP.ids.length + ' falsafah';
     if(LP.gap) return s + ' &middot; ' + (LP.gapThen === 'repeat' ? 'ulang ' + (LP.rep + 1) + '/' + lpSet.repeat + ' dalam ' : 'seterusnya dalam ') + LP.gapLeft + 's';
     if(lpSet.repeat > 1 && LP.clips) s += ' &middot; ulang ' + (LP.rep + 1) + '/' + lpSet.repeat;
-    if(LP.loading) s += ' &middot; memuatkan…';
+    if(LP.loading && LP.loadSlow) s += ' &middot; memuatkan…';
     return s;
+  }
+  function lpIcon(){ return lpPlaying() ? '&#10074;&#10074;' : '&#9654;'; }
+  function lpVoiceHtml(entry){
+    var h = LP.clips ? !!(LP.clips[0] && LP.clips[0].halon) : (lpVoice() !== 'rifai' && hasHalon(entry.id));
+    return 'Suara: ' + (h ? '<b>Dr. HALO-N</b>' : RECITER_NAME);
+  }
+  // iOS-style change: the old falsafah fades out, the new one fades in, and the card glides to its new height.
+  // When the falsafah is the same, only the small parts (status, icon) are updated in place.
+  var LP_EASE = 'cubic-bezier(.32,.72,0,1)';
+  function lpSwap(el, key, build, patch, glide){
+    if(el._key === key){ if(!el._swapT) patch(el); return; }
+    el._key = key;
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!el.firstElementChild || reduce || document.hidden){ clearTimeout(el._swapT); el._swapT = null; el.innerHTML = build(); return; }
+    if(el._swapT) return;   // already fading; it builds the newest content when it lands
+    el.classList.add('lp-out');
+    el._swapT = setTimeout(function(){
+      el._swapT = null;
+      var h0 = el.offsetHeight;
+      el.innerHTML = build();
+      if(glide){
+        var h1 = el.scrollHeight;
+        if(Math.abs(h1 - h0) > 2){
+          el.style.overflow = 'hidden'; el.style.height = h0 + 'px'; void el.offsetHeight;
+          el.style.transition = 'height .36s ' + LP_EASE + ', opacity .26s ' + LP_EASE + ', transform .26s ' + LP_EASE;
+          el.style.height = h1 + 'px';
+          clearTimeout(el._glideT);
+          el._glideT = setTimeout(function(){ el.style.height = ''; el.style.overflow = ''; el.style.transition = ''; }, 380);
+        }
+      }
+      el.classList.remove('lp-out');
+    }, 170);
   }
   function lpUpdateUI(){
     var mp = document.getElementById('miniPlayer'), entry = lpEntry();
-    var playing = LP.active && LP.clips && !lpAudio.paused;
+    var playing = lpPlaying();
     document.getElementById('listenBtn').classList.toggle('on', LP.active);
     if('mediaSession' in navigator){ try{ navigator.mediaSession.playbackState = LP.active ? (playing ? 'playing' : 'paused') : 'none'; }catch(e){} }
-    if(!LP.active || !entry){ mp.hidden = true; document.body.classList.remove('has-miniplayer'); }
+    if(!LP.active || !entry){ mp.hidden = true; document.body.classList.remove('has-miniplayer'); mp.innerHTML = ''; }
     else {
       mp.hidden = lpSheetOpen; document.body.classList.toggle('has-miniplayer', !lpSheetOpen);
-      mp.innerHTML =
-        '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + (playing ? '&#10074;&#10074;' : '&#9654;') + '</button>' +
-        '<div class="mp-info" data-lp="open"><div class="mp-t">' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</div>' +
-        '<div class="mp-s">&#127911; <span class="lp-status">' + lpStatusText() + '</span></div></div>' +
-        '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
-        '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&times;</button>';
+      if(!mp.firstElementChild){
+        mp.innerHTML =
+          '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda"></button>' +
+          '<div class="mp-info" data-lp="open"></div>' +
+          '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
+          '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&times;</button>';
+      }
+      mp.querySelector('[data-lp="toggle"]').innerHTML = lpIcon();
+      lpSwap(mp.querySelector('.mp-info'), entry.id, function(){
+        var e = lpEntry(); if(!e) return '';
+        return '<div class="mp-t">' + e.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(e.title)) + '</div>' +
+          '<div class="mp-s">&#127911; <span class="lp-status">' + lpStatusText() + '</span></div>';
+      }, function(el){ var s = el.querySelector('.lp-status'); if(s) s.innerHTML = lpStatusText(); });
     }
     var now = document.getElementById('lpNow');
-    if(lpSheetOpen && now) now.innerHTML = lpNowHtml();
+    if(lpSheetOpen && now){
+      if(!entry){ now.innerHTML = ''; now._key = null; }
+      else lpSwap(now, entry.id + (lpWbwCache[entry.id] ? ':w' : ''), lpNowHtml, function(el){
+        var e = lpEntry(); if(!e) return;
+        el.querySelectorAll('.lp-status').forEach(function(s){ s.innerHTML = lpStatusText(); });
+        var t = el.querySelector('[data-lp="toggle"]'); if(t) t.innerHTML = lpIcon();
+        var v = el.querySelector('.lp-voice'); if(v) v.innerHTML = lpVoiceHtml(e);
+        var m = el.querySelector('.lp-msg'); if(m) m.textContent = LP.msg || '';
+      }, true);
+    }
   }
   function lpNowHtml(){
     var entry = lpEntry();
     if(!entry) return '';
-    var playing = LP.clips && !lpAudio.paused;
     return '<div class="lp-now"><div class="lp-meta">Sedang dimainkan &middot; <span class="lp-status">' + lpStatusText() + '</span></div>' +
       '<h4>' + entry.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</h4>' +
-      (LP.clips ? '<div class="lp-meta">Suara: ' + (LP.clips[0] && LP.clips[0].halon ? '<b>Dr. HALO-N</b>' : RECITER_NAME) + '</div>' : '') +
+      '<div class="lp-meta lp-voice">' + lpVoiceHtml(entry) + '</div>' +
       '<div class="lp-ctl"><button type="button" class="mp-btn" data-lp="prev" aria-label="Sebelum">&#9198;</button>' +
-      '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + (playing ? '&#10074;&#10074;' : '&#9654;') + '</button>' +
+      '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda">' + lpIcon() + '</button>' +
       '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
       '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&#9632;</button></div>' +
       '<div class="lp-msg">' + escapeHtml(LP.msg || '') + '</div>' +
@@ -2979,9 +3105,9 @@
     if(!b) return;
     var a = b.getAttribute('data-lp');
     if(a === 'toggle') lpToggle();
-    else if(a === 'next') lpNext();
-    else if(a === 'prev') lpPrev();
-    else if(a === 'stop') lpStop();
+    else if(a === 'next') lpSkip(lpNext);
+    else if(a === 'prev') lpSkip(lpPrev);
+    else if(a === 'stop') lpSkip(lpStop);
     else if(a === 'open') openListen();
   }
   document.getElementById('miniPlayer').onclick = lpControl;
