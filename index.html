@@ -2646,8 +2646,8 @@
 
   /* ---------------- LISTEN (audio player) ---------------- */
   var LISTEN_KEY = 'falsafah200_listen_v1';
-  var lpSet = (function(){ try{ var s = JSON.parse(localStorage.getItem(LISTEN_KEY) || 'null'); if(s && s.repeat){ if(!s.voice) s.voice = 'campur'; return s; } }catch(e){} return { repeat: 1, order: 'nombor', voice: 'campur' }; })();
-  function saveLpSet(){ try{ localStorage.setItem(LISTEN_KEY, JSON.stringify({ repeat: lpSet.repeat, order: lpSet.order, voice: lpSet.voice })); }catch(e){} }
+  var lpSet = (function(){ try{ var s = JSON.parse(localStorage.getItem(LISTEN_KEY) || 'null'); if(s && s.repeat){ if(!s.voice) s.voice = 'campur'; if(!s.pause) s.pause = 5; return s; } }catch(e){} return { repeat: 1, order: 'nombor', voice: 'campur', pause: 5 }; })();
+  function saveLpSet(){ try{ localStorage.setItem(LISTEN_KEY, JSON.stringify({ repeat: lpSet.repeat, order: lpSet.order, voice: lpSet.voice, pause: lpSet.pause })); }catch(e){} }
   function lpVoice(){ return halonIds().length ? lpSet.voice : 'rifai'; }
   var LP = { ids: [], idx: 0, rep: 0, clip: 0, clips: null, active: false, loading: false, msg: '', from: null, to: null, token: 0, gap: false, gapLeft: 0 };
   var lpAudio = new Audio();
@@ -2665,8 +2665,9 @@
   }
   var SILENT = silentWav(800);
   // 5 seconds of silence between falsafah; played as real audio so the lock screen and car keep the session alive
-  var GAP_SECS = 5, GAP_SRC = null;
-  function gapSrc(){ return GAP_SRC || (GAP_SRC = silentWav(8000 * GAP_SECS)); }
+  var GAP_OPTS = [3, 5, 7, 10], GAP_SRCS = {};
+  function gapSecs(){ return GAP_OPTS.indexOf(lpSet.pause) >= 0 ? lpSet.pause : 5; }
+  function gapSrc(){ var n = gapSecs(); return GAP_SRCS[n] || (GAP_SRCS[n] = silentWav(8000 * n)); }
   function lpUnlock(){ try{ lpAudio.src = SILENT; var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
 
   function lpPool(from, to){
@@ -2732,18 +2733,19 @@
     LP.clip++;
     if(LP.clip >= LP.clips.length){
       LP.clip = 0; LP.rep++;
-      if(LP.rep >= lpSet.repeat){ if(LP.idx + 1 < LP.ids.length) lpGap(); else lpNext(); return; }
+      if(LP.rep >= lpSet.repeat){ if(LP.idx + 1 < LP.ids.length) lpGap('next'); else lpNext(); return; }
+      lpGap('repeat'); return;   // pause before each ulangan too
     }
     lpPlayClip();
   }
-  function lpGap(){
-    LP.gap = true; LP.gapLeft = GAP_SECS;
+  function lpGap(then){
+    LP.gap = true; LP.gapThen = then; LP.gapLeft = gapSecs();
     lpAudio.src = gapSrc();
     var p = lpAudio.play(); if(p && p.catch) p.catch(function(){ lpUpdateUI(); });
     lpUpdateUI();
   }
   function lpGapTick(){
-    var left = Math.max(1, Math.ceil(GAP_SECS - (lpAudio.currentTime || 0)));
+    var left = Math.max(1, Math.ceil(gapSecs() - (lpAudio.currentTime || 0)));
     if(left === LP.gapLeft) return;
     LP.gapLeft = left;
     document.querySelectorAll('.lp-status').forEach(function(el){ el.innerHTML = lpStatusText(); });
@@ -2776,7 +2778,7 @@
     lpUpdateUI();
   }
   lpAudio.addEventListener('ended', function(){
-    if(LP.gap){ LP.gap = false; lpNext(); return; }
+    if(LP.gap){ LP.gap = false; if(LP.gapThen === 'repeat' && LP.clips) lpPlayClip(); else lpNext(); return; }
     if(lpAudio.src !== SILENT && LP.clips) lpAdvance();
   });
   lpAudio.addEventListener('timeupdate', function(){
@@ -2817,7 +2819,7 @@
   function lpStatusText(){
     if(!LP.active) return '';
     var s = (LP.idx + 1) + '/' + LP.ids.length + ' falsafah';
-    if(LP.gap) return s + ' &middot; seterusnya dalam ' + LP.gapLeft + 's';
+    if(LP.gap) return s + ' &middot; ' + (LP.gapThen === 'repeat' ? 'ulang ' + (LP.rep + 1) + '/' + lpSet.repeat + ' dalam ' : 'seterusnya dalam ') + LP.gapLeft + 's';
     if(lpSet.repeat > 1 && LP.clips) s += ' &middot; ulang ' + (LP.rep + 1) + '/' + lpSet.repeat;
     if(LP.loading) s += ' &middot; memuatkan…';
     return s;
@@ -2877,11 +2879,13 @@
         '<div class="lp-quick"><button type="button" data-r="' + studyRange.from + '-' + studyRange.to + '">Julat kaji saya</button><button type="button" data-r="1-100">Tahun 1</button><button type="button" data-r="101-200">Tahun 2</button><button type="button" data-r="1-200">Semua</button></div></div>' +
       '<div class="lp-set"><label>Ulang setiap ayat</label><div class="lp-seg" id="lpRep">' +
         [1,2,3].map(function(n){ return '<button type="button" data-rep="' + n + '" class="' + (lpSet.repeat === n ? 'active' : '') + '">' + n + '&times;</button>'; }).join('') + '</div></div>' +
+      '<div class="lp-set"><label>Jeda selepas setiap bacaan (termasuk ulangan)</label><div class="lp-seg" id="lpPause">' +
+        GAP_OPTS.map(function(n){ return '<button type="button" data-pause="' + n + '" class="' + (gapSecs() === n ? 'active' : '') + '">' + n + ' saat</button>'; }).join('') + '</div></div>' +
       '<div class="lp-set"><label>Turutan</label><div class="lp-seg" id="lpOrd">' +
         '<button type="button" data-ord="nombor" class="' + (lpSet.order === 'nombor' ? 'active' : '') + '">Ikut nombor</button>' +
         '<button type="button" data-ord="rawak" class="' + (lpSet.order === 'rawak' ? 'active' : '') + '">Rawak</button></div></div>' +
       '<button type="button" class="lp-go" id="lpGo"></button>' +
-      '<p class="pnote">Selepas mula, anda boleh tutup panel ini dan terus guna aplikasi. Ada jeda 5 saat antara setiap falsafah. Kawalan juga ada di skrin kunci dan butang kereta (Bluetooth / CarPlay). Perlu internet.</p></div>';
+      '<p class="pnote">Selepas mula, anda boleh tutup panel ini dan terus guna aplikasi. Kawalan juga ada di skrin kunci dan butang kereta (Bluetooth / CarPlay). Perlu internet.</p></div>';
     var sheet = document.getElementById('detailSheet');
     sheet.innerHTML = html; sheet.scrollTop = 0;
     lpSheetOpen = true;
@@ -2904,6 +2908,8 @@
       if(r){ lpSet.repeat = +r.getAttribute('data-rep'); saveLpSet(); document.querySelectorAll('#lpRep button').forEach(function(b){ b.classList.toggle('active', b === r); }); lpUpdateUI(); return; }
       var vb = e.target.closest('[data-voice]');
       if(vb){ lpSet.voice = vb.getAttribute('data-voice'); saveLpSet(); document.querySelectorAll('#lpVoice button').forEach(function(b){ b.classList.toggle('active', b === vb); }); refreshGo(); return; }
+      var pz = e.target.closest('[data-pause]');
+      if(pz){ lpSet.pause = +pz.getAttribute('data-pause'); saveLpSet(); document.querySelectorAll('#lpPause button').forEach(function(b){ b.classList.toggle('active', b === pz); }); return; }
       var o = e.target.closest('[data-ord]');
       if(o){ lpSet.order = o.getAttribute('data-ord'); saveLpSet(); document.querySelectorAll('#lpOrd button').forEach(function(b){ b.classList.toggle('active', b === o); }); return; }
       if(e.target.closest('#lpGo')){ var v = rangeVals(); lpStart(v.from, v.to); refreshGo(); return; }
