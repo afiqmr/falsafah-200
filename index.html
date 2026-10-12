@@ -252,6 +252,17 @@
   .halon-btn.loading .hb-ico{ animation:hbPulse 1s ease-in-out infinite; }
   @keyframes hbPulse{ 50%{ opacity:.35; } }
   .lp-set.dim .lp-range, .lp-set.dim .lp-quick{ opacity:.4; pointer-events:none; }
+  .lp-pick{ display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+  .lp-pick-all{ display:flex; gap:6px; }
+  .lp-pick-all button{ border:1px solid var(--border); background:var(--surface-2); color:var(--ink); border-radius:100px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+  .lp-pick [data-hp]{ display:flex; align-items:center; gap:10px; text-align:left; border:1px solid var(--border); background:var(--surface); color:var(--muted);
+    border-radius:12px; padding:9px 12px; font-family:inherit; font-size:13px; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:background-color .25s var(--ios-curve), border-color .25s var(--ios-curve), color .25s var(--ios-curve); }
+  .lp-pick [data-hp] b{ min-width:30px; color:var(--muted); }
+  .lp-pick [data-hp] span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lp-pick [data-hp]::before{ content:""; width:18px; height:18px; flex:none; border-radius:6px; border:1.5px solid var(--border); background:var(--surface-2); }
+  .lp-pick [data-hp].active{ color:var(--ink); border-color:color-mix(in srgb, var(--gold) 60%, var(--border)); }
+  .lp-pick [data-hp].active b{ color:var(--gold-cite); }
+  .lp-pick [data-hp].active::before{ background:var(--gold); border-color:var(--gold); box-shadow:inset 0 0 0 3px var(--surface); }
   .wbw-head .wbw-toggle{ margin:0; }
   .wbw-head .wbl-seg{ display:none; }
   .wbw-on .wbw-head .wbl-seg{ display:inline-flex; }
@@ -2646,8 +2657,8 @@
 
   /* ---------------- LISTEN (audio player) ---------------- */
   var LISTEN_KEY = 'falsafah200_listen_v1';
-  var lpSet = (function(){ try{ var s = JSON.parse(localStorage.getItem(LISTEN_KEY) || 'null'); if(s && s.repeat){ if(!s.voice) s.voice = 'campur'; if(!s.pause) s.pause = 5; return s; } }catch(e){} return { repeat: 1, order: 'nombor', voice: 'campur', pause: 5 }; })();
-  function saveLpSet(){ try{ localStorage.setItem(LISTEN_KEY, JSON.stringify({ repeat: lpSet.repeat, order: lpSet.order, voice: lpSet.voice, pause: lpSet.pause })); }catch(e){} }
+  var lpSet = (function(){ try{ var s = JSON.parse(localStorage.getItem(LISTEN_KEY) || 'null'); if(s && s.repeat){ if(!s.voice) s.voice = 'campur'; if(!s.pause) s.pause = 5; if(!s.halonSkip) s.halonSkip = []; return s; } }catch(e){} return { repeat: 1, order: 'nombor', voice: 'campur', pause: 5, halonSkip: [] }; })();
+  function saveLpSet(){ try{ localStorage.setItem(LISTEN_KEY, JSON.stringify({ repeat: lpSet.repeat, order: lpSet.order, voice: lpSet.voice, pause: lpSet.pause, halonSkip: lpSet.halonSkip })); }catch(e){} }
   function lpVoice(){ return halonIds().length ? lpSet.voice : 'rifai'; }
   var LP = { ids: [], idx: 0, rep: 0, clip: 0, clips: null, active: false, loading: false, msg: '', from: null, to: null, token: 0, gap: false, gapLeft: 0 };
   var lpAudio = new Audio();
@@ -2671,7 +2682,8 @@
   function lpUnlock(){ try{ lpAudio.src = SILENT; var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
 
   function lpPool(from, to){
-    if(lpVoice() === 'halon') return halonIds().filter(function(id){ return entryById(id); });   // all of his recordings, any julat
+    // his recordings the student ticked (all by default; new uploads are included automatically), any julat
+    if(lpVoice() === 'halon') return halonIds().filter(function(id){ return entryById(id) && lpSet.halonSkip.indexOf(id) < 0; });
     return DATA.filter(function(e){ return e.noEnd >= from && e.noStart <= to; }).map(function(e){ return e.id; });
   }
   function lpClipsFor(entry){
@@ -2873,7 +2885,11 @@
       '<div id="lpNow"></div>' +
       (H ? '<div class="lp-set"><label>Suara</label><div class="lp-seg" id="lpVoice">' +
         [['campur','Campur'],['rifai','Hani ar-Rifai'],['halon','Dr. HALO-N sahaja']].map(function(v){ return '<button type="button" data-voice="' + v[0] + '" class="' + (lpVoice() === v[0] ? 'active' : '') + '">' + v[1] + '</button>'; }).join('') +
-        '</div><p class="pnote" id="lpVoiceNote" style="margin:6px 2px 0;"></p></div>' : '') +
+        '</div><p class="pnote" id="lpVoiceNote" style="margin:6px 2px 0;"></p>' +
+        '<div id="lpHalonPick" class="lp-pick"><div class="lp-pick-all"><button type="button" data-hpall="1">Pilih semua</button><button type="button" data-hpall="0">Kosongkan</button></div>' +
+          halonIds().map(function(id){ var e = entryById(id); if(!e) return '';
+            return '<button type="button" data-hp="' + id + '" class="' + (lpSet.halonSkip.indexOf(id) < 0 ? 'active' : '') + '"><b>' + id + '</b><span>' + escapeHtml(displayTitle(e.title)) + '</span></button>'; }).join('') +
+        '</div></div>' : '') +
       '<div class="lp-set" id="lpRangeSet"><label>Julat</label>' +
         '<div class="lp-range">Dari <input id="lpFrom" type="number" min="1" max="200" inputmode="numeric" value="' + from + '"> hingga <input id="lpTo" type="number" min="1" max="200" inputmode="numeric" value="' + to + '"></div>' +
         '<div class="lp-quick"><button type="button" data-r="' + studyRange.from + '-' + studyRange.to + '">Julat kaji saya</button><button type="button" data-r="1-100">Tahun 1</button><button type="button" data-r="101-200">Tahun 2</button><button type="button" data-r="1-200">Semua</button></div></div>' +
@@ -2892,13 +2908,14 @@
     var fromEl = document.getElementById('lpFrom'), toEl = document.getElementById('lpTo'), go = document.getElementById('lpGo');
     function rangeVals(){ return { from: parseInt(fromEl.value, 10), to: parseInt(toEl.value, 10) }; }
     function refreshGo(){
-      var r = rangeVals(), ok = r.from >= 1 && r.to <= 200 && r.from <= r.to, n = ok ? lpPool(r.from, r.to).length : 0;
       var v = lpVoice(), note = document.getElementById('lpVoiceNote');
+      var r = rangeVals(), ok = v === 'halon' || (r.from >= 1 && r.to <= 200 && r.from <= r.to), n = ok ? lpPool(r.from, r.to).length : 0;
       document.getElementById('lpRangeSet').classList.toggle('dim', v === 'halon');
-      if(note) note.innerHTML = v === 'halon' ? 'Semua ' + H + ' rakaman Dr. HALO-N dimainkan (Falsafah ' + halonIds().join(', ') + '). Julat tidak digunakan.'
+      var pick = document.getElementById('lpHalonPick'); if(pick) pick.hidden = v !== 'halon';
+      if(note) note.innerHTML = v === 'halon' ? 'Pilih rakaman yang mahu didengar (' + n + ' daripada ' + H + ' dipilih). Julat tidak digunakan.'
         : v === 'campur' ? 'Suara Dr. HALO-N bagi falsafah yang ada rakamannya; selebihnya ' + RECITER_NAME + '.' : 'Semua falsafah dengan suara ' + RECITER_NAME + '.';
       go.disabled = !n;
-      go.innerHTML = !n ? 'Julat tidak sah' : (LP.active ? '&#8635; Mula semula dengan tetapan ini (' + n + ' falsafah)' : '&#9654; Mula dengar (' + n + ' falsafah)');
+      go.innerHTML = !n ? (v === 'halon' ? 'Pilih sekurang-kurangnya satu rakaman' : 'Julat tidak sah') : (LP.active ? '&#8635; Mula semula dengan tetapan ini (' + n + ' falsafah)' : '&#9654; Mula dengar (' + n + ' falsafah)');
     }
     fromEl.oninput = toEl.oninput = refreshGo;
     sheet.onclick = function(e){
@@ -2908,6 +2925,14 @@
       if(r){ lpSet.repeat = +r.getAttribute('data-rep'); saveLpSet(); document.querySelectorAll('#lpRep button').forEach(function(b){ b.classList.toggle('active', b === r); }); lpUpdateUI(); return; }
       var vb = e.target.closest('[data-voice]');
       if(vb){ lpSet.voice = vb.getAttribute('data-voice'); saveLpSet(); document.querySelectorAll('#lpVoice button').forEach(function(b){ b.classList.toggle('active', b === vb); }); refreshGo(); return; }
+      var hp = e.target.closest('[data-hp]');
+      if(hp){ var hid = +hp.getAttribute('data-hp'), k = lpSet.halonSkip.indexOf(hid);
+        if(k >= 0) lpSet.halonSkip.splice(k, 1); else lpSet.halonSkip.push(hid);
+        hp.classList.toggle('active', k >= 0); saveLpSet(); refreshGo(); return; }
+      var ha = e.target.closest('[data-hpall]');
+      if(ha){ lpSet.halonSkip = ha.getAttribute('data-hpall') === '1' ? [] : halonIds().slice();
+        document.querySelectorAll('#lpHalonPick [data-hp]').forEach(function(b){ b.classList.toggle('active', lpSet.halonSkip.indexOf(+b.getAttribute('data-hp')) < 0); });
+        saveLpSet(); refreshGo(); return; }
       var pz = e.target.closest('[data-pause]');
       if(pz){ lpSet.pause = +pz.getAttribute('data-pause'); saveLpSet(); document.querySelectorAll('#lpPause button').forEach(function(b){ b.classList.toggle('active', b === pz); }); return; }
       var o = e.target.closest('[data-ord]');
