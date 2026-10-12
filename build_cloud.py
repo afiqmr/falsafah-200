@@ -26,6 +26,7 @@ sub('<p>Sila nyatakan nama atau panggilan anda untuk mula menggunakan pembantu h
 sub('<title>الفتح النوى - Falsafah 200</title>', '<title>الفتح النوى - Falsafah 200 (Test)</title>')
 # index.html is a page fragment; give it a doctype so it renders in standards mode.
 # Phones a little smaller (10%); laptops at full size.
+SITE = 'https://falsafah200-test.vercel.app'
 head = nl.join([
     '<link rel="manifest" href="manifest.webmanifest">',
     '<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">',
@@ -34,6 +35,19 @@ head = nl.join([
     '<meta name="apple-mobile-web-app-capable" content="yes">',
     '<meta name="apple-mobile-web-app-title" content="Falsafah 200">',
     '<meta name="apple-mobile-web-app-status-bar-style" content="default">',
+    # link preview card (WhatsApp, Telegram, Facebook, X); WhatsApp needs absolute URLs
+    '<meta property="og:type" content="website">',
+    '<meta property="og:site_name" content="Al-Fathun Nawa">',
+    '<meta property="og:title" content="الفتح النوى · Falsafah 200">',
+    '<meta property="og:description" content="Kaji dan hafaz 200 Falsafah Al-Quran dari Al-Fathun Nawa Jilid 7, dengan ayat asal, ulang kaji, kuiz dan kemajuan.">',
+    '<meta property="og:url" content="' + SITE + '/">',
+    '<meta property="og:image" content="' + SITE + '/icons/og-image.jpg?v=1">',
+    '<meta property="og:image:secure_url" content="' + SITE + '/icons/og-image.jpg?v=1">',
+    '<meta property="og:image:type" content="image/jpeg">',
+    '<meta property="og:image:width" content="1200">',
+    '<meta property="og:image:height" content="630">',
+    '<meta property="og:image:alt" content="Logo AFN, Falsafah 200">',
+    '<meta name="twitter:card" content="summary_large_image">',
     # Android's install prompt can fire early; keep it for the "Pasang sekarang" button
     '<script>window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__bip=e;document.dispatchEvent(new Event("fn-bip"));});'
     'if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>',
