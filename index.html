@@ -1868,13 +1868,21 @@
     renderFolioBody(entry);
   }
 
+  // A card marked Belum ingat goes back at a random spot, with at least 2 other cards before it
+  // when there are enough, so it does not come straight back and the order is not always the same.
+  function requeue(list, id){
+    var gap = 2;
+    if(list.length <= gap){ list.push(id); return; }
+    var pos = gap + Math.floor(Math.random() * (list.length - gap + 1));
+    list.splice(pos, 0, id);
+  }
   function recordKaji(id, result){
     grade(id, result);
     logHistory(id, result);
     if(focus && focus.mode === 'kaji'){
       var qi = focus.queue.indexOf(id);
       if(qi >= 0) focus.queue.splice(qi, 1);
-      if(result === 0) focus.queue.push(id);
+      if(result === 0) requeue(focus.queue, id);
       else {
         focus.done++;
         // A card remembered in a focus session comes back tomorrow, to check it stuck
@@ -1886,7 +1894,7 @@
     daily.results[id] = result === 0 ? 'again' : 'good';
     var i = daily.again.indexOf(id);
     if(i >= 0) daily.again.splice(i, 1);
-    if(result === 0) daily.again.push(id);
+    if(result === 0) requeue(daily.again, id);
     saveDaily(daily);
   }
 
