@@ -551,6 +551,9 @@
     padding:14px 15px; cursor:pointer; display:flex; flex-direction:column; gap:5px;
   }
   .listcard:hover{ border-color:var(--gold); }
+  /* Senarai: the phone only lays out cards near the screen; the rest wait until you scroll to them */
+  #cardList .listcard, #cardList .grouphead{ content-visibility:auto; contain-intrinsic-size:auto 128px; }
+  #cardList .grouphead{ contain-intrinsic-size:auto 64px; }
   .listcard .lc-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .listcard .lc-no{ font-weight:800; color:var(--gold-cite); font-size:13px; }
   .listcard .lc-title{ font-weight:800; font-size:15px; }
