@@ -24,7 +24,7 @@ sub(nl.join(["  if(!getName() || !rangeSaved){", "    setTimeout(openNameModal, 
 sub('<p>Sila nyatakan nama atau panggilan anda untuk mula menggunakan pembantu hafalan ini dalam lembaran pengajian Falsafah Al-Quran.</p>',
     '<p>Pilih julat falsafah yang anda kaji. Nama panggilan di bawah dipaparkan pada skrin utama.</p>')
 # index.html is a page fragment; give it a doctype so it renders in standards mode.
-# Phones a little smaller (10%); laptops at full size.
+# Phones a little smaller (10%); laptops at full size. Text boxes get 17.8px (x 90% = 16px) so iPhone does not zoom into them.
 SITE = 'https://falsafah200.vercel.app'
 head = nl.join([
     # backup for vercel.json: the old test address always shows the moved notice
@@ -57,7 +57,7 @@ head = nl.join([
     'if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>',
 ])
 src = ('<!doctype html>' + nl + '<meta charset="utf-8">' + nl + head + nl
-       + '<style>@media (max-width:600px){ html{ zoom:.9; } }</style>' + nl + src + nl + ui + nl)
+       + '<style>@media (max-width:600px){ html{ zoom:.9; } input:not(.pin), select, textarea{ font-size:17.8px !important; } }</style>' + nl + src + nl + ui + nl)
 
 os.makedirs('cloud-test', exist_ok=True)
 open('cloud-test/index.html', 'w', encoding='utf-8', newline='').write(src)
