@@ -472,6 +472,43 @@
   .sum-list li:last-child{ border-bottom:0; }
   .sum-list .sl-no{ font-weight:800; color:var(--gold-cite); white-space:nowrap; }
   .sum-empty{ font-size:12px; color:var(--muted); margin:0; }
+  .summarycard .sl-title{ flex:1; }
+  .summarycard .sl-meta{ font-size:11px; white-space:nowrap; font-weight:700; }
+  .summarycard .lbl-ok{ color:var(--emerald); }
+  .summarycard .lbl-re{ color:var(--re); }
+  .sum-later{
+    display:block; margin:8px auto 0; background:none; border:0; padding:8px 14px;
+    color:var(--muted); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;
+  }
+  .sum-later:hover{ color:var(--ink); }
+  .kaji-goal-done .kaji-ulang-btn{ display:block; width:auto; margin:18px auto 0; padding-left:22px; padding-right:22px; }
+  .kaji-goal-done .kaji-ulang-btn + .kaji-extra-btn{ margin-top:10px; }
+
+  /* ---------- Target reached: ribbons from both sides + a short note ---------- */
+  #cheer{ position:fixed; inset:0; z-index:400; pointer-events:none; transition:opacity .5s; }
+  #cheer.out{ opacity:0; }
+  #cheer .cheer-bits i{
+    position:absolute; top:var(--y); width:9px; height:22px; border-radius:2px; background:var(--c);
+    opacity:0; animation:cheerFly 2.6s cubic-bezier(.2,.7,.3,1) var(--d) forwards;
+  }
+  #cheer .cheer-bits i.l{ left:-12px; --sx:1; }
+  #cheer .cheer-bits i.r{ right:-12px; --sx:-1; }
+  @keyframes cheerFly{
+    0%{ opacity:1; transform:translate(0,0) rotate(0); }
+    70%{ opacity:1; }
+    100%{ opacity:0; transform:translate(calc(var(--dx) * var(--sx)), calc(var(--dy) + 30vh)) rotate(var(--r)); }
+  }
+  #cheer .cheer-note{
+    position:absolute; left:50%; top:calc(var(--sb-h, 0px) + 18px); transform:translateX(-50%);
+    pointer-events:auto; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;
+    background:var(--surface); color:var(--ink); border:1px solid var(--gold); border-radius:14px;
+    padding:12px 20px; box-shadow:0 10px 30px rgba(0,0,0,.28); text-align:center;
+    width:max-content; max-width:calc(100vw - 32px); animation:cheerIn .4s ease-out;
+  }
+  #cheer .cheer-note b{ font-size:16px; color:var(--gold-cite); }
+  #cheer .cheer-note span{ font-size:13px; color:var(--muted); }
+  @keyframes cheerIn{ from{ opacity:0; transform:translate(-50%,-12px); } to{ opacity:1; transform:translate(-50%,0); } }
+  @media (prefers-reduced-motion: reduce){ #cheer .cheer-bits{ display:none; } }
 
   .studydone{ text-align:center; padding:50px 20px; }
 
@@ -1360,7 +1397,6 @@
   var DAILY_KAJI_GOAL = 20;
   var DAILY_KUIZ_GOAL = 20;
   var DAILY_KEY = 'falsafah200_daily_v1';
-  var allowExtraKaji = false; // in-memory only: lets a student opt past today's cap without persisting the override
 
   function todayStr(){
     var d = new Date();
@@ -1374,8 +1410,11 @@
 
   // kajiIds: distinct falsafah studied today (counts toward the daily goal).
   // results: latest rating per id today. again: "Belum ingat" ids still to review, in order.
+  // repeating: the student pressed "Ulang" in the summary, so the again cards are being tested now.
+  // cheerKaji / cheerKuiz: the "target reached" ribbon has been shown today.
   function freshDaily(){
-    return { date: todayStr(), kajiIds: [], kuizCount: 0, results: {}, again: [], summaryShown: false };
+    return { date: todayStr(), kajiIds: [], kuizCount: 0, results: {}, again: [], summaryShown: false,
+             repeating: false, cheerKaji: false, cheerKuiz: false };
   }
   function loadDaily(){
     var fresh = freshDaily();
@@ -1413,6 +1452,30 @@
     rolloverDailyIfNeeded();
     daily.kuizCount = (daily.kuizCount||0) + 1;
     saveDaily(daily);
+    if(!daily.cheerKuiz && daily.kuizCount >= DAILY_KUIZ_GOAL){
+      daily.cheerKuiz = true; saveDaily(daily);
+      celebrate('Sasaran ' + DAILY_KUIZ_GOAL + ' kuiz hari ini tercapai.');
+    }
+  }
+  // Target reached: ribbons from both sides and a short note. Closes by itself; the session carries on.
+  function celebrate(msg){
+    var old = document.getElementById('cheer'); if(old) old.remove();
+    var el = document.createElement('div');
+    el.id = 'cheer';
+    var cols = ['#D4AF37','#E9B949','#C0392B','#0F766E','#F4E3B2'], bits = '';
+    for(var i = 0; i < 36; i++){
+      var left = i % 2 === 0;
+      bits += '<i class="' + (left ? 'l' : 'r') + '" style="--c:' + cols[i % cols.length] +
+        ';--y:' + (10 + Math.random() * 60).toFixed(0) + 'vh;--dx:' + (18 + Math.random() * 30).toFixed(0) + 'vw' +
+        ';--dy:' + (-20 + Math.random() * 60).toFixed(0) + 'vh;--r:' + (Math.random() * 720 - 360).toFixed(0) + 'deg' +
+        ';--d:' + (Math.random() * .35).toFixed(2) + 's"></i>';
+    }
+    el.innerHTML = '<div class="cheer-bits">' + bits + '</div>' +
+      '<div class="cheer-note" role="status"><b>&#127881; Tahniah!</b><span>' + msg + ' Teruskan!</span></div>';
+    document.body.appendChild(el);
+    el.querySelector('.cheer-note').onclick = function(){ el.remove(); };
+    setTimeout(function(){ el.classList.add('out'); }, 3200);
+    setTimeout(function(){ if(el.parentNode) el.remove(); }, 3800);
   }
 
   function kajiGoal(){ return Math.min(DAILY_KAJI_GOAL, STUDY_POOL.length); }
@@ -1454,10 +1517,27 @@
     });
     if(changed){ try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(kajiHistory)); }catch(e){} }
   }
+  // One day's record. A falsafah wrong at least once that day stays under Belum ingat for the day,
+  // even if it was answered right later; fixed lists those that were put right the same day.
+  function dayLists(d){
+    var h = kajiHistory[d] || {}, g = h.g || [], a = h.a || [], m = h.m || [];
+    var re = [], ok = [], fixed = [];
+    a.concat(m).forEach(function(id){ if(re.indexOf(id) === -1) re.push(id); });
+    g.forEach(function(id){ if(re.indexOf(id) === -1) ok.push(id); else if(a.indexOf(id) === -1) fixed.push(id); });
+    return { ok: ok, re: re, fixed: fixed };
+  }
   function todayLists(){
-    var ok = [], re = [];
-    daily.kajiIds.forEach(function(id){ (daily.results[id] === 'again' ? re : ok).push(id); });
-    return { ok: ok, re: re };
+    var L = dayLists(todayStr());
+    // anything studied today but missing from the log (older data) goes by its latest answer
+    daily.kajiIds.forEach(function(id){
+      if(L.ok.indexOf(id) >= 0 || L.re.indexOf(id) >= 0) return;
+      (daily.results[id] === 'again' ? L.re : L.ok).push(id);
+    });
+    return L;
+  }
+  // Mark beside each Belum ingat falsafah: fixed later the same day, or still not
+  function fixMark(L){
+    return function(id){ return L.fixed.indexOf(id) >= 0 ? '<span class="lbl-ok">&#10003; dibaiki</span>' : '<span class="lbl-re">&#10007; belum</span>'; };
   }
   function renderKajiStats(){
     var el = document.getElementById('kajiStats');
@@ -1466,7 +1546,7 @@
     el.innerHTML =
       '<div class="ks-main">' +
         '<div class="ks-line"><span class="ks-ok">&#10003; <b>' + L.ok.length + '</b> Ingat</span>' +
-        '<span class="ks-re">&#8635; <b>' + L.re.length + '</b> Perlu ulang</span></div>' +
+        '<span class="ks-re">&#8635; <b>' + L.re.length + '</b> Belum ingat</span></div>' +
         '<div class="ks-bar">' + (n ? '<span class="ok" style="width:' + (L.ok.length/n*100) + '%"></span><span class="re" style="width:' + (L.re.length/n*100) + '%"></span>' : '') + '</div>' +
       '</div>' +
       '<button type="button" class="progbtn" id="progBtn">&#128203; Butiran</button>';
@@ -1680,7 +1760,7 @@
     STUDY_POOL = poolFor(from, to);
     rangeSaved = true;
     try{ localStorage.setItem(RANGE_KEY, JSON.stringify(studyRange)); }catch(e){}
-    allowExtraKaji = false;
+    if(daily.repeating){ daily.repeating = false; saveDaily(daily); }
     renderRangeChips();
     renderStudy();
     quizCurrent = null;
@@ -1862,51 +1942,50 @@
 
   function entryById(id){ return DATA.find(function(e){ return e.id === id; }); }
 
-  // Order of play: a first pass of new falsafah up to the daily goal, then a
-  // summary popup, then every "Belum ingat" card again until it is rated "Ingat".
+  // Order of play: every due falsafah in the chosen range once (wrong ones are only recorded),
+  // then a summary of the whole day. The Belum ingat cards are tested again only if the student
+  // presses "Ulang" there; otherwise they wait, and stay under Belum ingat for the day.
+  function startRepeat(){
+    daily.repeating = true; saveDaily(daily);
+    renderStudy();
+  }
   function renderStudy(){
     renderMissionBar();
     rolloverDailyIfNeeded();
     if(focus && focus.mode === 'kaji'){ renderFocusStudy(); return; }
     var stage = document.getElementById('studyStage');
-    var goal = kajiGoal();
     var fresh = dueQueue().filter(function(e){ return daily.kajiIds.indexOf(e.id) === -1; });
-    var firstPassDone = daily.kajiIds.length >= goal || !fresh.length;
+    var againEntries = daily.again.map(entryById).filter(Boolean);
+    if(daily.repeating && !againEntries.length){ daily.repeating = false; saveDaily(daily); }
     var entry = null, reviewing = false;
 
-    if(!firstPassDone){
+    if(daily.repeating){
+      entry = againEntries[0];
+      reviewing = true;
+    } else if(fresh.length){
       entry = fresh[0];
-    } else {
-      if(!daily.summaryShown && daily.kajiIds.length) openKajiSummary();
-      var againEntries = daily.again.map(entryById).filter(Boolean);
-      if(againEntries.length){
-        entry = againEntries[0];
-        reviewing = true;
-      } else if(allowExtraKaji && fresh.length){
-        entry = fresh[0];
-      }
+    } else if(!daily.summaryShown && daily.kajiIds.length){
+      openKajiSummary();
     }
 
     if(!entry){
       currentCardId = null;
-      if(daily.kajiIds.length >= goal){
-        stage.innerHTML =
-          '<div class="folio"><div class="kaji-goal-done">' +
-          '<div class="big">&#127942;</div>' +
-          '<h3>Sasaran hari ini selesai!</h3>' +
-          '<p>Anda telah mengkaji ' + daily.kajiIds.length + ' falsafah dan mengulang semua yang belum ingat. ' +
-          (fresh.length ? 'Datang semula esok untuk teruskan, atau kaji tambahan sekarang jika anda rasa mahu terus.' : 'Datang semula esok untuk ulang kaji seterusnya.') + '</p>' +
-          (fresh.length ? '<button class="kaji-extra-btn" id="extraKajiBtn">Kaji tambahan hari ini</button>' : '') +
-          '</div></div>';
-        var extraBtn = document.getElementById('extraKajiBtn');
-        if(extraBtn) extraBtn.onclick = function(){ allowExtraKaji = true; renderStudy(); };
-      } else {
-        stage.innerHTML =
-          '<div class="folio"><div class="studydone">' +
-          '<div class="big">&#10003;</div>' +
-          '<p style="margin-top:10px;color:var(--muted);">Tiada falsafah tertunggak buat masa ini.<br>Kembali esok untuk ulang kaji seterusnya, atau jelajah Senarai.</p>' +
-          '</div></div>';
-      }
+      var n = againEntries.length;
+      stage.innerHTML =
+        '<div class="folio"><div class="kaji-goal-done">' +
+        '<div class="big">' + (n ? '&#8635;' : '&#10003;') + '</div>' +
+        '<h3>' + (daily.kajiIds.length ? 'Julat ini sudah dikaji hari ini' : 'Tiada falsafah tertunggak') + '</h3>' +
+        '<p>' + (n
+          ? 'Ada ' + n + ' falsafah belum ingat hari ini. Ulang sekarang, atau pilih julat lain di atas.'
+          : 'Pilih julat lain di atas untuk teruskan, atau kembali esok untuk ulang kaji seterusnya.') + '</p>' +
+        (n ? '<button class="namebtn kaji-ulang-btn" id="ulangBtn">Ulang belum ingat (' + n + ')</button>' : '') +
+        '<button class="kaji-extra-btn" id="sumAgainBtn">Lihat ringkasan hari ini</button>' +
+        '</div></div>';
+      var ub = document.getElementById('ulangBtn');
+      if(ub) ub.onclick = startRepeat;
+      var sb = document.getElementById('sumAgainBtn');
+      if(sb) sb.style.display = daily.kajiIds.length ? '' : 'none';
+      if(sb) sb.onclick = openKajiSummary;
       return;
     }
 
@@ -1942,7 +2021,7 @@
     if(focus && focus.mode === 'kaji'){
       var qi = focus.queue.indexOf(id);
       if(qi >= 0) focus.queue.splice(qi, 1);
-      if(result === 0) requeue(focus.queue, id);
+      if(result === 0) focus.queue.push(id);   // after every other card in the session
       else {
         focus.done++;
         // A card remembered in a focus session comes back tomorrow, to check it stuck
@@ -1950,12 +2029,24 @@
         if(c.due > tmr){ c.due = tmr; saveState(srs); }
       }
     }
+    var firstToday = daily.kajiIds.indexOf(id) === -1;
     markKajiDoneToday(id);
     daily.results[id] = result === 0 ? 'again' : 'good';
     var i = daily.again.indexOf(id);
     if(i >= 0) daily.again.splice(i, 1);
-    if(result === 0) requeue(daily.again, id);
+    var inFocusSession = focus && focus.mode === 'kaji';
+    if(result === 0){
+      // in the main pass a wrong card is only recorded; it is tested again only when the student presses Ulang
+      if(daily.repeating && !inFocusSession) requeue(daily.again, id); else daily.again.push(id);
+    }
+    // a new round (or the end of an Ulang) brings the day summary up again when it ends
+    if(!inFocusSession && (firstToday || (daily.repeating && !daily.again.length))) daily.summaryShown = false;
+    if(daily.repeating && !daily.again.length) daily.repeating = false;
     saveDaily(daily);
+    if(!daily.cheerKaji && daily.kajiIds.length >= kajiGoal()){
+      daily.cheerKaji = true; saveDaily(daily);
+      celebrate('Sasaran ' + kajiGoal() + ' kaji hari ini tercapai.');
+    }
   }
 
   // ---------- Focus sessions: test only a chosen set of falsafah ----------
@@ -2091,8 +2182,8 @@
       html += '<p class="pnote" style="margin-top:16px;">Belum ada falsafah dikaji hari ini. Tekan Dedah pada kad pertama untuk mula.</p>';
     } else {
       html += '<div class="ks-bar" style="height:8px;margin:14px 0 4px;"><span class="ok" style="width:' + (L.ok.length/n*100) + '%"></span><span class="re" style="width:' + (L.re.length/n*100) + '%"></span></div>' +
-        '<div class="prog-sec"><div class="sum-label again">&#8635; Perlu ulang &middot; ' + L.re.length + '</div>' +
-        (L.re.length ? progItems(L.re) + ujiRow('today', L.re.length) : '<p class="pnote">Tiada. Syabas!</p>') + '</div>' +
+        '<div class="prog-sec"><div class="sum-label again">&#8635; Belum ingat &middot; ' + L.re.length + '</div>' +
+        (L.re.length ? progItems(L.re, fixMark(L)) + ujiRow('today', L.re.length) : '<p class="pnote">Tiada. Syabas!</p>') + '</div>' +
         '<div class="prog-sec"><div class="sum-label good">&#10003; Ingat &middot; ' + L.ok.length + '</div>' +
         (L.ok.length ? progItems(L.ok) : '<p class="pnote">Tiada lagi.</p>') + '</div>';
     }
@@ -2120,7 +2211,7 @@
   // Every list the Kemajuan tab can open: [title, ids, uji set or null, meta]
   function listDef(key){
     var L = todayLists(), lv = allLevels();
-    if(key === 'today-re') return ['Perlu ulang hari ini', L.re, 'today'];
+    if(key === 'today-re') return ['Belum ingat hari ini', L.re, 'today', fixMark(L)];
     if(key === 'today-ok') return ['Ingat hari ini', L.ok, null];
     if(key === 'all-re') return ['Perlu ulang (semua hari)', recallAll().re, 'allre', function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }];
     if(key === 'all-ok') return ['Sudah ingat', recallAll().ok, null, function(id){ return BOX_LABELS[getCard(id).box]; }];
@@ -2171,7 +2262,7 @@
     progSets.kelas = W ? W.top.map(function(x){ return x.id; }) : [];
     var days14 = []; for(var i = 13; i >= 0; i--) days14.push(addDays(todayStr(), -i));
     var maxN = 1, activeDays = 0;
-    days14.forEach(function(d){ var h = kajiHistory[d]; var n = h ? (h.g||[]).length + (h.a||[]).length : 0; if(n){ activeDays++; maxN = Math.max(maxN, n); } });
+    days14.forEach(function(d){ var D = dayLists(d), n = D.ok.length + D.re.length; if(n){ activeDays++; maxN = Math.max(maxN, n); } });
     var histDays = Object.keys(kajiHistory).sort().reverse().filter(function(d){ var h = kajiHistory[d]; return h && ((h.g||[]).length || (h.a||[]).length); }).slice(0, 14);
 
     var html = '<div class="prog kmj">' +
@@ -2210,20 +2301,23 @@
     // 14-day chart
     html += '<div class="prog-sec card-sec"><h4>14 hari lepas</h4><div class="kmj-chart">' +
       days14.map(function(d){
-        var h = kajiHistory[d] || {}, g = (h.g||[]).length, a = (h.a||[]).length;
-        return '<div class="kc-col" title="' + fmtDay(d) + ': ' + g + ' ingat, ' + a + ' perlu ulang">' +
+        var D = dayLists(d), g = D.ok.length, a = D.re.length;
+        return '<div class="kc-col" title="' + fmtDay(d) + ': ' + g + ' ingat, ' + a + ' belum ingat">' +
           '<div class="kc-stack"><span class="re" style="height:' + (a/maxN*100) + '%"></span><span class="ok" style="height:' + (g/maxN*100) + '%"></span></div>' +
           '<div class="kc-lbl' + (d === todayStr() ? ' today' : '') + '">' + new Date(d + 'T00:00:00').getDate() + '</div></div>';
       }).join('') + '</div>' +
-      '<div class="kmj-legend"><span><i class="ok"></i>Ingat</span><span><i class="re"></i>Perlu ulang</span></div></div>';
+      '<div class="kmj-legend"><span><i class="ok"></i>Ingat</span><span><i class="re"></i>Belum ingat</span></div></div>';
 
     // Sejarah
     html += '<div class="prog-sec card-sec hist"><h4>Sejarah harian</h4>' +
       (histDays.length ? histDays.map(function(d){
-        var h = kajiHistory[d], g = h.g || [], a = h.a || [];
+        var D = dayLists(d);
         return '<details><summary><span class="hd">' + fmtDay(d) + (d === todayStr() ? ' (hari ini)' : '') + '</span>' +
-          '<span class="lbl-ok">&#10003; ' + g.length + '</span><span class="lbl-re">&#8635; ' + a.length + '</span></summary>' +
-          progItems(a.concat(g), function(id){ return a.indexOf(id) >= 0 ? '<span class="lbl-re">perlu ulang</span>' : '<span class="lbl-ok">ingat</span>'; }) +
+          '<span class="lbl-ok">&#10003; ' + D.ok.length + '</span><span class="lbl-re">&#8635; ' + D.re.length + '</span></summary>' +
+          progItems(D.re.concat(D.ok), function(id){
+            if(D.re.indexOf(id) === -1) return '<span class="lbl-ok">ingat</span>';
+            return '<span class="lbl-re">belum ingat</span>' + (D.fixed.indexOf(id) >= 0 ? ' <span class="lbl-ok">&middot; dibaiki</span>' : '');
+          }) +
           '</details>';
       }).join('') : '<p class="pnote">Sejarah akan muncul selepas anda mula mengkaji.</p>') +
       '</div></div>';
@@ -2234,32 +2328,29 @@
   function openKajiSummary(){
     daily.summaryShown = true;
     saveDaily(daily);
-    var again = [], good = [];
-    daily.kajiIds.forEach(function(id){
-      var e = entryById(id);
-      if(!e) return;
-      (daily.results[id] === 'again' ? again : good).push(e);
-    });
-    function list(items){
-      if(!items.length) return '<p class="sum-empty">Tiada.</p>';
-      return '<ul class="sum-list">' + items.map(function(e){
-        return '<li><span class="sl-no">' + e.rangeLabel.replace('Falsafah ', '') + '</span><span>' + escapeHtml(displayTitle(e.title)) + '</span></li>';
+    var L = todayLists(), mark = fixMark(L), n = L.ok.length + L.re.length;
+    function list(ids, withMark){
+      if(!ids.length) return '<p class="sum-empty">Tiada.</p>';
+      return '<ul class="sum-list">' + ids.map(function(id){
+        var e = entryById(id); if(!e) return '';
+        return '<li><span class="sl-no">' + e.rangeLabel.replace('Falsafah ', '') + '</span><span class="sl-title">' + escapeHtml(displayTitle(e.title)) + '</span>' +
+          (withMark ? '<span class="sl-meta">' + mark(id) + '</span>' : '') + '</li>';
       }).join('') + '</ul>';
     }
-    var reached = daily.kajiIds.length >= kajiGoal();
+    var left = daily.again.length;
     document.getElementById('summaryCard').innerHTML =
-      '<h3>' + (reached ? 'Sasaran ' + daily.kajiIds.length + '/' + kajiGoal() + ' selesai!' : 'Sesi kaji selesai') + '</h3>' +
-      '<p class="sum-intro">Ini ringkasan falsafah yang anda kaji hari ini.</p>' +
-      '<div class="sum-section"><div class="sum-label again">&#8635; Perlu ulang &middot; ' + again.length + '</div>' + list(again) + '</div>' +
-      '<div class="sum-section"><div class="sum-label good">&#10003; Ingat &middot; ' + good.length + '</div>' + list(good) + '</div>' +
-      '<button class="namebtn" id="summaryContinue">' +
-        (daily.again.length ? 'Ulang kaji yang belum ingat (' + daily.again.length + ')' : 'Selesai') +
-      '</button>';
-    document.getElementById('summaryOverlay').classList.add('active');
-    document.getElementById('summaryContinue').onclick = function(){
-      document.getElementById('summaryOverlay').classList.remove('active');
-      window.scrollTo(0, 0);
-    };
+      '<h3>Ringkasan hari ini</h3>' +
+      '<p class="sum-intro">' + n + ' falsafah dikaji hari ini. Yang salah sekali pun kekal di Belum ingat untuk hari ini.</p>' +
+      '<div class="sum-section"><div class="sum-label again">&#8635; Belum ingat &middot; ' + L.re.length + '</div>' + list(L.re, true) + '</div>' +
+      '<div class="sum-section"><div class="sum-label good">&#10003; Ingat &middot; ' + L.ok.length + '</div>' + list(L.ok, false) + '</div>' +
+      '<button class="namebtn" id="summaryContinue">' + (left ? 'Ulang belum ingat (' + left + ')' : 'Selesai') + '</button>' +
+      (left ? '<button type="button" class="sum-later" id="summaryLater">Nanti</button>' : '');
+    var ov = document.getElementById('summaryOverlay');
+    ov.classList.add('active');
+    function close(){ ov.classList.remove('active'); window.scrollTo(0, 0); }
+    document.getElementById('summaryContinue').onclick = function(){ close(); if(left) startRepeat(); };
+    var later = document.getElementById('summaryLater');
+    if(later) later.onclick = close;
   }
 
   function renderFolioBody(entry){
@@ -4053,7 +4144,9 @@ function mergeDaily(a, b) {
   const kaji = [...new Set([...(a.kajiIds || []), ...(b.kajiIds || [])])];
   const results = Object.assign({}, b.results || {}, a.results || {});
   const again = [...new Set([...(a.again || []), ...(b.again || [])])].filter(id => results[id] === 'again');
-  return { date: a.date, kajiIds: kaji, kuizCount: Math.max(a.kuizCount || 0, b.kuizCount || 0), results, again, summaryShown: !!(a.summaryShown || b.summaryShown) };
+  return { date: a.date, kajiIds: kaji, kuizCount: Math.max(a.kuizCount || 0, b.kuizCount || 0), results, again,
+    summaryShown: !!(a.summaryShown || b.summaryShown), repeating: !!a.repeating && again.length > 0,
+    cheerKaji: !!(a.cheerKaji || b.cheerKaji), cheerKuiz: !!(a.cheerKuiz || b.cheerKuiz) };
 }
 function mergeHistory(a, b) {   // per day: union, and a falsafah remembered on either device counts as remembered
   if (!a) return b; if (!b) return a;
@@ -4212,8 +4305,10 @@ async function loadStudents() {
      .sort((a, b) => misses(b.id) - misses(a.id)).map(e => ({ id: e.id, n: misses(e.id) }));
     let today = null;
     if (daily && daily.date === dayStr(new Date())) {
-      const ids = daily.kajiIds || [], r = daily.results || {};
-      today = { ok: ids.filter(id => r[id] !== 'again'), re: ids.filter(id => r[id] === 'again') };
+      // same rule as the app: wrong at least once today counts as Belum ingat for the day
+      const ids = daily.kajiIds || [], r = daily.results || {}, h = history[daily.date] || {};
+      const wrong = id => r[id] === 'again' || (h.m || []).includes(id) || (h.a || []).includes(id);
+      today = { ok: ids.filter(id => !wrong(id)), re: ids.filter(wrong) };
     }
     const updated = v.updatedAt && v.updatedAt.toDate ? v.updatedAt.toDate() : null;
     out.push({ uid: d.id, profile: v.profile || {}, range, pool: pool.length, levels, focus, today, history, updated,

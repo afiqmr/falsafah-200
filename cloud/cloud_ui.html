@@ -472,7 +472,9 @@ function mergeDaily(a, b) {
   const kaji = [...new Set([...(a.kajiIds || []), ...(b.kajiIds || [])])];
   const results = Object.assign({}, b.results || {}, a.results || {});
   const again = [...new Set([...(a.again || []), ...(b.again || [])])].filter(id => results[id] === 'again');
-  return { date: a.date, kajiIds: kaji, kuizCount: Math.max(a.kuizCount || 0, b.kuizCount || 0), results, again, summaryShown: !!(a.summaryShown || b.summaryShown) };
+  return { date: a.date, kajiIds: kaji, kuizCount: Math.max(a.kuizCount || 0, b.kuizCount || 0), results, again,
+    summaryShown: !!(a.summaryShown || b.summaryShown), repeating: !!a.repeating && again.length > 0,
+    cheerKaji: !!(a.cheerKaji || b.cheerKaji), cheerKuiz: !!(a.cheerKuiz || b.cheerKuiz) };
 }
 function mergeHistory(a, b) {   // per day: union, and a falsafah remembered on either device counts as remembered
   if (!a) return b; if (!b) return a;
@@ -631,8 +633,10 @@ async function loadStudents() {
      .sort((a, b) => misses(b.id) - misses(a.id)).map(e => ({ id: e.id, n: misses(e.id) }));
     let today = null;
     if (daily && daily.date === dayStr(new Date())) {
-      const ids = daily.kajiIds || [], r = daily.results || {};
-      today = { ok: ids.filter(id => r[id] !== 'again'), re: ids.filter(id => r[id] === 'again') };
+      // same rule as the app: wrong at least once today counts as Belum ingat for the day
+      const ids = daily.kajiIds || [], r = daily.results || {}, h = history[daily.date] || {};
+      const wrong = id => r[id] === 'again' || (h.m || []).includes(id) || (h.a || []).includes(id);
+      today = { ok: ids.filter(id => !wrong(id)), re: ids.filter(wrong) };
     }
     const updated = v.updatedAt && v.updatedAt.toDate ? v.updatedAt.toDate() : null;
     out.push({ uid: d.id, profile: v.profile || {}, range, pool: pool.length, levels, focus, today, history, updated,
