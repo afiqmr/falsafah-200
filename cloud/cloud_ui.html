@@ -16,17 +16,17 @@
   #acctOverlay.gate.active{ background:color-mix(in srgb, var(--bg) 82%, transparent); }
   #acctCard{ text-align:left; max-width:380px; position:relative; isolation:isolate; }
   .fn-sides{ display:none; }
-  @media (min-width:900px){
+  @media (min-width:800px){
     .fn-sides{ display:block; position:fixed; inset:0; z-index:0; pointer-events:none; }
     .app{ position:relative; z-index:1; }
     .fn-sides i{ position:absolute; inset:0; background-image:var(--page-songket-l, none); background-size:200px 280px; background-position:center top; }
     [data-theme="dark"] .fn-sides i{ background-image:var(--page-songket-d, none); }
-    /* full strength at the screen edge, fading slowly to nothing at the middle column; the inner half is blurred */
-    .fn-sides .sharp{ -webkit-mask-image:linear-gradient(90deg, #000 0, transparent calc(50% - 470px), transparent calc(50% + 470px), #000 100%);
-      mask-image:linear-gradient(90deg, #000 0, transparent calc(50% - 470px), transparent calc(50% + 470px), #000 100%); }
+    /* clear from the screen edge up to about 60px from the content column, then a short blurred fade into it */
+    .fn-sides .sharp{ -webkit-mask-image:linear-gradient(90deg, #000 0, #000 calc(50% - 450px), transparent calc(50% - 385px), transparent calc(50% + 385px), #000 calc(50% + 450px), #000 100%);
+      mask-image:linear-gradient(90deg, #000 0, #000 calc(50% - 450px), transparent calc(50% - 385px), transparent calc(50% + 385px), #000 calc(50% + 450px), #000 100%); }
     .fn-sides .soft{ filter:blur(3px);
-      -webkit-mask-image:linear-gradient(90deg, transparent 0, rgba(0,0,0,.6) calc(50% - 560px), transparent calc(50% - 380px), transparent calc(50% + 380px), rgba(0,0,0,.6) calc(50% + 560px), transparent 100%);
-      mask-image:linear-gradient(90deg, transparent 0, rgba(0,0,0,.6) calc(50% - 560px), transparent calc(50% - 380px), transparent calc(50% + 380px), rgba(0,0,0,.6) calc(50% + 560px), transparent 100%); }
+      -webkit-mask-image:linear-gradient(90deg, transparent calc(50% - 480px), #000 calc(50% - 430px), transparent calc(50% - 378px), transparent calc(50% + 378px), #000 calc(50% + 430px), transparent calc(50% + 480px));
+      mask-image:linear-gradient(90deg, transparent calc(50% - 480px), #000 calc(50% - 430px), transparent calc(50% - 378px), transparent calc(50% + 378px), #000 calc(50% + 430px), transparent calc(50% + 480px)); }
   }
   /* songket cloth behind the account menu: gold and red on cream (light), soft gold on charcoal (dark); faint in the middle so text stays clear */
   /* crisp cloth at the card edges; through the middle, where the words are, it turns faint and soft (no boxes) */
