@@ -32,6 +32,9 @@
   .acct-who{ text-align:center; margin:4px 0 14px; }
   .acct-who b{ display:block; font-size:18px; }
   .acct-who span{ font-size:13px; color:var(--muted); word-break:break-all; }
+  .acct-share{ display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:6px 14px; border-radius:100px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink); font:700 13px/1 inherit; font-family:inherit; cursor:pointer; transition:transform .15s ease; }
+  .acct-share svg{ color:var(--gold-cite, var(--gold)); }
+  .acct-share:active{ transform:scale(.95); }
   .acct-row{ display:flex; gap:8px; margin-top:10px; }
   .acct-row button{ flex:1; }
   .acct-ghost{ background:var(--surface-2) !important; color:var(--ink) !important; border:1px solid var(--border) !important; }
@@ -159,12 +162,12 @@ function render() {
   if (mode === 'account' && user) {
     const t = lastSync ? lastSync.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' }) : '—';
     card.innerHTML = `<h3>Akaun anda</h3>
-      <div class="acct-who"><b>${esc(profile?.name || '')}</b><span>@${esc(profile?.username || '')} · ${esc(user.email || '')}</span></div>
+      <div class="acct-who"><b>${esc(profile?.name || '')}</b><span>@${esc(profile?.username || '')} · ${esc(user.email || '')}</span>
+        <button type="button" class="acct-share" id="acctShare" aria-label="Kongsi Falsafah 200"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Kongsi</button></div>
       <p class="acct-msg ok" id="acctMsg">Progress synced ✓ · ${t}</p>
       <button class="namebtn" id="acctSyncNow">Sync progress</button>
       ${!isStandalone() && installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">Pasang di skrin utama</button>' : ''}
       <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">Panduan aplikasi</button>
-      <button class="namebtn acct-ghost" id="acctShare" style="margin-top:10px">Kongsi Falsafah 200</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">Papan pentadbir</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">Log keluar</button><button class="namebtn acct-ghost" id="acctClose">Tutup</button></div>
       <p class="acct-note">Di telefon atau komputer lain, log masuk dengan nama pengguna & PIN yang sama untuk sambung kemajuan anda.</p>`;
