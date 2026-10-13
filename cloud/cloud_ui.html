@@ -29,15 +29,14 @@
       mask-image:linear-gradient(90deg, transparent 0, rgba(0,0,0,.6) calc(50% - 560px), transparent calc(50% - 380px), transparent calc(50% + 380px), rgba(0,0,0,.6) calc(50% + 560px), transparent 100%); }
   }
   /* songket cloth behind the account menu: gold and red on cream (light), soft gold on charcoal (dark); faint in the middle so text stays clear */
-  #acctCard::before{ content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit; pointer-events:none;
-    background-image:var(--acct-songket-l, none); background-size:160px 224px; background-position:center top;
-    -webkit-mask-image:radial-gradient(ellipse 95% 80% at 50% 48%, rgba(0,0,0,.3) 30%, #000 90%); mask-image:radial-gradient(ellipse 95% 80% at 50% 48%, rgba(0,0,0,.3) 30%, #000 90%); }
-  [data-theme="dark"] #acctCard::before{ background-image:var(--acct-songket-d, none); }
-  /* the cloth blurs softly behind the words so they read clearly */
-  #acctCard h3, #acctCard .sub, #acctCard .brand, #acctCard .acct-who b, #acctCard .acct-who span, #acctCard .acct-msg, #acctCard .acct-note, #acctCard .acct-moved, #acctCard label{
-    -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); border-radius:10px; }
-  #acctCard .acct-who b, #acctCard .acct-who span{ display:table; margin-inline:auto; padding:0 8px; }
-  #acctCard h3, #acctCard .acct-msg, #acctCard .acct-note{ padding:2px 8px; }
+  /* crisp cloth at the card edges; through the middle, where the words are, it turns faint and soft (no boxes) */
+  #acctCard::before, #acctCard::after{ content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit; pointer-events:none;
+    background-image:var(--acct-songket-l, none); background-size:160px 224px; background-position:center top; }
+  #acctCard::before{ -webkit-mask-image:linear-gradient(90deg, #000 0, rgba(0,0,0,.55) 12%, transparent 30%, transparent 70%, rgba(0,0,0,.55) 88%, #000 100%);
+    mask-image:linear-gradient(90deg, #000 0, rgba(0,0,0,.55) 12%, transparent 30%, transparent 70%, rgba(0,0,0,.55) 88%, #000 100%); }
+  #acctCard::after{ filter:blur(2.5px); opacity:.45;
+    -webkit-mask-image:linear-gradient(90deg, transparent 8%, #000 30%, #000 70%, transparent 92%); mask-image:linear-gradient(90deg, transparent 8%, #000 30%, #000 70%, transparent 92%); }
+  [data-theme="dark"] #acctCard::before, [data-theme="dark"] #acctCard::after{ background-image:var(--acct-songket-d, none); }
   #acctCard h3, #acctCard .sub{ text-align:center; }
   #acctCard .brand{ text-align:center; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin:0 0 6px; }
   .acct-seg{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border-radius:100px; background:var(--surface-2); border:1px solid var(--border); margin:0 0 16px; }
