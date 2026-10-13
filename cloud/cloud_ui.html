@@ -463,6 +463,7 @@ function localSnapshot() { const o = {}; for (const [k, key] of Object.entries(K
 function better(a, b) { // pick the card with more study history
   if (!a) return b; if (!b) return a;
   if ((a.seen || 0) !== (b.seen || 0)) return (a.seen || 0) > (b.seen || 0) ? a : b;
+  if ((a.lt || 0) !== (b.lt || 0)) return (a.lt || 0) > (b.lt || 0) ? a : b;   // same Kaji count: the latest answer (e.g. a Kuiz) wins
   if ((a.box || 0) !== (b.box || 0)) return (a.box || 0) > (b.box || 0) ? a : b;
   return (a.due || '') >= (b.due || '') ? a : b;
 }
@@ -618,8 +619,21 @@ async function publishWeekly(students) {
 }
 
 // ---------- admin: every student's progress ----------
-const LVL = ['Baru', 'Belajar', 'Semakan', 'Kukuh', 'Mahir', 'Dikuasai'];
-const LVL_C = ['var(--border)', '#E9B949', '#D4AF37', '#7FB7A6', '#34D399', '#0F9F74'];
+// gred: same rule as the app (last 10 answers; Kaji +1/-1, Kuiz +0.5/-0.5)
+const LVL = ['A+', 'A', 'A−', 'B+', 'B', 'C', 'D', 'G', 'Belum dikaji'];
+const LVL_C = ['#0F9F74', '#34D399', '#7FB7A6', '#E9B949', '#D4AF37', '#EA6A2A', '#D9472B', '#B42318', 'var(--border)'];
+const G_MIN = [7, 5, 4, 3, 1, -1, -3, -Infinity];
+const LOG_PTS = { K: 1, k: -1, Q: 0.5, q: -0.5 };
+function seedLog(c) {
+  const seen = c.seen || 0; if (!seen) return '';
+  const n = Math.min(seen, 10), miss = Math.max(0, seen - (c.correct || 0)), tail = Math.min(c.box || 0, n);
+  let w = Math.min(n - tail, Math.round(n * miss / seen)); if (miss > 0 && !c.box && w < 1) w = 1;
+  return 'K'.repeat(n - tail - w) + 'k'.repeat(w) + 'K'.repeat(tail);
+}
+const cardLog = c => !c ? '' : typeof c.log === 'string' ? c.log : seedLog(c);
+const markahOf = c => [...cardLog(c)].reduce((a, ch) => a + (LOG_PTS[ch] || 0), 0);
+const gredIdx = c => { if (!cardLog(c).length) return 8; const m = markahOf(c); return G_MIN.findIndex(x => m >= x); };
+const fmtM = m => (m > 0 ? '+' : m < 0 ? '−' : '') + Math.abs(m);
 async function loadStudents() {
   const snap = await fb.F.getDocs(fb.F.collection(fb.db, 'users'));
   const out = [];
@@ -627,10 +641,9 @@ async function loadStudents() {
     const v = d.data() || {}, data = v.data || {};
     const srs = parse(data.srs) || {}, daily = parse(data.daily), range = parse(data.range) || { from: 1, to: 200 }, history = parse(data.history) || {};
     const pool = DATA.filter(e => e.noEnd >= range.from && e.noStart <= range.to);
-    const levels = [0, 0, 0, 0, 0, 0]; pool.forEach(e => { levels[(srs[e.id] && srs[e.id].box) || 0]++; });
-    const misses = id => srs[id] ? Math.max(0, (srs[id].seen || 0) - (srs[id].correct || 0)) : 0;
-    const focus = pool.filter(e => misses(e.id) >= 2 && ((srs[e.id] && srs[e.id].box) || 0) < 2)   // same rule as the app: out after 2 Ingat in a row
-     .sort((a, b) => misses(b.id) - misses(a.id)).map(e => ({ id: e.id, n: misses(e.id) }));
+    const levels = LVL.map(() => 0); pool.forEach(e => { levels[gredIdx(srs[e.id])]++; });
+    const focus = pool.filter(e => { const g = gredIdx(srs[e.id]); return g >= 5 && g <= 7; })   // same rule as the app: gred C, D, G
+     .map(e => ({ id: e.id, m: markahOf(srs[e.id]), g: LVL[gredIdx(srs[e.id])] })).sort((a, b) => a.m - b.m);
     let today = null;
     if (daily && daily.date === dayStr(new Date())) {
       // same rule as the app: wrong at least once today counts as Belum ingat for the day
@@ -687,7 +700,7 @@ async function openAdmin() {
   try { w = await publishWeekly(students); window.fnWeekly = w; } catch (e) {}
   const today = dayStr(new Date());
   const activeToday = students.filter(s => s.updated && dayStr(s.updated) === today).length;
-  const avgMast = students.length ? Math.round(students.reduce((a, s) => a + (s.pool ? s.levels[5] / s.pool : 0), 0) / students.length * 100) : 0;
+  const avgMast = students.length ? Math.round(students.reduce((a, s) => a + (s.pool ? s.levels[0] / s.pool : 0), 0) / students.length * 100) : 0;
   const card = (s, i) => {
     const p = s.profile, t = s.today, lv = s.levels, tot = s.pool || 1;
     const days = Object.keys(s.history).sort().reverse().filter(d => (s.history[d].g || []).length || (s.history[d].a || []).length).slice(0, 14);
@@ -695,20 +708,20 @@ async function openAdmin() {
       <div class="stu-h"><b>${esc(p.name || '(tiada nama)')}</b><span class="who">@${esc(p.username || '')} · ${esc(p.email || '')}</span>
         <span class="act ${s.updated && dayStr(s.updated) === today ? 'today' : ''}">${relTime(s.updated)}</span></div>
       <div class="stu-m"><span>Hari ini: <b>${t ? '✓ ' + t.ok.length + ' · ↻ ' + t.re.length : '—'}</b></span>
-        <span>Dikuasai: <b>${lv[5]}/${s.pool}</b></span><span>Julat: <b>${s.range.from}–${s.range.to}</b></span>
+        <span>Gred A+: <b>${lv[0]}/${s.pool}</b></span><span>Julat: <b>${s.range.from}–${s.range.to}</b></span>
         <span>Perlu fokus: <b>${s.focus.length}</b></span><span>Jumlah ulang kaji: <b>${s.seen}</b></span></div>
       <div class="lvl-bar">${lv.map((v, k) => v ? `<span style="width:${v / tot * 100}%;background:${LVL_C[k]}" title="${LVL[k]}: ${v}"></span>` : '').join('')}</div>
       <div class="stu-d">
-        <h4>Tahap</h4><p class="hint">${lv.map((v, k) => LVL[k] + ' ' + v).join(' · ')}</p>
+        <h4>Gred</h4><p class="hint">${lv.map((v, k) => LVL[k] + ' ' + v).join(' · ')}</p>
         ${t ? `<h4>Hari ini · perlu ulang</h4>${rows(t.re)}` : ''}
-        <h4>Perlu fokus (terlupa 2 kali atau lebih)</h4>${rows(s.focus, x => 'terlupa ' + x.n + '×')}
+        <h4>Perlu fokus (gred C, D, G)</h4>${rows(s.focus, x => 'markah ' + fmtM(x.m) + ' · ' + x.g)}
         <h4>Sejarah 14 hari</h4>${days.length ? '<ul class="adm-rows">' + days.map(d => `<li><span class="tt">${d}</span><span class="mt">✓ ${(s.history[d].g || []).length} · ↻ ${(s.history[d].a || []).length}</span></li>`).join('') + '</ul>' : '<p class="hint">Tiada sejarah lagi.</p>'}
       </div></div>`;
   };
   panel.innerHTML = `<div class="adm">
     <div class="adm-top"><h2>Papan pentadbir</h2><button id="admRefresh">Muat semula</button><button id="admClose">Tutup</button></div>
     <p class="adm-sub">Data dibaca terus daripada Firebase · ${new Date().toLocaleString('ms-MY')}</p>
-    <div class="adm-tiles"><div><b>${students.length}</b>Pelajar berdaftar</div><div><b>${activeToday}</b>Aktif hari ini</div><div><b>${w.activeStudents}</b>Aktif 7 hari</div><div><b>${avgMast}%</b>Purata dikuasai</div></div>
+    <div class="adm-tiles"><div><b>${students.length}</b>Pelajar berdaftar</div><div><b>${activeToday}</b>Aktif hari ini</div><div><b>${w.activeStudents}</b>Aktif 7 hari</div><div><b>${avgMast}%</b>Purata gred A+</div></div>
     <div class="adm-sec"><h3>Kelas minggu ini · paling kerap terlupa</h3>
       <p class="hint">${w.from} hingga ${w.to}. Bilangan pelajar yang terlupa setiap falsafah sekurang-kurangnya sekali. Senarai ini dikemas kini setiap kali anda membuka papan ini atau log masuk, dan dipaparkan kepada pelajar dalam tab Progres setiap Jumaat.</p>
       ${rows(w.top, x => x.students + ' pelajar')}</div>

@@ -83,6 +83,7 @@
     --rose:#D98C86;
     --rose-soft:rgba(217,140,134,.12);
     --lv1:#C9A85C; --lv2:#B8994F; --lv3:#8FB5A6; --lv4:#7CC4A4; --lv5:#5FA88A;
+    --gC:#D9975B; --gD:#D9776B; --gG:#C0504D;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 28px -14px rgba(0,0,0,.55);
     --radius:16px;
     --ios-ease:cubic-bezier(.32,.72,0,1);
@@ -111,6 +112,7 @@
     --rose:#B42318;
     --rose-soft:rgba(180,35,24,.10);
     --lv1:#E9B949; --lv2:#D4AF37; --lv3:#7FB7A6; --lv4:#34D399; --lv5:#0F9F74;
+    --gC:#EA6A2A; --gD:#D9472B; --gG:#B42318;
     --shadow:0 1px 2px rgba(16,33,43,.05),0 14px 32px -16px rgba(16,33,43,.18);
     color-scheme:light;
   }
@@ -373,6 +375,7 @@
   .badge-neutral{ background:rgba(148,163,184,.12); color:var(--muted); border-color:rgba(148,163,184,.22); }
   .badge-gold{ background:var(--gold-soft); color:var(--gold-cite); border-color:rgba(212,175,55,.32); }
   .badge-emerald{ background:var(--emerald-soft); color:var(--emerald); border-color:rgba(52,211,153,.32); }
+  .badge-re{ background:rgba(217,151,91,.12); color:var(--re); border-color:rgba(217,151,91,.34); }
 
   /* ---------- Study (Kaji) ---------- */
   .study-head{
@@ -560,6 +563,13 @@
   .lvl-grid div{ border:1px solid var(--border); border-radius:10px; padding:8px 10px; font-size:12px; color:var(--muted); }
   .lvl-grid b{ display:block; font-size:18px; color:var(--ink); font-variant-numeric:tabular-nums; }
   .lvl-grid i{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
+  .focus-sec{ border-left:3px solid var(--re); }
+  .focus-sec > h4{ color:var(--re); }
+  .sl-meta b{ font-weight:800; }
+  .sl-meta .gred-top{ color:var(--emerald); }
+  .sl-meta .gred-mid{ color:var(--gold-cite); }
+  .sl-meta .gred-low{ color:var(--re); }
+  .markah-pill{ font-size:12px; color:var(--muted); font-weight:700; margin-left:4px; }
   .hist details{ border:1px solid var(--border); border-radius:10px; margin-bottom:6px; }
   .hist summary{ cursor:pointer; padding:9px 12px; font-size:13px; font-weight:700; display:flex; gap:10px; }
   .hist summary .hd{ flex:1; }
@@ -1648,9 +1658,56 @@
     return c.due <= todayStr();
   }
 
+  // ---------- Markah & gred ----------
+  // Each falsafah keeps its last 10 answers: K/k = Kaji Ingat/Belum ingat (+1/-1),
+  // Q/q = Kuiz betul/salah (+0.5/-0.5). The sum is the markah; the markah gives the gred.
+  // The box (spacing) still decides when a card comes back; students see the gred.
+  var LOG_MAX = 10;
+  var LOG_PTS = { K: 1, k: -1, Q: 0.5, q: -0.5 };
+  var GREDS = [
+    { g:'A+', min:7,  cls:'badge-emerald', col:'var(--lv5)' },
+    { g:'A',  min:5,  cls:'badge-emerald', col:'var(--lv4)' },
+    { g:'A-', min:4,  cls:'badge-emerald', col:'var(--lv3)' },
+    { g:'B+', min:3,  cls:'badge-gold',    col:'var(--lv1)' },
+    { g:'B',  min:1,  cls:'badge-gold',    col:'var(--lv2)' },
+    { g:'C',  min:-1, cls:'badge-re',      col:'var(--gC)' },
+    { g:'D',  min:-3, cls:'badge-re',      col:'var(--gD)' },
+    { g:'G',  min:-Infinity, cls:'badge-re', col:'var(--gG)' }
+  ];
+  var FOCUS_GREDS = ['C','D','G'];
+  function gredLabel(g){ return g.replace('-', '−'); }
+  function rep(ch, n){ return n > 0 ? new Array(n + 1).join(ch) : ''; }
+  // Cards studied before markah existed only kept totals: rebuild a likely last-10 from them
+  // (the box = Ingat in a row since the last miss, so those go last).
+  function seedLog(c){
+    var seen = c.seen || 0; if(!seen) return '';
+    var n = Math.min(seen, LOG_MAX), miss = Math.max(0, seen - (c.correct || 0));
+    var tail = Math.min(c.box || 0, n);
+    var w = Math.min(n - tail, Math.round(n * miss / seen));
+    if(miss > 0 && !(c.box) && w < 1) w = 1;
+    return rep('K', n - tail - w) + rep('k', w) + rep('K', tail);
+  }
+  function cardLog(id){ var c = srs[id]; if(!c) return ''; return typeof c.log === 'string' ? c.log : seedLog(c); }
+  function pushLog(id, ch){ var c = getCard(id); c.log = (cardLog(id) + ch).slice(-LOG_MAX); c.lt = Date.now(); }
+  function markahOf(id){ var s = 0, l = cardLog(id); for(var i = 0; i < l.length; i++) s += LOG_PTS[l[i]] || 0; return s; }
+  function gredOf(id){   // null = belum dikaji
+    if(!cardLog(id).length) return null;
+    var m = markahOf(id);
+    for(var i = 0; i < GREDS.length; i++) if(m >= GREDS[i].min) return GREDS[i];
+    return GREDS[GREDS.length - 1];
+  }
+  function fmtMarkah(m){ var s = (Math.abs(m) % 1 ? Math.abs(m).toFixed(1) : String(Math.abs(m))); return (m > 0 ? '+' : m < 0 ? '−' : '') + s; }
+  function gredBadge(id){
+    var g = gredOf(id);
+    return g ? '<span class="badge ' + g.cls + '">Gred ' + gredLabel(g.g) + '</span>' : '<span class="badge badge-neutral">Baru</span>';
+  }
+  function gredKey(id){ var g = gredOf(id); return g ? g.g : '-'; }
+  function recordQuizAnswer(id, ok){ if(!entryById(id)) return; pushLog(id, ok ? 'Q' : 'q'); saveState(srs); }
+
   function grade(id, result){
     // result: 0 = belum ingat, 1 = ingat
     var c = getCard(id);
+    pushLog(id, result ? 'K' : 'k');
     c.seen = (c.seen||0)+1;
     if(result===0){
       c.box = 0;
@@ -1809,7 +1866,7 @@
     { sel:'#view-study .rangechip', title:'Julat', text:'Falsafah yang anda kaji. Tekan <b>Tukar</b> untuk pilih Tahun 1, Tahun 2, Semua atau julat sendiri.' },
     { sel:'#progBtn', title:'Butiran', text:'Senarai <b>Ingat</b> dan <b>Perlu ulang</b> hari ini, dengan butang <b>Uji</b> untuk ulang yang belum ingat.' },
     { sel:'#listenBtn', title:'Dengar', text:'Dengar bacaan ayat ikut julat, ulang 1&ndash;3 kali. Sesuai semasa memandu; kawalan ada di skrin kunci.' },
-    { sel:'nav.tabs button[data-view="kemajuan"]', title:'Progres', text:'Kemajuan keseluruhan 200 falsafah: tahap hafalan, <b>Perlu fokus</b>, carta 14 hari dan sejarah harian.' }
+    { sel:'nav.tabs button[data-view="kemajuan"]', title:'Progres', text:'Kemajuan keseluruhan 200 falsafah: gred hafalan, <b>Perlu fokus</b>, carta 14 hari dan sejarah harian.' }
   ];
   var tourStep = -1, tourTip = null, tourTarget = null, tourSpot = null, tourBlock = null, tourMoveT = null;
   function startTour(){
@@ -1999,7 +2056,7 @@
     var box = getCard(entry.id).box;
     var badge = reviewing
       ? '<span class="badge badge-gold">Ulang &middot; ' + daily.again.length + ' lagi</span>'
-      : '<span class="badge ' + BOX_BADGE_CLASS[box] + '">' + BOX_LABELS[box] + '</span>';
+      : gredBadge(entry.id);
 
     // Progress through the chosen range today: cards due today in the range, done vs left (this card included)
     var prog = '';
@@ -2122,18 +2179,16 @@
   // ---------- shared helpers for Butiran (Kaji) and the Kemajuan tab ----------
   var LEVEL_COLORS = ['var(--border)','var(--lv1)','var(--lv2)','var(--lv3)','var(--lv4)','var(--lv5)'];
   function missesOf(id){ var c = srs[id]; return c ? Math.max(0, (c.seen||0) - (c.correct||0)) : 0; }
-  // Perlu fokus: forgotten 2+ times and not yet recovered. It leaves after 2 Ingat in a row
-  // (box counts Ingat since the last miss); one more Belum ingat sends it back to 0/2.
-  var FOCUS_CLEAR = 2;
-  function inFocus(id){ return missesOf(id) >= 2 && (getCard(id).box || 0) < FOCUS_CLEAR; }
-  function focusMeta(id){
-    var b = getCard(id).box || 0;
-    return 'terlupa ' + missesOf(id) + '&times;' + (b > 0 ? ' &middot; <span class="pulih">pulih ' + b + '/' + FOCUS_CLEAR + '</span>' : '');
+  // Perlu fokus: every falsafah with gred C, D or G (markah 0.5 and below). It leaves when the markah reaches 1 (gred B).
+  function inFocus(id){ var g = gredOf(id); return !!g && FOCUS_GREDS.indexOf(g.g) >= 0; }
+  function markahMeta(id){
+    var g = gredOf(id);
+    return g ? 'markah ' + fmtMarkah(markahOf(id)) + ' &middot; <b class="gred-' + (FOCUS_GREDS.indexOf(g.g) >= 0 ? 'low' : g.min >= 4 ? 'top' : 'mid') + '">' + gredLabel(g.g) + '</b>' : '';
   }
+  var focusMeta = markahMeta;
+  function byMarkah(a, b){ return (markahOf(a) - markahOf(b)) || (a - b); }
   function focusList(){
-    return STUDY_POOL.filter(function(e){ return inFocus(e.id); })
-      .sort(function(a, b){ return (missesOf(b.id) - missesOf(a.id)) || (getCard(a.id).box - getCard(b.id).box) || (a.id - b.id); })
-      .map(function(e){ return e.id; });
+    return STUDY_POOL.filter(function(e){ return inFocus(e.id); }).map(function(e){ return e.id; }).sort(byMarkah);
   }
   function progItems(ids, meta){
     if(!ids.length) return '';
@@ -2207,15 +2262,16 @@
   }
 
   // ---------- Kemajuan tab: overall progress across all 200 falsafah ----------
-  function allLevels(){
-    var lv = [[],[],[],[],[],[]];
-    DATA.forEach(function(e){ lv[getCard(e.id).box].push(e.id); });
-    return lv;
+  // All 200 by gred: index 0..7 follow GREDS (A+ to G), index 8 = belum dikaji. Each list lowest markah first.
+  function allGreds(){
+    var out = GREDS.map(function(){ return []; }); out.push([]);
+    DATA.forEach(function(e){ var g = gredOf(e.id); out[g ? GREDS.indexOf(g) : GREDS.length].push(e.id); });
+    out.forEach(function(ids, i){ if(i < GREDS.length) ids.sort(byMarkah); });
+    return out;
   }
+  function allMarked(){ return DATA.filter(function(e){ return cardLog(e.id).length; }).map(function(e){ return e.id; }).sort(byMarkah); }
   function allFocus(){
-    return DATA.filter(function(e){ return inFocus(e.id); })
-      .sort(function(a, b){ return (missesOf(b.id) - missesOf(a.id)) || (getCard(a.id).box - getCard(b.id).box) || (a.id - b.id); })
-      .map(function(e){ return e.id; });
+    return DATA.filter(function(e){ return inFocus(e.id); }).map(function(e){ return e.id; }).sort(byMarkah);
   }
   // Across all days: the last answer decides. Belum ingat stays here until the student presses Ingat.
   function recallAll(){
@@ -2225,17 +2281,22 @@
   }
   // Every list the Kemajuan tab can open: [title, ids, uji set or null, meta]
   function listDef(key){
-    var L = todayLists(), lv = allLevels();
+    var L = todayLists();
     if(key === 'today-re') return ['Belum ingat hari ini', L.re, 'today', fixMark(L)];
     if(key === 'today-ok') return ['Ingat hari ini', L.ok, null];
     if(key === 'all-re') return ['Perlu ulang (semua hari)', recallAll().re, 'allre', function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }];
-    if(key === 'all-ok') return ['Sudah ingat', recallAll().ok, null, function(id){ return BOX_LABELS[getCard(id).box]; }];
+    if(key === 'all-ok') return ['Sudah ingat', recallAll().ok, null, markahMeta];
+    if(key === 'markah') return ['Markah setiap falsafah', allMarked(), null, markahMeta];
     if(key === 'focus') return ['Perlu fokus', allFocus(), 'focus', focusMeta];
     if(key === 'studied') return ['Pernah dikaji', DATA.filter(function(e){ return (getCard(e.id).seen||0) > 0; }).map(function(e){ return e.id; }), null];
     if(key === 'unstudied') return ['Belum pernah dikaji', DATA.filter(function(e){ return !(getCard(e.id).seen||0); }).map(function(e){ return e.id; }), null];
     if(key === 'kelas'){ var W = classWeekly(); return ['Kelas minggu ini', W ? W.top.map(function(x){ return x.id; }) : [], 'kelas']; }
-    var m = /^lv(\d)$/.exec(key);
-    if(m) return ['Tahap: ' + BOX_LABELS[+m[1]], lv[+m[1]], +m[1] < 5 ? 'lv' + m[1] : null];
+    var m = /^gr(\d)$/.exec(key);
+    if(m){
+      var gi = +m[1], ids = allGreds()[gi] || [];
+      if(gi === GREDS.length) return ['Belum dikaji', ids, 'gr' + gi];
+      return ['Gred ' + gredLabel(GREDS[gi].g), ids, gi > 0 ? 'gr' + gi : null, markahMeta];
+    }
     return ['', [], null];
   }
   var currentList = null, listView = 'ringkas';
@@ -2243,7 +2304,7 @@
     currentList = key;
     var d = listDef(key), title = d[0], ids = d[1], set = d[2], meta = d[3];
     if(set) progSets[set] = ids;
-    if(set && /^lv/.test(set)) UJI_LABELS[set] = title;
+    if(set && /^gr/.test(set)) UJI_LABELS[set] = title;
     sheetBack = { label: title, open: function(){ openListSheet(key); } };
     var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
       '<h3 class="ptitle">' + escapeHtml(title) + '</h3>' +
@@ -2270,7 +2331,7 @@
     if(!stage) return;
     backfillHistory();
     var L = todayLists(), nToday = L.ok.length + L.re.length;
-    var F = allFocus(), W = classWeekly(), lv = allLevels(), total = DATA.length, RA = recallAll();
+    var F = allFocus(), W = classWeekly(), gr = allGreds(), total = DATA.length, RA = recallAll(), nMarked = total - gr[GREDS.length].length;
     progSets.allre = RA.re;
     var studied = DATA.filter(function(e){ return (getCard(e.id).seen||0) > 0; }).length;
     progSets.focus = F; progSets.today = L.re;
@@ -2284,25 +2345,30 @@
       '<div class="kmj-head"><h2>Progres anda</h2><span class="psub">Semua 200 falsafah</span></div>' +
       '<div class="kmj-tiles">' +
         '<div data-list="focus"><b>' + F.length + '</b>Perlu fokus</div>' +
-        '<div data-list="lv5"><b>' + lv[5].length + '<small>/' + total + '</small></b>Dikuasai</div>' +
+        '<div data-list="gr0"><b>' + gr[0].length + '<small>/' + total + '</small></b>Gred A+</div>' +
         '<div class="k-re-all" data-list="all-re"><b>' + RA.re.length + '</b>&#8635; Perlu ulang</div>' +
         '<div class="k-ok-all" data-list="all-ok"><b>' + RA.ok.length + '</b>&#10003; Sudah ingat</div>' +
       '</div>' +
       '<p class="pnote" style="margin:8px 2px 0;">Perlu ulang dikira dari semua hari, dan kekal di situ sehingga anda tekan <b>Ingat</b>.</p>';
 
-    // Tahap hafalan
-    html += '<div class="prog-sec card-sec"><h4>Tahap hafalan &middot; tekan untuk lihat senarai</h4>' +
-      '<div class="lvl-bar">' + lv.map(function(v, i){ return v.length ? '<span style="width:' + (v.length/total*100) + '%;background:' + LEVEL_COLORS[i] + '"></span>' : ''; }).join('') + '</div>' +
-      '<div class="lvl-grid">' + lv.map(function(v, i){ return '<div data-list="lv' + i + '"><b>' + v.length + '</b><i style="background:' + LEVEL_COLORS[i] + '"></i>' + BOX_LABELS[i] + '</div>'; }).join('') + '</div>' +
-      '<p class="pnote">Setiap kali anda tekan Ingat, falsafah naik satu tahap. Belum ingat membawanya kembali ke Baru.</p></div>';
+    // Gred hafalan (from each falsafah's markah)
+    var grCol = function(i){ return i < GREDS.length ? GREDS[i].col : 'var(--border)'; };
+    var grName = function(i){ return i < GREDS.length ? 'Gred ' + gredLabel(GREDS[i].g) : 'Belum dikaji'; };
+    html += '<div class="prog-sec card-sec"><h4>Gred hafalan &middot; tekan untuk lihat senarai</h4>' +
+      '<div class="lvl-bar">' + gr.map(function(v, i){ return v.length ? '<span style="width:' + (v.length/total*100) + '%;background:' + grCol(i) + '"></span>' : ''; }).join('') + '</div>' +
+      '<div class="lvl-grid">' + gr.map(function(v, i){ return '<div data-list="gr' + i + '"' + (i >= 5 && i < GREDS.length ? ' class="gr-low"' : '') + '><b>' + v.length + '</b><i style="background:' + grCol(i) + '"></i>' + grName(i) + '</div>'; }).join('') + '</div>' +
+      '<p class="pnote">Markah dikira dari 10 jawapan terakhir setiap falsafah: Kaji <b>Ingat +1</b>, <b>Belum ingat &minus;1</b>, Kuiz betul +&frac12;, salah &minus;&frac12;.<br>' +
+      'A+ 7 ke atas &middot; A 5 &middot; A&minus; 4 &middot; B+ 3 &middot; B 1 &middot; C &minus;1 &middot; D &minus;3 &middot; G bawah &minus;3</p>' +
+      (nMarked ? '<button type="button" class="backbtn" data-list="markah" style="margin:12px 0 0;">Senarai markah setiap falsafah (' + nMarked + ') &rsaquo;</button>' : '') +
+      '</div>';
 
     // Perlu fokus
-    html += '<div class="prog-sec card-sec"><h4>Perlu fokus &middot; <span class="cnt">' + F.length + '</span></h4>' +
+    html += '<div class="prog-sec card-sec focus-sec"><h4>Perlu fokus &middot; <span class="cnt">' + F.length + '</span> &middot; gred C, D, G</h4>' +
       (F.length ? progItems(F.slice(0, 5), focusMeta) +
-                  '<p class="pnote" style="margin:8px 2px 0;">Keluar dari senarai selepas 2 kali Ingat berturut-turut.</p>' +
+                  '<p class="pnote" style="margin:8px 2px 0;">Markah paling rendah di atas. Keluar dari senarai bila markah naik ke +1 (gred B).</p>' +
                   (F.length > 5 ? '<button type="button" class="backbtn" data-list="focus" style="margin:10px 0 0;">Lihat semua ' + F.length + ' &rsaquo;</button>' : '') +
                   ujiRow('focus', F.length)
-                : '<p class="pnote">Belum ada. Falsafah yang terlupa 2 kali atau lebih akan muncul di sini, dan keluar selepas 2 kali Ingat berturut-turut.</p>') +
+                : '<p class="pnote">Tiada. Falsafah gred C, D dan G akan muncul di sini, dan keluar bila markah naik ke +1 (gred B).</p>') +
       '</div>';
 
     // Kelas minggu ini (Fridays)
@@ -2469,9 +2535,8 @@
   }
 
   function listCardHtml(e){
-    var box = getCard(e.id).box;
-    return '<div class="listcard" data-id="'+e.id+'">' +
-      '<div class="lc-top"><span class="lc-no">'+e.rangeLabel+'</span><span class="badge '+BOX_BADGE_CLASS[box]+'">'+BOX_LABELS[box]+'</span></div>' +
+    return '<div class="listcard" data-id="'+e.id+'" data-gred="'+gredKey(e.id)+'">' +
+      '<div class="lc-top"><span class="lc-no">'+e.rangeLabel+'</span>'+gredBadge(e.id)+'</div>' +
       '<div class="lc-title">'+escapeHtml(displayTitle(e.title))+'</div>' +
       '<div class="lc-arabic" lang="ar" dir="rtl">'+escapeHtml(e.arabic)+'</div>' +
       '<div class="lc-surah">'+escapeHtml(e.surahDisplay)+'</div>' +
@@ -2514,11 +2579,11 @@
       if(!ok) return;
       shown++;
       var gi = card.getAttribute('data-gi'); if(gi !== null) groupHits[gi] = 1;
-      // keep the level badge current without redrawing the card
-      var box = getCard(e.id).box, badge = card.querySelector('.badge');
-      if(badge && card.getAttribute('data-box') !== String(box)){
-        badge.className = 'badge ' + BOX_BADGE_CLASS[box]; badge.textContent = BOX_LABELS[box];
-        card.setAttribute('data-box', box);
+      // keep the gred badge current without redrawing the card
+      var gk = gredKey(e.id), badge = card.querySelector('.badge');
+      if(badge && card.getAttribute('data-gred') !== gk){
+        badge.outerHTML = gredBadge(e.id);
+        card.setAttribute('data-gred', gk);
       }
     });
     var groupsShown = 0, totalGrouped = 0;
@@ -2557,7 +2622,7 @@
       '<button class="closebtn" id="closeDetail">&times;</button>' +
       (fromProgress ? '<button type="button" class="backbtn" id="backToProg">&lsaquo; ' + escapeHtml(fromProgress.label) + '</button><br>' : '') +
       '<span class="rangepill">'+entry.rangeLabel+'</span> ' +
-      '<span class="badge '+BOX_BADGE_CLASS[box]+'">'+BOX_LABELS[box]+'</span>' +
+      gredBadge(id) + (cardLog(id).length ? ' <span class="markah-pill">Markah ' + fmtMarkah(markahOf(id)) + '</span>' : '') +
       '<h3 class="folio-title" style="margin-top:14px;">'+escapeHtml(displayTitle(entry.title))+'</h3>' +
       '<hr class="divider">' +
       renderArabic(entry) +
@@ -2713,6 +2778,7 @@
         });
         quizTotal++;
         if(chosen === correctVal) quizScore++;
+        if(quizCurrent && quizCurrent.entry) recordQuizAnswer(quizCurrent.entry.id, chosen === correctVal);
         markKuizAnsweredToday();
         renderMissionBar();
         document.getElementById('quizScore').textContent = quizScore;
@@ -4150,6 +4216,7 @@ function localSnapshot() { const o = {}; for (const [k, key] of Object.entries(K
 function better(a, b) { // pick the card with more study history
   if (!a) return b; if (!b) return a;
   if ((a.seen || 0) !== (b.seen || 0)) return (a.seen || 0) > (b.seen || 0) ? a : b;
+  if ((a.lt || 0) !== (b.lt || 0)) return (a.lt || 0) > (b.lt || 0) ? a : b;   // same Kaji count: the latest answer (e.g. a Kuiz) wins
   if ((a.box || 0) !== (b.box || 0)) return (a.box || 0) > (b.box || 0) ? a : b;
   return (a.due || '') >= (b.due || '') ? a : b;
 }
@@ -4305,8 +4372,21 @@ async function publishWeekly(students) {
 }
 
 // ---------- admin: every student's progress ----------
-const LVL = ['Baru', 'Belajar', 'Semakan', 'Kukuh', 'Mahir', 'Dikuasai'];
-const LVL_C = ['var(--border)', '#E9B949', '#D4AF37', '#7FB7A6', '#34D399', '#0F9F74'];
+// gred: same rule as the app (last 10 answers; Kaji +1/-1, Kuiz +0.5/-0.5)
+const LVL = ['A+', 'A', 'A−', 'B+', 'B', 'C', 'D', 'G', 'Belum dikaji'];
+const LVL_C = ['#0F9F74', '#34D399', '#7FB7A6', '#E9B949', '#D4AF37', '#EA6A2A', '#D9472B', '#B42318', 'var(--border)'];
+const G_MIN = [7, 5, 4, 3, 1, -1, -3, -Infinity];
+const LOG_PTS = { K: 1, k: -1, Q: 0.5, q: -0.5 };
+function seedLog(c) {
+  const seen = c.seen || 0; if (!seen) return '';
+  const n = Math.min(seen, 10), miss = Math.max(0, seen - (c.correct || 0)), tail = Math.min(c.box || 0, n);
+  let w = Math.min(n - tail, Math.round(n * miss / seen)); if (miss > 0 && !c.box && w < 1) w = 1;
+  return 'K'.repeat(n - tail - w) + 'k'.repeat(w) + 'K'.repeat(tail);
+}
+const cardLog = c => !c ? '' : typeof c.log === 'string' ? c.log : seedLog(c);
+const markahOf = c => [...cardLog(c)].reduce((a, ch) => a + (LOG_PTS[ch] || 0), 0);
+const gredIdx = c => { if (!cardLog(c).length) return 8; const m = markahOf(c); return G_MIN.findIndex(x => m >= x); };
+const fmtM = m => (m > 0 ? '+' : m < 0 ? '−' : '') + Math.abs(m);
 async function loadStudents() {
   const snap = await fb.F.getDocs(fb.F.collection(fb.db, 'users'));
   const out = [];
@@ -4314,10 +4394,9 @@ async function loadStudents() {
     const v = d.data() || {}, data = v.data || {};
     const srs = parse(data.srs) || {}, daily = parse(data.daily), range = parse(data.range) || { from: 1, to: 200 }, history = parse(data.history) || {};
     const pool = DATA.filter(e => e.noEnd >= range.from && e.noStart <= range.to);
-    const levels = [0, 0, 0, 0, 0, 0]; pool.forEach(e => { levels[(srs[e.id] && srs[e.id].box) || 0]++; });
-    const misses = id => srs[id] ? Math.max(0, (srs[id].seen || 0) - (srs[id].correct || 0)) : 0;
-    const focus = pool.filter(e => misses(e.id) >= 2 && ((srs[e.id] && srs[e.id].box) || 0) < 2)   // same rule as the app: out after 2 Ingat in a row
-     .sort((a, b) => misses(b.id) - misses(a.id)).map(e => ({ id: e.id, n: misses(e.id) }));
+    const levels = LVL.map(() => 0); pool.forEach(e => { levels[gredIdx(srs[e.id])]++; });
+    const focus = pool.filter(e => { const g = gredIdx(srs[e.id]); return g >= 5 && g <= 7; })   // same rule as the app: gred C, D, G
+     .map(e => ({ id: e.id, m: markahOf(srs[e.id]), g: LVL[gredIdx(srs[e.id])] })).sort((a, b) => a.m - b.m);
     let today = null;
     if (daily && daily.date === dayStr(new Date())) {
       // same rule as the app: wrong at least once today counts as Belum ingat for the day
@@ -4374,7 +4453,7 @@ async function openAdmin() {
   try { w = await publishWeekly(students); window.fnWeekly = w; } catch (e) {}
   const today = dayStr(new Date());
   const activeToday = students.filter(s => s.updated && dayStr(s.updated) === today).length;
-  const avgMast = students.length ? Math.round(students.reduce((a, s) => a + (s.pool ? s.levels[5] / s.pool : 0), 0) / students.length * 100) : 0;
+  const avgMast = students.length ? Math.round(students.reduce((a, s) => a + (s.pool ? s.levels[0] / s.pool : 0), 0) / students.length * 100) : 0;
   const card = (s, i) => {
     const p = s.profile, t = s.today, lv = s.levels, tot = s.pool || 1;
     const days = Object.keys(s.history).sort().reverse().filter(d => (s.history[d].g || []).length || (s.history[d].a || []).length).slice(0, 14);
@@ -4382,20 +4461,20 @@ async function openAdmin() {
       <div class="stu-h"><b>${esc(p.name || '(tiada nama)')}</b><span class="who">@${esc(p.username || '')} · ${esc(p.email || '')}</span>
         <span class="act ${s.updated && dayStr(s.updated) === today ? 'today' : ''}">${relTime(s.updated)}</span></div>
       <div class="stu-m"><span>Hari ini: <b>${t ? '✓ ' + t.ok.length + ' · ↻ ' + t.re.length : '—'}</b></span>
-        <span>Dikuasai: <b>${lv[5]}/${s.pool}</b></span><span>Julat: <b>${s.range.from}–${s.range.to}</b></span>
+        <span>Gred A+: <b>${lv[0]}/${s.pool}</b></span><span>Julat: <b>${s.range.from}–${s.range.to}</b></span>
         <span>Perlu fokus: <b>${s.focus.length}</b></span><span>Jumlah ulang kaji: <b>${s.seen}</b></span></div>
       <div class="lvl-bar">${lv.map((v, k) => v ? `<span style="width:${v / tot * 100}%;background:${LVL_C[k]}" title="${LVL[k]}: ${v}"></span>` : '').join('')}</div>
       <div class="stu-d">
-        <h4>Tahap</h4><p class="hint">${lv.map((v, k) => LVL[k] + ' ' + v).join(' · ')}</p>
+        <h4>Gred</h4><p class="hint">${lv.map((v, k) => LVL[k] + ' ' + v).join(' · ')}</p>
         ${t ? `<h4>Hari ini · perlu ulang</h4>${rows(t.re)}` : ''}
-        <h4>Perlu fokus (terlupa 2 kali atau lebih)</h4>${rows(s.focus, x => 'terlupa ' + x.n + '×')}
+        <h4>Perlu fokus (gred C, D, G)</h4>${rows(s.focus, x => 'markah ' + fmtM(x.m) + ' · ' + x.g)}
         <h4>Sejarah 14 hari</h4>${days.length ? '<ul class="adm-rows">' + days.map(d => `<li><span class="tt">${d}</span><span class="mt">✓ ${(s.history[d].g || []).length} · ↻ ${(s.history[d].a || []).length}</span></li>`).join('') + '</ul>' : '<p class="hint">Tiada sejarah lagi.</p>'}
       </div></div>`;
   };
   panel.innerHTML = `<div class="adm">
     <div class="adm-top"><h2>Papan pentadbir</h2><button id="admRefresh">Muat semula</button><button id="admClose">Tutup</button></div>
     <p class="adm-sub">Data dibaca terus daripada Firebase · ${new Date().toLocaleString('ms-MY')}</p>
-    <div class="adm-tiles"><div><b>${students.length}</b>Pelajar berdaftar</div><div><b>${activeToday}</b>Aktif hari ini</div><div><b>${w.activeStudents}</b>Aktif 7 hari</div><div><b>${avgMast}%</b>Purata dikuasai</div></div>
+    <div class="adm-tiles"><div><b>${students.length}</b>Pelajar berdaftar</div><div><b>${activeToday}</b>Aktif hari ini</div><div><b>${w.activeStudents}</b>Aktif 7 hari</div><div><b>${avgMast}%</b>Purata gred A+</div></div>
     <div class="adm-sec"><h3>Kelas minggu ini · paling kerap terlupa</h3>
       <p class="hint">${w.from} hingga ${w.to}. Bilangan pelajar yang terlupa setiap falsafah sekurang-kurangnya sekali. Senarai ini dikemas kini setiap kali anda membuka papan ini atau log masuk, dan dipaparkan kepada pelajar dalam tab Progres setiap Jumaat.</p>
       ${rows(w.top, x => x.students + ' pelajar')}</div>
