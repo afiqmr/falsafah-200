@@ -35,7 +35,7 @@ head = nl.join([
     '<meta name="mobile-web-app-capable" content="yes">',
     '<meta name="apple-mobile-web-app-capable" content="yes">',
     '<meta name="apple-mobile-web-app-title" content="Falsafah 200">',
-    '<meta name="apple-mobile-web-app-status-bar-style" content="default">',
+    '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">',
     # link preview card (WhatsApp, Telegram, Facebook, X); WhatsApp needs absolute URLs
     '<meta property="og:type" content="website">',
     '<meta property="og:site_name" content="Al-Fathun Nawa">',
@@ -48,7 +48,7 @@ head = nl.join([
     '<meta property="og:image:width" content="800">',
     '<meta property="og:image:height" content="800">',
     '<meta property="og:image:alt" content="Logo AFN, Falsafah 200">',
-    '<meta name="twitter:card" content="summary_large_image">',
+    '<meta name="twitter:card" content="summary">',
     # progress handed over from the old link (landing page): merged into this device before the app starts,
     # then into the student's account when they log in or register
     '<script>' + open('cloud/import.js', encoding='utf-8').read() + '</script>',

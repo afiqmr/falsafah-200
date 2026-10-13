@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Falsafah 200">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Al-Fathun Nawa">
 <meta property="og:title" content="الفتح النوى · Falsafah 200">
@@ -19,7 +19,7 @@
 <meta property="og:image:width" content="800">
 <meta property="og:image:height" content="800">
 <meta property="og:image:alt" content="Logo AFN, Falsafah 200">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
 <script>(function(){
   var h = location.hash, m = /^#bawa=([A-Za-z0-9_-]+)$/.exec(h);
   if(!m) return;
@@ -59,7 +59,7 @@
 <script>window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__bip=e;document.dispatchEvent(new Event("fn-bip"));});if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 <style>@media (max-width:600px){ html{ zoom:.9; } }</style>
 <title>الفتح النوى - Falsafah 200</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#121316">
 <script>try{ if(localStorage.getItem('falsafah200_theme_v1') === 'light'){ document.querySelector('meta[name="theme-color"]').setAttribute('content', '#FAF5EC'); document.documentElement.style.backgroundColor = '#FAF5EC'; } else document.documentElement.style.backgroundColor = '#121316'; }catch(e){}</script>
 <meta name="description" content="Kaji dan hafaz 200 Falsafah Al Quran dari Al Fathun Nawa Jilid 7, dengan ayat asal, ulang kaji jarak masa, kuiz dan penjejakan kemajuan.">
@@ -141,7 +141,7 @@
   }
   /* Pinned tab row: clear at rest, frosted glass once it sticks to the top */
   .tabbar{
-    position:sticky; top:0; z-index:20;
+    position:sticky; top:var(--sb-h); z-index:20;
     margin:0 -18px 22px; padding:8px 0 10px;
     border-bottom:1px solid transparent;
     transition:background-color .3s ease, border-color .3s ease, -webkit-backdrop-filter .3s ease, backdrop-filter .3s ease;
@@ -158,6 +158,13 @@
   }
   .wordmark{ display:flex; flex-direction:column; gap:1px; }
   .wordmark-top{ display:flex; align-items:baseline; gap:8px; }
+  /* iPhone home-screen app: the status bar is see-through, so this strip paints it in the theme's colour
+     (dark page colour in dark mode; deep teal in light mode so the white clock and battery stay readable) */
+  :root{ --sb-h:env(safe-area-inset-top, 0px); }
+  @media (max-width:600px){ :root{ --sb-h:calc(env(safe-area-inset-top, 0px) / .9); } }   /* phones are zoomed to 90% */
+  .sb-strip{ position:fixed; top:0; left:0; right:0; height:var(--sb-h); z-index:100; background:#121316; pointer-events:none; }
+  body[data-theme="light"] .sb-strip{ background:#0F766E; }
+  body{ padding-top:var(--sb-h); }
   .wordmark .mark{ font-weight:700; font-size:21px; color:var(--gold); letter-spacing:-.01em; }
   .wordmark .sub{
     font-size:13px; color:var(--muted); letter-spacing:.02em; font-weight:600;
@@ -1158,6 +1165,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;700&display=swap">
 
 
+<div class="sb-strip" aria-hidden="true"></div>
 <div class="app">
   <header class="topbar">
     <div class="topbar-inner">
@@ -2756,7 +2764,8 @@
 
   // Frost the tab row only while it is pinned to the top
   var tabBar = document.getElementById('tabBar');
-  function updateTabBarStuck(){ tabBar.classList.toggle('stuck', tabBar.getBoundingClientRect().top <= 0.5 && window.scrollY > 0); }
+  var sbStrip = document.querySelector('.sb-strip');
+  function updateTabBarStuck(){ var top = sbStrip ? sbStrip.getBoundingClientRect().height : 0; tabBar.classList.toggle('stuck', tabBar.getBoundingClientRect().top <= top + 0.5 && window.scrollY > 0); }
   window.addEventListener('scroll', updateTabBarStuck, { passive:true });
   updateTabBarStuck();
 
