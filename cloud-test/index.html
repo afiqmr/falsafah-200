@@ -2346,10 +2346,7 @@
       '<div class="kmj-tiles">' +
         '<div data-list="focus"><b>' + F.length + '</b>Perlu fokus</div>' +
         '<div data-list="gr0"><b>' + gr[0].length + '<small>/' + total + '</small></b>Gred A+</div>' +
-        '<div class="k-re-all" data-list="all-re"><b>' + RA.re.length + '</b>&#8635; Perlu ulang</div>' +
-        '<div class="k-ok-all" data-list="all-ok"><b>' + RA.ok.length + '</b>&#10003; Sudah ingat</div>' +
-      '</div>' +
-      '<p class="pnote" style="margin:8px 2px 0;">Perlu ulang dikira dari semua hari, dan kekal di situ sehingga anda tekan <b>Ingat</b>.</p>';
+      '</div>';
 
     // Gred hafalan (from each falsafah's markah)
     var grCol = function(i){ return i < GREDS.length ? GREDS[i].col : 'var(--border)'; };
@@ -3938,7 +3935,7 @@ const overlay = $('acctOverlay'), card = $('acctCard');
     r.setProperty('--acct-songket-l', draw(['', 'rgba(176,128,40,.55)', 'rgba(196,72,48,.6)']));   // gold and songket red on cream
     r.setProperty('--acct-songket-d', draw(['', 'rgba(201,168,92,.42)', 'rgba(226,176,100,.55)']));  // soft gold on charcoal
     r.setProperty('--page-songket-l', draw(['', 'rgba(176,128,40,.25)', 'rgba(196,72,48,.25)']));
-    r.setProperty('--page-songket-d', draw(['', 'rgba(201,168,92,.19)', 'rgba(226,176,100,.24)']));
+    r.setProperty('--page-songket-d', draw(['', 'rgba(201,168,92,.16)', 'rgba(226,176,100,.20)']));
     // laptops and desktops: the cloth shows at the left and right of the page, still; it blurs and fades toward the middle column
     const sides = document.createElement('div'); sides.className = 'fn-sides'; sides.setAttribute('aria-hidden', 'true');
     sides.innerHTML = '<i class="sharp"></i><i class="soft"></i>';
