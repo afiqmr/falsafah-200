@@ -399,6 +399,11 @@
     display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px;
   }
   .rangepill{ font-weight:700; font-size:14px; color:var(--gold-cite); }
+  /* range progress on the Kaji card: plain data, not highlighted */
+  .julatprog{ margin:-6px 0 16px; }
+  .jp-txt{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .jp-bar{ height:3px; border-radius:100px; background:var(--border); margin-top:5px; overflow:hidden; }
+  .jp-bar span{ display:block; height:100%; background:var(--muted); opacity:.55; border-radius:100px; }
   .folio-title{
     font-size:24px; line-height:1.3; margin-bottom:2px; color:var(--ink);
   }
@@ -1996,11 +2001,21 @@
       ? '<span class="badge badge-gold">Ulang &middot; ' + daily.again.length + ' lagi</span>'
       : '<span class="badge ' + BOX_BADGE_CLASS[box] + '">' + BOX_LABELS[box] + '</span>';
 
+    // Progress through the chosen range today: cards due today in the range, done vs left (this card included)
+    var prog = '';
+    if(!reviewing){
+      var doneHere = STUDY_POOL.filter(function(e){ return daily.kajiIds.indexOf(e.id) >= 0; }).length;
+      var totalHere = doneHere + fresh.length;
+      prog = '<div class="julatprog"><div class="jp-txt"><span>' + doneHere + '/' + totalHere + ' dalam julat</span>' +
+        '<span>Tinggal ' + fresh.length + '</span></div>' +
+        '<div class="jp-bar"><span style="width:' + (totalHere ? doneHere / totalHere * 100 : 0) + '%"></span></div></div>';
+    }
+
     stage.innerHTML =
       '<div class="folio">' +
         '<div class="folio-top">' +
           '<span class="rangepill">' + entry.rangeLabel + '</span>' + badge +
-        '</div>' +
+        '</div>' + prog +
         '<div id="folioBody"></div>' +
       '</div>';
 
