@@ -27,6 +27,8 @@ sub('<p>Sila nyatakan nama atau panggilan anda untuk mula menggunakan pembantu h
 # Phones a little smaller (10%); laptops at full size.
 SITE = 'https://falsafah200.vercel.app'
 head = nl.join([
+    # backup for vercel.json: the old test address always shows the moved notice
+    '<script>if(location.hostname==="falsafah200-test.vercel.app")location.replace("/moved.html");</script>',
     '<link rel="manifest" href="manifest.webmanifest">',
     '<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">',
     '<link rel="icon" type="image/png" href="icons/favicon-32.png">',
