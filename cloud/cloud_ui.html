@@ -136,6 +136,22 @@ const BRAND = '<p class="brand">Al-Fathun Nawa &middot; Falsafah 1&ndash;200</p>
 const pinInput = (id, ac) => `<input id="${id}" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="${ac}" placeholder="••••••">`;
 const userInput = v => `<input id="fUser" maxlength="20" autocapitalize="none" autocomplete="username" spellcheck="false" placeholder="cth. ahmad_t1" value="${esc(v || '')}">`;
 
+// ---------- Kongsi aplikasi (share from the account menu) ----------
+const SHARE_URL = 'https://falsafah200.vercel.app/';
+const SHARE_TEXT = 'Assalamualaikum. Tengah study Falsafah Al Quran? Cuba app Falsafah 200 ni. Semua 200 falsafah dari Al-Fathun Nawa Jilid 7 ada dalam satu tempat. Pilih julat, study, dan ulang bila-bila masa. Cuba dulu, lepas tu bagi tahu pendapat anda.';
+async function shareApp() {
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Falsafah 200', text: SHARE_TEXT, url: SHARE_URL }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try {
+    await navigator.clipboard.writeText(SHARE_TEXT + ' ' + SHARE_URL);
+    msg('Mesej dan pautan sudah disalin ✓', 'ok');
+  } catch (e) {
+    msg('Tidak dapat menyalin. Hantar pautan ini: ' + SHARE_URL);
+  }
+}
+
 function render() {
   if (!CFG) { card.innerHTML = BRAND + '<h3>Akaun</h3><p class="sub">Log masuk belum disediakan untuk versi ini.</p>'; return; }
   if (mode === 'wait') { card.innerHTML = BRAND + '<h3>Selamat datang</h3><div class="acct-spin"></div><p class="sub">Memuatkan…</p>'; return; }
@@ -148,6 +164,7 @@ function render() {
       <button class="namebtn" id="acctSyncNow">Sync progress</button>
       ${!isStandalone() && installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">Pasang di skrin utama</button>' : ''}
       <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">Panduan aplikasi</button>
+      <button class="namebtn acct-ghost" id="acctShare" style="margin-top:10px">Kongsi Falsafah 200</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">Papan pentadbir</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">Log keluar</button><button class="namebtn acct-ghost" id="acctClose">Tutup</button></div>
       <p class="acct-note">Di telefon atau komputer lain, log masuk dengan nama pengguna & PIN yang sama untuk sambung kemajuan anda.</p>`;
@@ -156,6 +173,7 @@ function render() {
     if ($('acctAdmin')) $('acctAdmin').onclick = () => { closeSheet(); openAdmin(); };
     if ($('acctInstall')) $('acctInstall').onclick = () => openInstall(false);
     $('acctTour').onclick = () => { closeSheet(); setTimeout(() => window.FN_APP && window.FN_APP.startTour(), 300); };
+    $('acctShare').onclick = shareApp;
     return;
   }
   const reg = mode === 'register', last = lsGet(LAST_USER) || '';
