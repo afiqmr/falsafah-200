@@ -3552,7 +3552,12 @@
   @keyframes acctPulse{ 50%{ opacity:.3; } }
   #acctOverlay{ z-index:80; }
   #acctOverlay.gate.active{ background:color-mix(in srgb, var(--bg) 82%, transparent); }
-  #acctCard{ text-align:left; max-width:380px; }
+  #acctCard{ text-align:left; max-width:380px; position:relative; isolation:isolate; }
+  /* songket cloth behind the account menu: gold and red on cream (light), soft gold on charcoal (dark); faint in the middle so text stays clear */
+  #acctCard::before{ content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit; pointer-events:none;
+    background-image:var(--acct-songket-l, none); background-size:160px 224px; background-position:center top;
+    -webkit-mask-image:radial-gradient(ellipse 95% 80% at 50% 48%, rgba(0,0,0,.3) 30%, #000 90%); mask-image:radial-gradient(ellipse 95% 80% at 50% 48%, rgba(0,0,0,.3) 30%, #000 90%); }
+  [data-theme="dark"] #acctCard::before{ background-image:var(--acct-songket-d, none); }
   #acctCard h3, #acctCard .sub{ text-align:center; }
   #acctCard .brand{ text-align:center; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin:0 0 6px; }
   .acct-seg{ display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border-radius:100px; background:var(--surface-2); border:1px solid var(--border); margin:0 0 16px; }
@@ -3665,6 +3670,43 @@ function setBtn(state, text) { btn.classList.toggle('on', state === 'on'); btn.c
 
 // ---------- sheet ----------
 const overlay = $('acctOverlay'), card = $('acctCard');
+// ---------- songket motif for the account card (same pattern as the moved page) ----------
+(function songket() {
+  const star = (ex, ey, r) => { const a = Math.abs(ex), b = Math.abs(ey); return (a + b <= r - 2) || (ex === 0 && b <= r) || (ey === 0 && a <= r) || (a === b && a <= r - 1); };
+  const even = v => ((v % 2) + 2) % 2 === 0;
+  function medallion(dx, dy) {
+    const a = Math.abs(dx), b = Math.abs(dy);
+    if (a > 14 || b > 21) return 0;
+    if (star(dx, dy, 4)) return 2;
+    const d = a + b;
+    if (d === 6) return 1;
+    if (d === 8 && even(dx + dy)) return 1;
+    for (const cy of [12, -12]) { const e = a + Math.abs(dy - cy); if (e <= 4 && even(dx + dy)) return 1; if (e === 6) return 1; }
+    for (const cy of [18, -18]) if (a + Math.abs(dy - cy) <= 1) return 1;
+    if (a === 0 && b === 21) return 1;
+    for (const cx of [11, -11]) if (star(dx - cx, dy, 3)) return 2;
+    for (const cx of [6, -6]) for (const cy of [9, -9]) { const ex = dx - cx, ey = dy - cy; if (Math.abs(ex) <= 1 && Math.abs(ey) <= 1 && even(ex + ey)) return 1; }
+    for (const cx of [12, -12]) for (const cy of [15, -15]) if (Math.abs(dx - cx) + Math.abs(dy - cy) <= 1) return 1;
+    return 0;
+  }
+  function cell(x, y) {
+    let best = 0;
+    for (const [mx, my] of [[20, 28], [0, 0], [40, 0], [0, 56], [40, 56]]) { const v = medallion(x - mx, y - my); if (v > best) best = v; }
+    if (!best) for (const [sx, sy] of [[0, 28], [40, 28], [20, 0], [20, 56]]) if (star(x - sx, y - sy, 3)) best = 2;
+    return best;
+  }
+  function draw(col) {
+    const sc = 2, S = 4 * sc, B = sc, PAT = [[0, 0], [2, 0], [1, 1], [0, 2], [2, 2]];
+    const c = document.createElement('canvas'); c.width = 40 * S; c.height = 56 * S; const g = c.getContext('2d');
+    for (let y = 0; y < 56; y++) for (let x = 0; x < 40; x++) { const v = cell(x, y); if (v) { g.fillStyle = col[v]; for (const [px, py] of PAT) g.fillRect(x * S + px * B, y * S + py * B, B, B); } }
+    return 'url(' + c.toDataURL() + ')';
+  }
+  try {
+    const r = document.documentElement.style;
+    r.setProperty('--acct-songket-l', draw(['', 'rgba(176,128,40,.55)', 'rgba(196,72,48,.6)']));   // gold and songket red on cream
+    r.setProperty('--acct-songket-d', draw(['', 'rgba(201,168,92,.42)', 'rgba(226,176,100,.55)']));  // soft gold on charcoal
+  } catch (e) {}
+})();
 let mode = 'wait', fb = null, user = null, profile = null, lastSync = null, gated = true;
 overlay.addEventListener('click', e => { if (e.target === overlay && !gated) closeSheet(); });
 btn.onclick = () => { if (user) { gated = false; openSheet('account'); } else openGate(); };
