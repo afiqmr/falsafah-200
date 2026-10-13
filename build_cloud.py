@@ -62,6 +62,7 @@ open('cloud-test/index.html', 'w', encoding='utf-8', newline='').write(src)
 # home-screen app files
 import shutil
 shutil.copytree('cloud/icons', 'cloud-test/icons', dirs_exist_ok=True)
-for f in ('manifest.webmanifest', 'sw.js'):
+# moved.html: the notice shown on the old test address (vercel.json routes that host to it)
+for f in ('manifest.webmanifest', 'sw.js', 'moved.html'):
     shutil.copy('cloud/' + f, 'cloud-test/' + f)
 print('cloud-test/index.html', len(src))

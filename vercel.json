@@ -1,0 +1,5 @@
+{
+  "routes": [
+    { "src": "^/(index\\.html)?$", "has": [{ "type": "host", "value": "falsafah200-test.vercel.app" }], "dest": "/moved.html" }
+  ]
+}
