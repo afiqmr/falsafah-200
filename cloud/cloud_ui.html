@@ -54,7 +54,7 @@
   .acct-who{ text-align:center; margin:4px 0 14px; }
   .acct-who b{ display:block; font-size:18px; }
   .acct-who span{ font-size:13px; color:var(--muted); word-break:break-all; }
-  .acct-share{ display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:6px 14px; border-radius:100px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink); font:700 13px/1 inherit; font-family:inherit; cursor:pointer; transition:transform .15s ease; }
+  .acct-share{ display:flex; width:fit-content; margin:10px auto 0; align-items:center; gap:6px; padding:6px 14px; border-radius:100px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink); font:700 13px/1 inherit; font-family:inherit; cursor:pointer; transition:transform .15s ease; }
   .acct-share svg{ color:var(--gold-cite, var(--gold)); }
   .acct-share:active{ transform:scale(.95); }
   .acct-row{ display:flex; gap:8px; margin-top:10px; }
@@ -231,7 +231,7 @@ function render() {
         <button type="button" class="acct-share" id="acctShare" aria-label="Kongsi Falsafah 200"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Kongsi</button></div>
       <p class="acct-msg ok" id="acctMsg">Progress synced ✓ · ${t}</p>
       <button class="namebtn" id="acctSyncNow">Sync progress</button>
-      ${!isStandalone() && installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">Pasang di skrin utama</button>' : ''}
+      ${isStandalone() || installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">Pasang di skrin utama</button>' : ''}
       <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">Panduan aplikasi</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">Papan pentadbir</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">Log keluar</button><button class="namebtn acct-ghost" id="acctClose">Tutup</button></div>
@@ -305,7 +305,9 @@ function renderInstall() {
   const uname = esc(profile?.username || lsGet(LAST_USER) || '');
   let body = '', main = '';
   if (k === 'done') {
-    body = '<p class="sub">Siap! Ikon <b>Falsafah 200</b> kini di skrin utama telefon anda. Buka dari situ bila-bila masa.</p>';
+    body = (isStandalone() && !installDone)
+      ? '<p class="sub">Anda sedang guna Falsafah 200 dari ikon di skrin utama. ✓</p><p class="sub">Jika ikon terpadam: buka <b>falsafah200.vercel.app</b> di ' + (isIOS ? 'Safari' : 'Chrome') + ', tekan butang nama anda di atas, kemudian <b>Pasang di skrin utama</b>.</p>'
+      : '<p class="sub">Siap! Ikon <b>Falsafah 200</b> kini di skrin utama telefon anda. Buka dari situ bila-bila masa.</p>';
     main = `<button class="namebtn" id="instLater">${installFromReg ? 'Teruskan' : 'Tutup'}</button>`;
   } else if (k === 'prompt') {
     body = '<p class="sub">Satu tekan sahaja. Buka Falsafah 200 terus dari skrin telefon, penuh skrin, tanpa bar pelayar.</p>';
@@ -336,7 +338,7 @@ function renderInstall() {
     main = `<button class="namebtn" id="instCopy">Salin pautan</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
   }
   card.innerHTML = `<img class="inst-logo" src="icons/logo-240.png" alt="">
-    <h3>${k === 'done' ? 'Berjaya dipasang' : 'Pasang di skrin utama'}</h3>${body}
+    <h3>${k === 'done' ? (isStandalone() && !installDone ? 'Sudah di skrin utama' : 'Berjaya dipasang') : 'Pasang di skrin utama'}</h3>${body}
     <p class="acct-msg ok" id="acctMsg">${esc(installNote)}</p>${main}`;
   const later_ = () => { installNote = ''; if (installFromReg) { installFromReg = false; afterLogin(); } else closeSheet(); };
   $('instLater').onclick = later_;
