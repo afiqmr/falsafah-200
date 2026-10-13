@@ -2353,44 +2353,63 @@
     '</div>';
   }
 
+  // Senarai: the cards are drawn once per view (all falsafah, or a kumpulan) and searching only
+  // hides and shows them, so typing stays quick on phones (Arabic text is slow to lay out).
+  var browseBuiltKey = null;
+  function buildBrowse(key){
+    var wrap = document.getElementById('cardList'), html = '';
+    if(browseMode === 'groups'){
+      AYAT_GROUPS.forEach(function(g, gi){
+        if(selectedGroup >= 0 && gi !== selectedGroup) return;
+        html += '<div class="grouphead" data-gh="' + gi + '">' +
+          '<span class="gh-label"><b>Kumpulan ' + (gi+1) + '</b> &middot; ' + escapeHtml(g.name) + ' &middot; ' + g.entries.length + ' falsafah</span>' +
+          '<span class="gh-ar" lang="ar" dir="rtl">' + escapeHtml(g.ar) + '</span>' +
+        '</div>' + g.entries.map(function(e){ return listCardHtml(e).replace('<div class="listcard"', '<div class="listcard" data-gi="' + gi + '"'); }).join('');
+      });
+    } else {
+      html = DATA.map(listCardHtml).join('');
+    }
+    wrap.innerHTML = html + '<div class="empty" id="browseEmpty" hidden>Tiada padanan ditemui.</div>';
+    wrap.onclick = function(ev){
+      var card = ev.target.closest('.listcard');
+      if(card) openDetail(parseInt(card.getAttribute('data-id'), 10));
+    };
+    browseBuiltKey = key;
+  }
   function renderBrowse(filter){
     filter = (filter||'').trim().toLowerCase();
     var match = browseMatcher(filter);
-    var wrap = document.getElementById('cardList');
-    var html = '', shown = 0;
-
+    var key = browseMode + '|' + selectedGroup;
+    if(browseBuiltKey !== key) buildBrowse(key);
+    var wrap = document.getElementById('cardList'), shown = 0, groupHits = {};
+    wrap.querySelectorAll('.listcard').forEach(function(card){
+      var e = entryById(+card.getAttribute('data-id'));
+      var ok = !!e && match(e);
+      card.hidden = !ok;
+      if(!ok) return;
+      shown++;
+      var gi = card.getAttribute('data-gi'); if(gi !== null) groupHits[gi] = 1;
+      // keep the level badge current without redrawing the card
+      var box = getCard(e.id).box, badge = card.querySelector('.badge');
+      if(badge && card.getAttribute('data-box') !== String(box)){
+        badge.className = 'badge ' + BOX_BADGE_CLASS[box]; badge.textContent = BOX_LABELS[box];
+        card.setAttribute('data-box', box);
+      }
+    });
+    var groupsShown = 0, totalGrouped = 0;
     if(browseMode === 'groups'){
-      var groupsShown = 0, totalGrouped = 0;
-      AYAT_GROUPS.forEach(function(g, gi){
-        if(selectedGroup >= 0 && gi !== selectedGroup) return;
-        totalGrouped += g.entries.length;
-        var hits = g.entries.filter(match);
-        if(!hits.length) return;
-        groupsShown++;
-        shown += hits.length;
-        html += '<div class="grouphead">' +
-          '<span class="gh-label"><b>Kumpulan ' + (gi+1) + '</b> &middot; ' + escapeHtml(g.name) + ' &middot; ' + g.entries.length + ' falsafah</span>' +
-          '<span class="gh-ar" lang="ar" dir="rtl">' + escapeHtml(g.ar) + '</span>' +
-        '</div>' + hits.map(listCardHtml).join('');
+      wrap.querySelectorAll('.grouphead').forEach(function(h){
+        var gi = h.getAttribute('data-gh'), on = !!groupHits[gi];
+        h.hidden = !on; if(on) groupsShown++;
+        totalGrouped += AYAT_GROUPS[+gi].entries.length;
       });
       document.getElementById('listCount').textContent = filter
         ? shown + ' falsafah dalam ' + groupsShown + ' kumpulan'
         : (selectedGroup >= 0 ? 'Kumpulan ' + (selectedGroup+1) : AYAT_GROUPS.length + ' kumpulan') + ' · ' + totalGrouped + ' falsafah';
     } else {
-      var list = DATA.filter(match);
-      shown = list.length;
-      html = list.map(listCardHtml).join('');
-      document.getElementById('listCount').textContent = list.length + ' daripada ' + DATA.length + ' falsafah';
+      document.getElementById('listCount').textContent = shown + ' daripada ' + DATA.length + ' falsafah';
     }
-
-    if(!shown){
-      wrap.innerHTML = '<div class="empty">Tiada padanan ditemui.</div>';
-      return;
-    }
-    wrap.innerHTML = html;
-    wrap.querySelectorAll('.listcard').forEach(function(card){
-      card.onclick = function(){ openDetail(parseInt(card.getAttribute('data-id'),10)); };
-    });
+    document.getElementById('browseEmpty').hidden = shown > 0;
   }
 
   document.querySelectorAll('.browse-mode button').forEach(function(btn){
@@ -2738,8 +2757,12 @@
   window.addEventListener('scroll', updateTabBarStuck, { passive:true });
   updateTabBarStuck();
 
+  // wait until typing pauses (0.3 s) before filtering
+  var searchTimer = null;
   document.getElementById('searchInput').addEventListener('input', function(e){
-    renderBrowse(e.target.value);
+    var v = e.target.value;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function(){ renderBrowse(v); }, 300);
   });
 
   /* ---------------- LISTEN (audio player) ---------------- */
