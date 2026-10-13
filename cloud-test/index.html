@@ -563,6 +563,9 @@
   .lvl-grid div{ border:1px solid var(--border); border-radius:10px; padding:8px 10px; font-size:12px; color:var(--muted); }
   .lvl-grid b{ display:block; font-size:18px; color:var(--ink); font-variant-numeric:tabular-nums; }
   .lvl-grid i{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
+  .gred-key{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:4px 14px; margin-top:8px; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .gred-key b{ color:var(--ink); display:inline-block; min-width:2.2em; }
+  @media (min-width:700px){ .gred-key{ grid-template-columns:repeat(4, minmax(0,1fr)); } }
   .focus-sec{ border-left:3px solid var(--re); }
   .focus-sec > h4{ color:var(--re); }
   .sl-meta b{ font-weight:800; }
@@ -2354,8 +2357,11 @@
     html += '<div class="prog-sec card-sec"><h4>Gred hafalan &middot; tekan untuk lihat senarai</h4>' +
       '<div class="lvl-bar">' + gr.map(function(v, i){ return v.length ? '<span style="width:' + (v.length/total*100) + '%;background:' + grCol(i) + '"></span>' : ''; }).join('') + '</div>' +
       '<div class="lvl-grid">' + gr.map(function(v, i){ return '<div data-list="gr' + i + '"' + (i >= 5 && i < GREDS.length ? ' class="gr-low"' : '') + '><b>' + v.length + '</b><i style="background:' + grCol(i) + '"></i>' + grName(i) + '</div>'; }).join('') + '</div>' +
-      '<p class="pnote">Markah dikira dari 10 jawapan terakhir setiap falsafah: Kaji <b>Ingat +1</b>, <b>Belum ingat &minus;1</b>, Kuiz betul +&frac12;, salah &minus;&frac12;.<br>' +
-      'A+ 7 ke atas &middot; A 5 &middot; A&minus; 4 &middot; B+ 3 &middot; B 1 &middot; C &minus;1 &middot; D &minus;3 &middot; G bawah &minus;3</p>' +
+      '<p class="pnote">Markah dikira dari 10 jawapan terakhir setiap falsafah: Kaji <b>Ingat +1</b>, <b>Belum ingat &minus;1</b>, Kuiz betul +&frac12;, salah &minus;&frac12;.</p>' +
+      '<div class="gred-key">' + [
+        ['A+', '7 dan ke atas'], ['A', '5 hingga 6&frac12;'], ['A&minus;', '4 hingga 4&frac12;'], ['B+', '3 hingga 3&frac12;'],
+        ['B', '1 hingga 2&frac12;'], ['C', '&minus;1 hingga &frac12;'], ['D', '&minus;3 hingga &minus;1&frac12;'], ['G', 'bawah &minus;3']
+      ].map(function(r){ return '<span><b>' + r[0] + ':</b> ' + r[1] + '</span>'; }).join('') + '</div>' +
       (nMarked ? '<button type="button" class="backbtn" data-list="markah" style="margin:12px 0 0;">Senarai markah setiap falsafah (' + nMarked + ') &rsaquo;</button>' : '') +
       '</div>';
 
@@ -3935,7 +3941,7 @@ const overlay = $('acctOverlay'), card = $('acctCard');
     r.setProperty('--acct-songket-l', draw(['', 'rgba(176,128,40,.55)', 'rgba(196,72,48,.6)']));   // gold and songket red on cream
     r.setProperty('--acct-songket-d', draw(['', 'rgba(201,168,92,.42)', 'rgba(226,176,100,.55)']));  // soft gold on charcoal
     r.setProperty('--page-songket-l', draw(['', 'rgba(176,128,40,.25)', 'rgba(196,72,48,.25)']));
-    r.setProperty('--page-songket-d', draw(['', 'rgba(201,168,92,.16)', 'rgba(226,176,100,.20)']));
+    r.setProperty('--page-songket-d', draw(['', 'rgba(201,168,92,.145)', 'rgba(226,176,100,.18)']));
     // laptops and desktops: the cloth shows at the left and right of the page, still; it blurs and fades toward the middle column
     const sides = document.createElement('div'); sides.className = 'fn-sides'; sides.setAttribute('aria-hidden', 'true');
     sides.innerHTML = '<i class="sharp"></i><i class="soft"></i>';
