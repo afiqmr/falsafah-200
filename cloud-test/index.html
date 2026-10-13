@@ -11,17 +11,53 @@
 <meta property="og:site_name" content="Al-Fathun Nawa">
 <meta property="og:title" content="الفتح النوى · Falsafah 200">
 <meta property="og:description" content="Kaji dan hafaz 200 Falsafah Al-Quran dari Al-Fathun Nawa Jilid 7, dengan ayat asal, ulang kaji, kuiz dan kemajuan.">
-<meta property="og:url" content="https://falsafah200-test.vercel.app/">
-<meta property="og:image" content="https://falsafah200-test.vercel.app/icons/og-image.jpg?v=1">
-<meta property="og:image:secure_url" content="https://falsafah200-test.vercel.app/icons/og-image.jpg?v=1">
+<meta property="og:url" content="https://falsafah200.vercel.app/">
+<meta property="og:image" content="https://falsafah200.vercel.app/icons/og-image.jpg?v=1">
+<meta property="og:image:secure_url" content="https://falsafah200.vercel.app/icons/og-image.jpg?v=1">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Logo AFN, Falsafah 200">
 <meta name="twitter:card" content="summary_large_image">
+<script>(function(){
+  var h = location.hash, m = /^#bawa=([A-Za-z0-9_-]+)$/.exec(h);
+  if(!m) return;
+  try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+  try{
+    var b = m[1].replace(/-/g, '+').replace(/_/g, '/'); while(b.length % 4) b += '=';
+    var bin = atob(b), bytes = new Uint8Array(bin.length);
+    for(var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    var d = JSON.parse(new TextDecoder().decode(bytes));
+    if(!d || d.v !== 1) return;
+    var get = function(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } };
+    var put = function(k, v){ localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); };
+    var better = function(a, b){ if(!a) return b; if(!b) return a;
+      if((a.seen||0) !== (b.seen||0)) return (a.seen||0) > (b.seen||0) ? a : b;
+      if((a.box||0) !== (b.box||0)) return (a.box||0) > (b.box||0) ? a : b;
+      return (a.due||'') >= (b.due||'') ? a : b; };
+    var n = 0;
+    if(d.srs){
+      var loc = get('falsafah200_srs_v1') || {}, out = {};
+      Object.keys(loc).concat(Object.keys(d.srs)).forEach(function(id){ out[id] = better(loc[id], d.srs[id]); });
+      n = Object.keys(d.srs).length;
+      // the old link already moved its progress to the 200 falsafah numbers
+      if(!localStorage.getItem('falsafah200_ids_v2')) put('falsafah200_ids_v2', '1');
+      put('falsafah200_srs_v1', out);
+    }
+    if(d.daily){
+      var ld = get('falsafah200_daily_v1');
+      if(!ld || (d.daily.date || '') > (ld.date || '')) put('falsafah200_daily_v1', d.daily);
+    }
+    if(d.range && !localStorage.getItem('falsafah200_range_v1')) put('falsafah200_range_v1', d.range);
+    if(d.username && !localStorage.getItem('falsafah200_username_v1')) put('falsafah200_username_v1', d.username);
+    if(d.theme && !localStorage.getItem('falsafah200_theme_v1')) put('falsafah200_theme_v1', d.theme);
+    if(n) sessionStorage.setItem('fn_imported', String(n));
+  }catch(e){}
+})();
+</script>
 <script>window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__bip=e;document.dispatchEvent(new Event("fn-bip"));});if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 <style>@media (max-width:600px){ html{ zoom:.9; } }</style>
-<title>الفتح النوى - Falsafah 200 (Test)</title>
+<title>الفتح النوى - Falsafah 200</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#121316">
 <script>try{ if(localStorage.getItem('falsafah200_theme_v1') === 'light'){ document.querySelector('meta[name="theme-color"]').setAttribute('content', '#FAF5EC'); document.documentElement.style.backgroundColor = '#FAF5EC'; } else document.documentElement.style.backgroundColor = '#121316'; }catch(e){}</script>
@@ -3525,6 +3561,7 @@
   .acct-field label{ display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 5px 2px; }
   #acctCard input{ text-align:left; margin-bottom:0; }
   #acctCard input.pin{ letter-spacing:.5em; font-weight:800; text-align:center; font-size:20px; }
+  .acct-moved{ font-size:13px; line-height:1.5; color:var(--emerald); background:color-mix(in srgb, var(--emerald) 12%, transparent); border-radius:10px; padding:9px 12px; margin:0 0 12px; text-align:left; }
   .acct-msg{ min-height:18px; font-size:13px; font-weight:700; margin:6px 0 10px; text-align:center; }
   .acct-msg.err{ color:var(--rose); }
   .acct-msg.ok{ color:var(--emerald); }
@@ -3630,6 +3667,7 @@ btn.onclick = () => { if (user) { gated = false; openSheet('account'); } else op
 function openSheet(m) { mode = m; overlay.classList.toggle('gate', gated); render(); overlay.classList.add('active'); }
 function openGate() { gated = true; openSheet('login'); }
 function closeSheet() { overlay.classList.remove('active'); }
+const imported = () => { try { return +(sessionStorage.getItem('fn_imported') || 0); } catch (e) { return 0; } };
 function msg(text, kind) { const m = $('acctMsg'); if (m) { m.textContent = text || ''; m.className = 'acct-msg ' + (kind || ''); } }
 const BRAND = '<p class="brand">Al-Fathun Nawa &middot; Falsafah 1&ndash;200</p>';
 const pinInput = (id, ac) => `<input id="${id}" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="${ac}" placeholder="••••••">`;
@@ -3660,6 +3698,7 @@ function render() {
   const reg = mode === 'register', last = lsGet(LAST_USER) || '';
   card.innerHTML = `${BRAND}<h3>${reg ? 'Daftar akaun' : 'Log masuk'}</h3>
     <p class="sub">${reg ? 'Sekali daftar sahaja. Kemajuan anda disimpan di awan.' : 'Masukkan nama pengguna dan PIN 6 digit anda.'}</p>
+    ${imported() ? `<p class="acct-moved">&#10003; Kemajuan anda dari pautan lama (${imported()} falsafah) sudah dibawa ke sini. ${reg ? 'Daftar' : 'Log masuk atau daftar'} untuk menyimpannya dalam akaun anda.</p>` : ''}
     <div class="acct-seg"><button type="button" data-m="login" class="${reg ? '' : 'active'}">Log Masuk</button><button type="button" data-m="register" class="${reg ? 'active' : ''}">Daftar</button></div>
     ${reg ? '<div class="acct-field"><label>Nama penuh</label><input id="fName" maxlength="60" autocomplete="name" placeholder="cth. Ahmad bin Abdullah"></div>' : ''}
     <div class="acct-field"><label>Nama pengguna</label>${userInput(reg ? '' : last)}</div>
@@ -3847,6 +3886,7 @@ async function logout() {
 // After sign-in: close the gate, then ask for the julat if this account has none yet.
 function afterLogin() {
   registering = false; gated = false;
+  try { sessionStorage.removeItem('fn_imported'); } catch (e) {}
   loadWeekly();
   loadHalon();
   setBtn('on', firstName(profile?.name));

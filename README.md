@@ -66,7 +66,7 @@ Made for students of the Advanced Diploma in Al-Quranic Philosophy, Institut Fal
 
 ## Cloud login test (branch `cloud-login-test`)
 
-A test version with accounts and cloud sync, live at https://falsafah200-test.vercel.app.
+The version with accounts and cloud sync is live at https://falsafah200.vercel.app (the old address falsafah200-test.vercel.app still works).
 
 - Students must register or log in before using the app. Register: full name, username, email, 6-digit PIN. Log in: username + PIN.
 - "Lupa PIN?" emails a reset link through Firebase.

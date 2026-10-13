@@ -23,10 +23,9 @@ sub(nl.join(["  if(!getName() || !rangeSaved){", "    setTimeout(openNameModal, 
     nl.join(["  if(getName() && rangeSaved){", "    setTimeout(showThemeTip, 600);", "  }"]))
 sub('<p>Sila nyatakan nama atau panggilan anda untuk mula menggunakan pembantu hafalan ini dalam lembaran pengajian Falsafah Al-Quran.</p>',
     '<p>Pilih julat falsafah yang anda kaji. Nama panggilan di bawah dipaparkan pada skrin utama.</p>')
-sub('<title>الفتح النوى - Falsafah 200</title>', '<title>الفتح النوى - Falsafah 200 (Test)</title>')
 # index.html is a page fragment; give it a doctype so it renders in standards mode.
 # Phones a little smaller (10%); laptops at full size.
-SITE = 'https://falsafah200-test.vercel.app'
+SITE = 'https://falsafah200.vercel.app'
 head = nl.join([
     '<link rel="manifest" href="manifest.webmanifest">',
     '<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">',
@@ -48,6 +47,9 @@ head = nl.join([
     '<meta property="og:image:height" content="630">',
     '<meta property="og:image:alt" content="Logo AFN, Falsafah 200">',
     '<meta name="twitter:card" content="summary_large_image">',
+    # progress handed over from the old link (landing page): merged into this device before the app starts,
+    # then into the student's account when they log in or register
+    '<script>' + open('cloud/import.js', encoding='utf-8').read() + '</script>',
     # Android's install prompt can fire early; keep it for the "Pasang sekarang" button
     '<script>window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.__bip=e;document.dispatchEvent(new Event("fn-bip"));});'
     'if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>',

@@ -24,6 +24,7 @@
   .acct-field label{ display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 5px 2px; }
   #acctCard input{ text-align:left; margin-bottom:0; }
   #acctCard input.pin{ letter-spacing:.5em; font-weight:800; text-align:center; font-size:20px; }
+  .acct-moved{ font-size:13px; line-height:1.5; color:var(--emerald); background:color-mix(in srgb, var(--emerald) 12%, transparent); border-radius:10px; padding:9px 12px; margin:0 0 12px; text-align:left; }
   .acct-msg{ min-height:18px; font-size:13px; font-weight:700; margin:6px 0 10px; text-align:center; }
   .acct-msg.err{ color:var(--rose); }
   .acct-msg.ok{ color:var(--emerald); }
@@ -129,6 +130,7 @@ btn.onclick = () => { if (user) { gated = false; openSheet('account'); } else op
 function openSheet(m) { mode = m; overlay.classList.toggle('gate', gated); render(); overlay.classList.add('active'); }
 function openGate() { gated = true; openSheet('login'); }
 function closeSheet() { overlay.classList.remove('active'); }
+const imported = () => { try { return +(sessionStorage.getItem('fn_imported') || 0); } catch (e) { return 0; } };
 function msg(text, kind) { const m = $('acctMsg'); if (m) { m.textContent = text || ''; m.className = 'acct-msg ' + (kind || ''); } }
 const BRAND = '<p class="brand">Al-Fathun Nawa &middot; Falsafah 1&ndash;200</p>';
 const pinInput = (id, ac) => `<input id="${id}" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="${ac}" placeholder="••••••">`;
@@ -159,6 +161,7 @@ function render() {
   const reg = mode === 'register', last = lsGet(LAST_USER) || '';
   card.innerHTML = `${BRAND}<h3>${reg ? 'Daftar akaun' : 'Log masuk'}</h3>
     <p class="sub">${reg ? 'Sekali daftar sahaja. Kemajuan anda disimpan di awan.' : 'Masukkan nama pengguna dan PIN 6 digit anda.'}</p>
+    ${imported() ? `<p class="acct-moved">&#10003; Kemajuan anda dari pautan lama (${imported()} falsafah) sudah dibawa ke sini. ${reg ? 'Daftar' : 'Log masuk atau daftar'} untuk menyimpannya dalam akaun anda.</p>` : ''}
     <div class="acct-seg"><button type="button" data-m="login" class="${reg ? '' : 'active'}">Log Masuk</button><button type="button" data-m="register" class="${reg ? 'active' : ''}">Daftar</button></div>
     ${reg ? '<div class="acct-field"><label>Nama penuh</label><input id="fName" maxlength="60" autocomplete="name" placeholder="cth. Ahmad bin Abdullah"></div>' : ''}
     <div class="acct-field"><label>Nama pengguna</label>${userInput(reg ? '' : last)}</div>
@@ -346,6 +349,7 @@ async function logout() {
 // After sign-in: close the gate, then ask for the julat if this account has none yet.
 function afterLogin() {
   registering = false; gated = false;
+  try { sessionStorage.removeItem('fn_imported'); } catch (e) {}
   loadWeekly();
   loadHalon();
   setBtn('on', firstName(profile?.name));
