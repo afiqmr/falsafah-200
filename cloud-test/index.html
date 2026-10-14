@@ -480,6 +480,11 @@
   .sum-list li:last-child{ border-bottom:0; }
   .sum-list .sl-no{ font-weight:800; color:var(--gold-cite); white-space:nowrap; }
   .sum-empty{ font-size:12px; color:var(--muted); margin:0; }
+  .wk-uji{
+    margin-top:8px; width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--ink); font-family:inherit; font-weight:800; font-size:13px; cursor:pointer;
+  }
+  .wk-uji:hover{ border-color:var(--gold); }
   .summarycard .sl-title{ flex:1; }
   .summarycard .sl-meta{ font-size:11px; white-space:nowrap; font-weight:700; }
   .summarycard .lbl-ok{ color:var(--emerald); }
@@ -1996,13 +2001,11 @@
   var studyOrderIndex = {};
   studyOrder.forEach(function(id, i){ studyOrderIndex[id] = i; });
 
+  // Every falsafah in the chosen julat, every day (no hidden return dates). Lowest markah first.
   function dueQueue(){
-    return STUDY_POOL.filter(function(e){ return isDue(e.id); })
-               .sort(function(a,b){
-                 var boxA = getCard(a.id).box, boxB = getCard(b.id).box;
-                 if(boxA !== boxB) return boxA - boxB;
-                 return studyOrderIndex[a.id] - studyOrderIndex[b.id];
-               });
+    return STUDY_POOL.slice().sort(function(a,b){
+      return (markahOf(a.id) - markahOf(b.id)) || (studyOrderIndex[a.id] - studyOrderIndex[b.id]);
+    });
   }
 
   function entryById(id){ return DATA.find(function(e){ return e.id === id; }); }
@@ -2042,7 +2045,7 @@
         '<h3>' + (daily.kajiIds.length ? 'Julat ini sudah dikaji hari ini' : 'Tiada falsafah tertunggak') + '</h3>' +
         '<p>' + (n
           ? 'Ada ' + n + ' falsafah belum ingat hari ini. Ulang sekarang, atau pilih julat lain di atas.'
-          : 'Pilih julat lain di atas untuk teruskan, atau kembali esok untuk ulang kaji seterusnya.') + '</p>' +
+          : 'Semua falsafah dalam julat ini sudah dikaji hari ini. Pilih julat lain di atas, atau kaji semula esok.') + '</p>' +
         (n ? '<button class="namebtn kaji-ulang-btn" id="ulangBtn">Ulang belum ingat (' + n + ')</button>' : '') +
         '<button class="kaji-extra-btn" id="sumAgainBtn">Lihat ringkasan hari ini</button>' +
         '</div></div>';
@@ -2158,7 +2161,7 @@
         '<div class="folio"><div class="kaji-goal-done">' +
         '<div class="big">&#127775;</div>' +
         '<h3>Bagus! Sesi fokus selesai.</h3>' +
-        '<p>Anda telah mengulang ' + focus.ids.length + ' falsafah (' + escapeHtml(focus.label) + '). Kad ini akan muncul semula esok untuk pastikan ia benar-benar melekat.</p>' +
+        '<p>Anda telah mengulang ' + focus.ids.length + ' falsafah (' + escapeHtml(focus.label) + '). Markah dan gred setiap falsafah sudah dikemas kini.</p>' +
         '<button class="kaji-extra-btn" id="focusDone">Kembali ke kaji biasa</button>' +
         '</div></div>';
       document.getElementById('focusDone').onclick = endFocus;
@@ -2404,9 +2407,68 @@
           }) +
           '</details>';
       }).join('') : '<p class="pnote">Sejarah akan muncul selepas anda mula mengkaji.</p>') +
+      (function(){ var Wk = weekLists(weekSaturday()); return (Wk.re.length || Wk.ok.length)
+        ? '<button type="button" class="backbtn" id="weeklyBtn" style="margin:12px 0 0;">Ringkasan minggu lepas (' + (Wk.re.length + Wk.ok.length) + ') &rsaquo;</button>' : ''; })() +
       '</div></div>';
     stage.innerHTML = html;
     stage.onclick = progClick;
+    var wb = document.getElementById('weeklyBtn'); if(wb) wb.onclick = function(ev){ ev.stopPropagation(); openWeekly(); };
+  }
+
+  // ---------- Weekly summary: shown on Saturday (or the first open after it), once a week ----------
+  // Covers the 7 days before that Saturday (Sabtu to Jumaat). Wrong even once that week = Belum ingat.
+  var WEEKLY_KEY = 'falsafah200_weekly_seen_v1';
+  function weekSaturday(){ var back = (new Date().getDay() + 1) % 7; return addDays(todayStr(), -back); }
+  function weekLists(sat){
+    var from = addDays(sat, -7), to = addDays(sat, -1), re = [], ok = [];
+    for(var d = from; d <= to; d = addDays(d, 1)){
+      var D = dayLists(d);
+      D.re.forEach(function(id){ if(re.indexOf(id) === -1) re.push(id); });
+      D.ok.forEach(function(id){ if(ok.indexOf(id) === -1) ok.push(id); });
+    }
+    ok = ok.filter(function(id){ return re.indexOf(id) === -1; });
+    return { from: from, to: to, re: re.sort(byMarkah), ok: ok.sort(function(a, b){ return a - b; }) };
+  }
+  function openWeekly(sat){
+    var W = weekLists(sat || weekSaturday());
+    function list(ids){
+      if(!ids.length) return '<p class="sum-empty">Tiada.</p>';
+      return '<ul class="sum-list">' + ids.map(function(id){
+        var e = entryById(id); if(!e) return '';
+        return '<li><span class="sl-no">' + e.rangeLabel.replace('Falsafah ', '') + '</span><span class="sl-title">' + escapeHtml(displayTitle(e.title)) + '</span>' +
+          '<span class="sl-meta">' + markahMeta(id) + '</span></li>';
+      }).join('') + '</ul>';
+    }
+    function uji(key, n){ return n ? '<button type="button" class="wk-uji" data-wk="' + key + '">Uji ' + n + ' ini &middot; Kaji</button>' : ''; }
+    document.getElementById('summaryCard').innerHTML =
+      '<h3>Ringkasan minggu lepas</h3>' +
+      '<p class="sum-intro">' + fmtDay(W.from, { weekday:'short', day:'numeric', month:'short' }) + ' hingga ' + fmtDay(W.to, { weekday:'short', day:'numeric', month:'short' }) +
+        ' &middot; ' + (W.re.length + W.ok.length) + ' falsafah dikaji</p>' +
+      '<div class="sum-section"><div class="sum-label again">&#8635; Belum ingat &middot; ' + W.re.length + '</div>' +
+        '<p class="sum-empty" style="margin:0 0 6px;">Salah sekurang-kurangnya sekali minggu lepas. Ulang dahulu.</p>' + list(W.re) + uji('re', W.re.length) + '</div>' +
+      '<div class="sum-section"><div class="sum-label good">&#10003; Ingat &middot; ' + W.ok.length + '</div>' +
+        '<p class="sum-empty" style="margin:0 0 6px;">Sudah ingat. Kukuhkan semula supaya tidak hilang.</p>' + list(W.ok) + uji('ok', W.ok.length) + '</div>' +
+      '<button class="namebtn" id="weeklyClose">Tutup</button>';
+    var ov = document.getElementById('summaryOverlay');
+    ov.classList.add('active');
+    function close(){ ov.classList.remove('active'); }
+    document.getElementById('weeklyClose').onclick = close;
+    document.querySelectorAll('#summaryCard .wk-uji').forEach(function(b){
+      b.onclick = function(){
+        var re = b.getAttribute('data-wk') === 're';
+        close();
+        startFocus(re ? W.re : W.ok, 'kaji', re ? 'Belum ingat minggu lepas' : 'Ingat minggu lepas');
+      };
+    });
+  }
+  function weeklyCheck(){
+    var sat = weekSaturday(), seen = null;
+    try{ seen = localStorage.getItem(WEEKLY_KEY); }catch(e){}
+    if(seen === sat) return;
+    if(document.querySelector('.nameoverlay.active')) return;   // something else is open; try on the next visit
+    var W = weekLists(sat);
+    try{ localStorage.setItem(WEEKLY_KEY, sat); }catch(e){}
+    if(W.re.length || W.ok.length) openWeekly(sat);
   }
 
   function openKajiSummary(){
@@ -2458,8 +2520,8 @@
         '<p class="folio-text">' + escapeHtml(entry.text) + '</p>' +
         '<p class="surah-ref">' + escapeHtml(entry.surahDisplay) + '</p>' +
         '<div class="gradebar">' +
-          '<button class="gradebtn again" data-g="0"><span class="g-label">Belum ingat</span><span class="g-sub">Ulang hari ini</span></button>' +
-          '<button class="gradebtn good" data-g="1"><span class="g-label">Ingat</span><span class="g-sub">+' + BOX_INTERVALS[Math.min(BOX_INTERVALS.length-1,getCard(entry.id).box+1)] + ' hari</span></button>' +
+          '<button class="gradebtn again" data-g="0"><span class="g-label">Belum ingat</span></button>' +
+          '<button class="gradebtn good" data-g="1"><span class="g-label">Ingat</span></button>' +
         '</div>' +
         renderExtras(entry);
       applyWbw(el);
@@ -3434,7 +3496,7 @@
   document.getElementById('miniPlayer').onclick = lpControl;
   document.getElementById('listenBtn').onclick = openListen;
 
-  window.FN_APP = { startTour: function(){ startTour(); }, displayTitle: function(t){ return displayTitle(t); }, refreshProgress: function(){ renderKajiStats(); if(document.getElementById('view-kemajuan').classList.contains('active')) renderKemajuan(); } };
+  window.FN_APP = { startTour: function(){ startTour(); }, weeklyCheck: function(){ weeklyCheck(); }, openWeekly: function(){ openWeekly(); }, displayTitle: function(t){ return displayTitle(t); }, refreshProgress: function(){ renderKajiStats(); if(document.getElementById('view-kemajuan').classList.contains('active')) renderKemajuan(); } };
 
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, function(c){
@@ -4205,6 +4267,8 @@ function afterLogin() {
     lsDel(TOUR_KEY);
     setTimeout(() => window.FN_APP && window.FN_APP.startTour(), 700);
   }
+  // Saturday: last week's Ingat / Belum ingat lists (once a week; the app decides if it is due)
+  else if (lsGet(KEYS.range)) setTimeout(() => window.FN_APP && window.FN_APP.weeklyCheck && window.FN_APP.weeklyCheck(), 900);
   if (!lsGet(KEYS.range)) {
     setTimeout(() => {
       $('greetBtn')?.click();                                   // opens the app's own setup sheet (julat)

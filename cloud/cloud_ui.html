@@ -449,6 +449,8 @@ function afterLogin() {
     lsDel(TOUR_KEY);
     setTimeout(() => window.FN_APP && window.FN_APP.startTour(), 700);
   }
+  // Saturday: last week's Ingat / Belum ingat lists (once a week; the app decides if it is due)
+  else if (lsGet(KEYS.range)) setTimeout(() => window.FN_APP && window.FN_APP.weeklyCheck && window.FN_APP.weeklyCheck(), 900);
   if (!lsGet(KEYS.range)) {
     setTimeout(() => {
       $('greetBtn')?.click();                                   // opens the app's own setup sheet (julat)
