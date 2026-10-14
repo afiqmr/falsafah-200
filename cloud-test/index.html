@@ -2692,7 +2692,6 @@
   });
 
   // ---------- Kongsi: a one-page card (image) + short text, for WhatsApp ----------
-  var SHARE_IDS = [1];   // testing on Falsafah 1 first
   var APP_URL = 'https://falsafah200.vercel.app';
   var shareCache = {};
   function shareHook(){ return 'Catitan ringkas pengarang Al-Fathun Nawa tentang ayat ini ada dalam aplikasi Falsafah 200:'; }
@@ -2833,7 +2832,7 @@
       '<span class="rangepill">'+entry.rangeLabel+'</span> ' +
       gredBadge(id) + (cardLog(id).length ? ' <span class="markah-pill">Markah ' + fmtMarkah(markahOf(id)) + '</span>' : '') +
       '<h3 class="folio-title" style="margin-top:14px;">'+escapeHtml(displayTitle(entry.title))+'</h3>' +
-      (SHARE_IDS.indexOf(id) >= 0 ? '<div class="share-row"><button type="button" class="share-btn" id="shareBtn" aria-label="Share">' + SHARE_ICON + 'Share</button>' +
+      (true ? '<div class="share-row"><button type="button" class="share-btn" id="shareBtn" aria-label="Share">' + SHARE_ICON + 'Share</button>' +
         '<button type="button" class="share-text" id="shareTextBtn">Copy to clipboard</button></div>' : '') +
       '<hr class="divider">' +
       renderArabic(entry) +
