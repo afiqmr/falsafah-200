@@ -343,8 +343,8 @@
     -webkit-tap-highlight-color:transparent; transition:border-color .3s var(--ios-curve), color .3s var(--ios-curve), transform .2s var(--ios-curve); }
   .wbl-seg button:active{ transform:scale(.92); }
   .wbl-seg button:focus:not(:focus-visible){ outline:none; box-shadow:none; }
-  /* on: soft teal letters inside a gold ring; off: dim letters, no ring */
-  .wbl-seg button.active{ color:var(--emerald); border-color:var(--gold); }
+  /* on: soft teal letters; off: dim letters */
+  .wbl-seg button.active{ color:var(--emerald); }
   /* word-by-word appears and leaves with a soft fade and lift (iOS curve) */
   @keyframes wbwIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
   @keyframes lineIn{ from{ opacity:0; transform:translateY(-3px); } to{ opacity:1; transform:none; } }
