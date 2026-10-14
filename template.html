@@ -377,6 +377,19 @@
   .kata-kunci:last-child{ margin-bottom:0; }
   .catitan-text{ font-size:13px; color:var(--muted); line-height:1.65; margin:0 0 8px; }
   .catitan-text:last-child{ margin-bottom:0; }
+  .book-ref{ margin:16px 0 0; padding-top:12px; border-top:1px dashed var(--border); font-size:13px; color:var(--muted); }
+  .book-ref b{ color:var(--ink); font-weight:700; }
+  .share-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .share-btn{
+    display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:100px; cursor:pointer;
+    background:#25D366; color:#fff; border:0; font-family:inherit; font-weight:800; font-size:14px;
+  }
+  .share-btn svg{ width:18px; height:18px; }
+  .share-btn[disabled]{ opacity:.6; cursor:wait; }
+  .share-text{ background:none; border:0; padding:6px 4px; color:var(--muted); font-family:inherit; font-size:13px; font-weight:700; text-decoration:underline; cursor:pointer; }
+  .share-toast{ position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); z-index:500;
+    background:var(--ink); color:var(--bg); padding:11px 18px; border-radius:12px; font-size:13px; font-weight:700; max-width:calc(100vw - 32px); text-align:center;
+    box-shadow:0 8px 24px rgba(0,0,0,.25); }
 
   .revealbtn{
     align-self:flex-start; margin-top:20px;
@@ -2617,6 +2630,129 @@
     };
   });
 
+  // ---------- Kongsi: a one-page card (image) + short text, for WhatsApp ----------
+  var SHARE_IDS = [1];   // testing on Falsafah 1 first
+  var APP_URL = 'https://falsafah200.vercel.app';
+  var shareCache = {};
+  function shareHook(entry){
+    var m = /maka\s+[a-z]+\s*\((\d+)\)\s*perkara/i.exec((entry.catitan || [])[0] || '');
+    return (m ? 'Bila baca ayat ini, ada ' + m[1] + ' perkara yang kena masuk dalam kepala. Apa dia? ' : '') +
+      'Baca catitan ringkas pengarang Al-Fathun Nawa, dengar bacaan ayat dan uji hafalan anda di aplikasi Falsafah 200:';
+  }
+  function shareText(entry, withMaksud){
+    return '*' + entry.rangeLabel + ' · ' + displayTitle(entry.title) + '*\n' + entry.surahDisplay + '\n' +
+      (withMaksud ? '\n“' + entry.text + '”\n\n' : '') +
+      'Rujukan: Al-Fathun Nawa Jilid 7, ' + msLabel(entry) + '\n\n' + shareHook(entry) + '\n' + APP_URL;
+  }
+  function loadImg(src){ return new Promise(function(res){ if(!src) return res(null); var i = new Image(); i.onload = function(){ res(i); }; i.onerror = function(){ res(null); }; i.src = src; }); }
+  function wrapLines(ctx, text, maxW){
+    var words = String(text).split(/\s+/), lines = [], cur = '';
+    words.forEach(function(w){ var t = cur ? cur + ' ' + w : w; if(cur && ctx.measureText(t).width > maxW){ lines.push(cur); cur = w; } else cur = t; });
+    if(cur) lines.push(cur);
+    return lines;
+  }
+  function roundRect(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  // Light theme card, 1080 wide; font sizes never change, the height follows the ayat and maksud.
+  function makeShareCard(entry){
+    var SANS = '"Noto Sans", system-ui, sans-serif', AR = '"Scheherazade New", "Traditional Arabic", serif';
+    var fontsReady = (document.fonts && document.fonts.load) ? Promise.all([
+      document.fonts.load('400 50px "Scheherazade New"', entry.arabic), document.fonts.load('400 30px "Noto Sans"'),
+      document.fonts.load('600 26px "Noto Sans"'), document.fonts.load('800 58px "Noto Sans"')]).catch(function(){}) : Promise.resolve();
+    return Promise.all([fontsReady, loadImg('icons/logo-240.png'), loadImg(window.FN_SONGKET_BAND)]).then(function(r){
+      var logo = r[1], cloth = r[2];
+      var W = 1080, X = 84, IW = W - 2 * X, BAND = 150;
+      var c = document.createElement('canvas'), ctx = c.getContext('2d');
+      c.width = W; c.height = 10;
+      // ---- measure ----
+      ctx.font = '800 58px ' + SANS; var tLines = wrapLines(ctx, displayTitle(entry.title), IW);
+      ctx.font = '400 50px ' + AR; ctx.direction = 'rtl'; var aLines = wrapLines(ctx, entry.arabic, IW - 80); ctx.direction = 'ltr';
+      ctx.font = '400 30px ' + SANS; var mLines = wrapLines(ctx, entry.text, IW);
+      var refL = 'Rujukan: ', refB = 'Al-Fathun Nawa Jilid 7, ' + msLabel(entry), url = APP_URL.replace('https://', '');
+      ctx.font = '400 24px ' + SANS; var wRefL = ctx.measureText(refL).width;
+      ctx.font = '600 24px ' + SANS; var wRefB = ctx.measureText(refB).width;
+      ctx.font = '800 24px ' + SANS; var wUrl = ctx.measureText(url).width;
+      var refOneRow = wRefL + wRefB + 24 + wUrl <= IW;
+      var y0 = BAND - 58, yNo = y0 + 68 + 44, yT = yNo + 41 + 8, yA = yT + tLines.length * 65 + 36;
+      var aH = 68 + aLines.length * 95, yL = yA + aH + 34, yM = yL + 27 + 10, yS = yM + mLines.length * 45 + 18;
+      var yR = yS + 36 + 34, H = yR + 24 + (refOneRow ? 33 : 66) + BAND - 30;
+      c.height = Math.ceil(H);
+      ctx = c.getContext('2d');
+      // ---- background + songket bands ----
+      ctx.fillStyle = '#FAF5EC'; ctx.fillRect(0, 0, W, H);
+      if(cloth){
+        [0, H - BAND].forEach(function(top, i){
+          var b = document.createElement('canvas'); b.width = W; b.height = BAND; var g = b.getContext('2d');
+          var tw = 120, th = 168, off = (W / 2 - tw / 2) % tw;
+          for(var x = off - tw; x < W; x += tw) for(var yy = (i ? BAND - th : 0); i ? yy > -th : yy < BAND; yy += (i ? -th : th)) g.drawImage(cloth, x, yy, tw, th);
+          var gr = g.createLinearGradient(0, 0, 0, BAND);
+          if(i){ gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(.65, '#000'); gr.addColorStop(1, '#000'); }
+          else { gr.addColorStop(0, '#000'); gr.addColorStop(.35, '#000'); gr.addColorStop(1, 'rgba(0,0,0,0)'); }
+          g.globalCompositeOperation = 'destination-in'; g.fillStyle = gr; g.fillRect(0, 0, W, BAND);
+          ctx.drawImage(b, 0, top);
+        });
+      }
+      ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      // ---- brand row ----
+      if(logo){ ctx.save(); ctx.shadowColor = 'rgba(16,33,43,.18)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 4; roundRect(ctx, X, y0, 68, 68, 15); ctx.fillStyle = '#fff'; ctx.fill(); ctx.restore();
+        ctx.save(); roundRect(ctx, X, y0, 68, 68, 15); ctx.clip(); ctx.drawImage(logo, X, y0, 68, 68); ctx.restore(); }
+      var bx = X + (logo ? 86 : 0);
+      ctx.font = '800 22px ' + SANS; ctx.fillStyle = '#B8451F';
+      var cx = bx; 'AL-FATHUN NAWA'.split('').forEach(function(ch){ ctx.fillText(ch, cx, y0 + 21); cx += ctx.measureText(ch).width + 3.1; });
+      ctx.font = '600 19px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.fillText('Falsafah 200 · Jilid 7', bx, y0 + 50);
+      // ---- number + title ----
+      ctx.font = '800 30px ' + SANS; ctx.fillStyle = '#B8451F'; ctx.fillText(entry.rangeLabel, X, yNo + 20);
+      ctx.font = '800 58px ' + SANS; ctx.fillStyle = '#10212B'; tLines.forEach(function(l, i){ ctx.fillText(l, X, yT + i * 65 + 33); });
+      // ---- ayat box ----
+      ctx.save(); ctx.shadowColor = 'rgba(16,33,43,.06)'; ctx.shadowBlur = 22; ctx.shadowOffsetY = 6;
+      roundRect(ctx, X, yA, IW, aH, 22); ctx.fillStyle = '#FFFDF9'; ctx.fill(); ctx.restore();
+      roundRect(ctx, X + .5, yA + .5, IW - 1, aH - 1, 22); ctx.strokeStyle = 'rgba(16,33,43,.10)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.font = '400 50px ' + AR; ctx.fillStyle = '#10212B'; ctx.textAlign = 'center'; ctx.direction = 'rtl';
+      aLines.forEach(function(l, i){ ctx.fillText(l, W / 2, yA + 34 + i * 95 + 50); });
+      ctx.direction = 'ltr'; ctx.textAlign = 'left';
+      // ---- maksud ----
+      ctx.font = '800 20px ' + SANS; ctx.fillStyle = '#5F6B6D';
+      cx = X; 'MAKSUD'.split('').forEach(function(ch){ ctx.fillText(ch, cx, yL + 13); cx += ctx.measureText(ch).width + 2.8; });
+      ctx.font = '400 30px ' + SANS; ctx.fillStyle = '#10212B'; mLines.forEach(function(l, i){ ctx.fillText(l, X, yM + i * 45 + 22); });
+      ctx.font = '700 26px ' + SANS; ctx.fillStyle = '#0F766E'; ctx.fillText(entry.surahDisplay, X, yS + 18);
+      // ---- reference + link ----
+      ctx.fillStyle = 'rgba(16,33,43,.12)'; ctx.fillRect(X, yR, IW, 1);
+      var ry = yR + 24 + 16;
+      ctx.font = '400 24px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.fillText(refL, X, ry);
+      ctx.font = '600 24px ' + SANS; ctx.fillStyle = '#10212B'; ctx.fillText(refB, X + wRefL, ry);
+      ctx.font = '800 24px ' + SANS; ctx.fillStyle = '#B8451F';
+      if(refOneRow){ ctx.textAlign = 'right'; ctx.fillText(url, X + IW, ry); ctx.textAlign = 'left'; } else ctx.fillText(url, X, ry + 33);
+      return new Promise(function(res){ c.toBlob(function(b){ res(b); }, 'image/png'); });
+    });
+  }
+  function prepareShare(entry){
+    if(!shareCache[entry.id]) shareCache[entry.id] = { p: makeShareCard(entry).then(function(b){ shareCache[entry.id].blob = b; return b; }) };
+    return shareCache[entry.id].p;
+  }
+  function shareToast(msg){
+    var t = document.createElement('div'); t.className = 'share-toast'; t.textContent = msg; document.body.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 4200);
+  }
+  function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+  function shareFalsafah(entry){
+    var text = shareText(entry, false), C = shareCache[entry.id];
+    if(!C || !C.blob){ shareToast('Sedang menyediakan gambar. Cuba tekan sekali lagi.'); prepareShare(entry); return; }
+    var name = entry.rangeLabel.toLowerCase().replace(/\s+/g, '-') + '.png';
+    var file = null; try{ file = new File([C.blob], name, { type: 'image/png' }); }catch(e){}
+    try{ navigator.clipboard && navigator.clipboard.writeText(text).catch(function(){}); }catch(e){}
+    if(file && navigator.canShare && navigator.canShare({ files: [file] })){
+      navigator.share({ files: [file], text: text }).catch(function(e){ if(e && e.name !== 'AbortError') downloadCard(C.blob, name); });
+      if(isIOS()) setTimeout(function(){ shareToast('Teks sudah disalin. Jika teks tidak muncul di WhatsApp, tampal sebagai kapsyen.'); }, 600);
+      return;
+    }
+    downloadCard(C.blob, name);
+    shareToast('Gambar dimuat turun dan teks sudah disalin. Hantar gambar di WhatsApp, kemudian tampal teks.');
+  }
+  function downloadCard(blob, name){
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+  var SHARE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>';
+
   function openDetail(id, fromProgress){
     var entry = DATA.find(function(e){ return e.id===id; });
     if(!entry) return;
@@ -2629,6 +2765,8 @@
       '<span class="rangepill">'+entry.rangeLabel+'</span> ' +
       gredBadge(id) + (cardLog(id).length ? ' <span class="markah-pill">Markah ' + fmtMarkah(markahOf(id)) + '</span>' : '') +
       '<h3 class="folio-title" style="margin-top:14px;">'+escapeHtml(displayTitle(entry.title))+'</h3>' +
+      (SHARE_IDS.indexOf(id) >= 0 ? '<div class="share-row"><button type="button" class="share-btn" id="shareBtn">' + SHARE_ICON + 'Kongsi</button>' +
+        '<button type="button" class="share-text" id="shareTextBtn">Kongsi teks sahaja</button></div>' : '') +
       '<hr class="divider">' +
       renderArabic(entry) +
       '<div class="folio-text-label">Maksud</div>' +
@@ -2645,6 +2783,14 @@
     document.getElementById('closeDetail').onclick = closeDetail;
     var bp = document.getElementById('backToProg');
     if(bp) bp.onclick = function(){ fromProgress.open(); };
+    var sb = document.getElementById('shareBtn');
+    if(sb){
+      prepareShare(entry);   // draw the card now, so the tap can open the share menu straight away
+      sb.onclick = function(){ shareFalsafah(entry); };
+      document.getElementById('shareTextBtn').onclick = function(){
+        window.open('https://wa.me/?text=' + encodeURIComponent(shareText(entry, true)), '_blank');
+      };
+    }
   }
   function closeDetail(){
     if(typeof lpSheetOpen !== 'undefined' && lpSheetOpen){ lpSheetOpen = false; setTimeout(lpUpdateUI, 0); }
@@ -3735,7 +3881,12 @@
         }).join('') +
         '</div>';
     }
+    if(entry.bookPages) html += '<p class="book-ref">Rujukan: <b>Al-Fathun Nawa Jilid 7, ' + msLabel(entry) + '</b></p>';
     return html;
+  }
+  function msLabel(entry){
+    var p = entry.bookPages || []; if(!p[0]) return '';
+    return 'ms. ' + p[0] + (p[1] && p[1] !== p[0] ? '\u2013' + p[1] : '');
   }
 
   var CATITAN_ORDINAL_RE = /(?=\b(?:Satu|Dua|Tiga|Empat|Lima|Enam|Tujuh):)/;

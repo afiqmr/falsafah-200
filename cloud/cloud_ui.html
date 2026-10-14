@@ -186,6 +186,8 @@ const overlay = $('acctOverlay'), card = $('acctCard');
     r.setProperty('--acct-songket-d', draw(['', 'rgba(201,168,92,.42)', 'rgba(226,176,100,.55)']));  // soft gold on charcoal
     r.setProperty('--page-songket-l', draw(['', 'rgba(176,128,40,.25)', 'rgba(196,72,48,.25)']));
     r.setProperty('--page-songket-d', draw(['', 'rgba(201,168,92,.145)', 'rgba(226,176,100,.18)']));
+    // the share card (Kongsi) draws this cloth at its top and bottom
+    window.FN_SONGKET_BAND = draw(['', 'rgba(176,128,40,.75)', 'rgba(196,72,48,.72)']).slice(4, -1);
     // laptops and desktops: the cloth shows at the left and right of the page, still; it blurs and fades toward the middle column
     const sides = document.createElement('div'); sides.className = 'fn-sides'; sides.setAttribute('aria-hidden', 'true');
     sides.innerHTML = '<i class="sharp"></i><i class="soft"></i>';
