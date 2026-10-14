@@ -339,11 +339,12 @@
   .wbw-head .wbl-seg{ display:none; }
   .wbw-on .wbw-head .wbl-seg{ display:inline-flex; }
   .wbl-seg{ display:inline-flex; gap:2px; padding:3px; border-radius:100px; border:1px solid var(--border); background:var(--surface); }
-  .wbl-seg button{ border:0; background:transparent; color:var(--muted); font-family:inherit; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:100px; cursor:pointer;
-    -webkit-tap-highlight-color:transparent; transition:background-color .3s var(--ios-curve), color .3s var(--ios-curve), transform .2s var(--ios-curve); }
+  .wbl-seg button{ border:1.5px solid transparent; background:transparent; color:var(--muted); font-family:inherit; font-size:11.5px; font-weight:800; padding:3px 10px; border-radius:100px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent; transition:border-color .3s var(--ios-curve), color .3s var(--ios-curve), transform .2s var(--ios-curve); }
   .wbl-seg button:active{ transform:scale(.92); }
   .wbl-seg button:focus:not(:focus-visible){ outline:none; box-shadow:none; }
-  .wbl-seg button.active{ background:var(--surface-2); color:var(--ink); box-shadow:inset 0 0 0 1px var(--border); }
+  /* on: soft teal letters inside a gold ring; off: dim letters, no ring */
+  .wbl-seg button.active{ color:var(--emerald); border-color:var(--gold); }
   /* word-by-word appears and leaves with a soft fade and lift (iOS curve) */
   @keyframes wbwIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
   @keyframes lineIn{ from{ opacity:0; transform:translateY(-3px); } to{ opacity:1; transform:none; } }
