@@ -24,6 +24,7 @@
     --rose-soft:rgba(217,140,134,.12);
     --lv1:#C9A85C; --lv2:#B8994F; --lv3:#8FB5A6; --lv4:#7CC4A4; --lv5:#5FA88A;
     --gC:#D9975B; --gD:#D9776B; --gG:#C0504D;
+    --bm:#9DB4D6;   /* BM word-by-word line and the EN/BM pills: blue-grey */
     --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 28px -14px rgba(0,0,0,.55);
     --radius:16px;
     --ios-ease:cubic-bezier(.32,.72,0,1);
@@ -53,6 +54,7 @@
     --rose-soft:rgba(180,35,24,.10);
     --lv1:#E9B949; --lv2:#D4AF37; --lv3:#7FB7A6; --lv4:#34D399; --lv5:#0F9F74;
     --gC:#EA6A2A; --gD:#D9472B; --gG:#B42318;
+    --bm:#3B5B8C;
     --shadow:0 1px 2px rgba(16,33,43,.05),0 14px 32px -16px rgba(16,33,43,.18);
     color-scheme:light;
   }
@@ -251,8 +253,8 @@
   .wbw .w{ display:flex; flex-direction:column; align-items:center; text-align:center; max-width:132px; }
   .wbw .w-ar{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:27px; line-height:1.75; color:var(--ink); }
   .wbw .w-en{ direction:ltr; font-size:12px; line-height:1.3; color:var(--muted); margin-top:2px; }
-  .wbw .w-id{ direction:ltr; font-size:12px; line-height:1.3; color:var(--emerald); margin-top:2px; font-style:italic; }
-  .wbw-src .k-id{ color:var(--emerald); font-style:italic; }
+  .wbw .w-id{ direction:ltr; font-size:12px; line-height:1.3; color:var(--bm); margin-top:2px; font-style:italic; }
+  .wbw-src .k-id{ color:var(--bm); font-style:italic; }
   .wbw-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 10px; }
   /* Dr. HALO-N's own recitation (signed-in students only) */
   .halon-btn{ display:inline-flex; align-items:center; gap:7px; padding:6px 13px 6px 7px; border-radius:100px; border:1px solid var(--gold);
@@ -283,8 +285,8 @@
     -webkit-tap-highlight-color:transparent; transition:border-color .3s var(--ios-curve), color .3s var(--ios-curve), transform .2s var(--ios-curve); }
   .wbl-seg button:active{ transform:scale(.92); }
   .wbl-seg button:focus:not(:focus-visible){ outline:none; box-shadow:none; }
-  /* on: soft teal letters; off: dim letters */
-  .wbl-seg button.active{ color:var(--emerald); }
+  /* on: blue-grey letters; off: dim letters */
+  .wbl-seg button.active{ color:var(--bm); }
   /* word-by-word appears and leaves with a soft fade and lift (iOS curve) */
   @keyframes wbwIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
   @keyframes lineIn{ from{ opacity:0; transform:translateY(-3px); } to{ opacity:1; transform:none; } }
@@ -803,10 +805,10 @@
   .lp-wbw .w{ display:flex; flex-direction:column; align-items:center; text-align:center; max-width:130px; }
   .lp-wbw .w-ar{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:26px; line-height:1.7; color:var(--ink); }
   .lp-wbw .w-en{ direction:ltr; font-size:11.5px; line-height:1.3; color:var(--muted); margin-top:2px; }
-  .lp-wbw .w-id{ direction:ltr; font-size:11.5px; line-height:1.3; color:var(--emerald); margin-top:2px; font-style:italic; }
+  .lp-wbw .w-id{ direction:ltr; font-size:11.5px; line-height:1.3; color:var(--bm); margin-top:2px; font-style:italic; }
   .lp-wbw .w-end .w-ar{ color:var(--gold-cite); font-size:21px; }
   .lp-legend{ font-size:10.5px; color:var(--muted); margin:6px 0 0; }
-  .lp-legend .k-id{ color:var(--emerald); font-style:italic; }
+  .lp-legend .k-id{ color:var(--bm); font-style:italic; }
   .lp-maksud{ margin:12px 0 8px; font-size:14px; line-height:1.6; color:var(--ink); }
   .lp-maksud span{ display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
   .rangechip .rc-edit{ color:var(--gold-cite); }
