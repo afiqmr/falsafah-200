@@ -311,8 +311,8 @@
   .wbw .w{ display:flex; flex-direction:column; align-items:center; text-align:center; max-width:132px; }
   .wbw .w-ar{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:27px; line-height:1.75; color:var(--ink); }
   .wbw .w-en{ direction:ltr; font-size:12px; line-height:1.3; color:var(--muted); margin-top:2px; }
-  .wbw .w-id{ direction:ltr; font-size:12px; line-height:1.3; color:var(--gold-cite); margin-top:2px; font-style:italic; }
-  .wbw-src .k-id{ color:var(--gold-cite); font-style:italic; }
+  .wbw .w-id{ direction:ltr; font-size:12px; line-height:1.3; color:var(--emerald); margin-top:2px; font-style:italic; }
+  .wbw-src .k-id{ color:var(--emerald); font-style:italic; }
   .wbw-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 10px; }
   /* Dr. HALO-N's own recitation (signed-in students only) */
   .halon-btn{ display:inline-flex; align-items:center; gap:7px; padding:6px 13px 6px 7px; border-radius:100px; border:1px solid var(--gold);
@@ -343,7 +343,7 @@
     -webkit-tap-highlight-color:transparent; transition:background-color .3s var(--ios-curve), color .3s var(--ios-curve), transform .2s var(--ios-curve); }
   .wbl-seg button:active{ transform:scale(.92); }
   .wbl-seg button:focus:not(:focus-visible){ outline:none; box-shadow:none; }
-  .wbl-seg button.active{ background:var(--gold); color:var(--gold-ink); }
+  .wbl-seg button.active{ background:var(--surface-2); color:var(--ink); box-shadow:inset 0 0 0 1px var(--border); }
   /* word-by-word appears and leaves with a soft fade and lift (iOS curve) */
   @keyframes wbwIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
   @keyframes lineIn{ from{ opacity:0; transform:translateY(-3px); } to{ opacity:1; transform:none; } }
@@ -862,10 +862,10 @@
   .lp-wbw .w{ display:flex; flex-direction:column; align-items:center; text-align:center; max-width:130px; }
   .lp-wbw .w-ar{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:26px; line-height:1.7; color:var(--ink); }
   .lp-wbw .w-en{ direction:ltr; font-size:11.5px; line-height:1.3; color:var(--muted); margin-top:2px; }
-  .lp-wbw .w-id{ direction:ltr; font-size:11.5px; line-height:1.3; color:var(--gold-cite); margin-top:2px; font-style:italic; }
+  .lp-wbw .w-id{ direction:ltr; font-size:11.5px; line-height:1.3; color:var(--emerald); margin-top:2px; font-style:italic; }
   .lp-wbw .w-end .w-ar{ color:var(--gold-cite); font-size:21px; }
   .lp-legend{ font-size:10.5px; color:var(--muted); margin:6px 0 0; }
-  .lp-legend .k-id{ color:var(--gold-cite); font-style:italic; }
+  .lp-legend .k-id{ color:var(--emerald); font-style:italic; }
   .lp-maksud{ margin:12px 0 8px; font-size:14px; line-height:1.6; color:var(--ink); }
   .lp-maksud span{ display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:2px; }
   .rangechip .rc-edit{ color:var(--gold-cite); }
@@ -3564,7 +3564,7 @@
     if(!words) return '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>';
     return '<div class="lp-wbw-head"><span>Word by word</span>' + wblSeg() + '</div>' +
     '<div class="lp-wbw" lang="ar">' + wordCells(words) + '</div>' +
-    '<p class="lp-legend">Quran.com &middot; <span class="k-en">English</span> &middot; <span class="k-id">Bahasa Indonesia</span></p>';
+    '<p class="lp-legend">Quran.com &middot; <span class="k-en">English</span> &middot; <span class="k-id">Bahasa Melayu</span></p>';
   }
   function openListen(){
     var from = LP.active ? LP.from : studyRange.from, to = LP.active ? LP.to : studyRange.to, H = halonIds().length;
@@ -3713,7 +3713,7 @@
       '<p class="wbw-msg"></p>' +
       '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>' +
       '<div class="wbw" lang="ar"></div>' +
-      '<p class="wbw-src">Word by word: Quran.com &middot; <span class="k-en">English</span> &middot; <span class="k-id">Bahasa Indonesia</span></p>' +
+      '<p class="wbw-src">Word by word: Quran.com &middot; <span class="k-en">English</span> &middot; <span class="k-id">Bahasa Melayu</span></p>' +
     '</div>';
   }
   function arSkeleton(s){
@@ -3772,7 +3772,7 @@
       return out;
     });
   }
-  // Word by word for the Dengar player: English plus Indonesian, both from Quran.com
+  // Word by word for the Dengar player: English plus BM (Quran.com "id" set), both from Quran.com
   var idVerseCache = {}, lpWbwCache = {};
   function fetchVerseId(key){
     if(!idVerseCache[key]){
@@ -3843,7 +3843,7 @@
       msg.textContent = 'Word by word perlukan internet. Cuba lagi sebentar nanti.';
     });
   }
-  // Which meaning lines show under each word: English, Indonesian or both (one setting for the whole app)
+  // Which meaning lines show under each word: English, BM or both (one setting for the whole app)
   var WBL_KEY = 'falsafah200_wbwlang_v1';
   var wbl = (function(){ try{ var v = localStorage.getItem(WBL_KEY); return (v === 'en' || v === 'id' || v === 'both') ? v : 'both'; }catch(e){ return 'both'; } })();
   function applyWbl(){
@@ -3853,13 +3853,13 @@
   }
   function wblSeg(){
     return '<span class="wbl-seg" role="group" aria-label="Bahasa terjemahan">' +
-      [['en','EN'],['id','ID']].map(function(o){ var on = wbl === 'both' || wbl === o[0]; return '<button type="button" data-wbl="' + o[0] + '" aria-pressed="' + on + '" class="' + (on ? 'active' : '') + '">' + o[1] + '</button>'; }).join('') + '</span>';
+      [['en','EN'],['id','BM']].map(function(o){ var on = wbl === 'both' || wbl === o[0]; return '<button type="button" data-wbl="' + o[0] + '" aria-pressed="' + on + '" class="' + (on ? 'active' : '') + '">' + o[1] + '</button>'; }).join('') + '</span>';
   }
   function wordCells(words){
     return words.map(function(w){
       return '<div class="w' + (w.end ? ' w-end' : '') + '"><span class="w-ar">' + escapeHtml(w.ar) + '</span>' +
         (w.en ? '<span class="w-en" lang="en">' + escapeHtml(w.en) + '</span>' : '') +
-        (w.id ? '<span class="w-id" lang="id">' + escapeHtml(w.id) + '</span>' : '') + '</div>';
+        (w.id ? '<span class="w-id" lang="ms">' + escapeHtml(w.id) + '</span>' : '') + '</div>';
     }).join('');
   }
   document.addEventListener('click', function(e){
