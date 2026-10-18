@@ -364,12 +364,21 @@
     font-size:16px; line-height:1.65; color:var(--muted);
   }
   .voicebox{ margin:12px 0 4px; }
+  .voicebox.pre{ margin:4px 0 16px; }
+  .voiceresult{ margin:14px 0 4px; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); }
+  .voiceresult.pass{ border-color:var(--emerald); }
+  .vr-head{ font-size:14px; font-weight:800; }
+  .vr-head.ok{ color:var(--emerald); } .vr-head.mid{ color:var(--gold-cite); } .vr-head.low{ color:var(--rose); }
+  .vr-sub{ font-size:12.5px; color:var(--muted); margin:4px 0 6px; line-height:1.5; }
+  .vr-link{ background:none; border:0; padding:0 0 0 4px; font:inherit; font-weight:800; color:var(--rose); text-decoration:underline; cursor:pointer; }
+  .voiceresult .voicebtn{ margin-top:8px; }
+  .gradebtn.good.auto{ border-color:var(--emerald); box-shadow:0 0 0 2px var(--emerald-soft); }
   .voicebtn{ display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:100px; border:1px solid var(--border);
     background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; }
   .voicebtn.on{ border-color:var(--rose); color:var(--rose); }
   .voicebtn.on .vb-ic{ animation:vpulse 1.1s ease-in-out infinite; }
   @keyframes vpulse{ 50%{ opacity:.35; } }
-  .voice-note{ display:inline-block; margin-left:10px; font-size:11.5px; color:var(--muted); }
+  .voice-note{ display:block; margin:6px 0 0 2px; font-size:11.5px; color:var(--muted); line-height:1.45; }
   .voice-out:empty{ display:none; }
   .voice-out{ margin-top:10px; padding:12px 14px; border-radius:12px; background:var(--surface-2); border:1px solid var(--border); }
   .voice-words{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:23px; line-height:2; margin:0; }
@@ -2516,13 +2525,43 @@
     if(later) later.onclick = close;
   }
 
+  // Reading from memory before Dedah: 80% and above is marked Ingat (with 3 s to undo);
+  // below that the student tries again or marks it by hand. Voice never marks Belum ingat.
+  var VOICE_PASS = 80, VOICE_TRIES = 2;
+  var voicePre = null, voiceAutoT = null;
+  function clearVoiceAuto(){ clearTimeout(voiceAutoT); voiceAutoT = null; }
+  function voiceResultHtml(entry){
+    var v = voicePre, r = v.r, pass = r.pct >= VOICE_PASS;
+    var head = pass ? '<div class="vr-head ok">&#10003; ' + r.pct + '% (' + r.ok + '/' + r.total + ' kalimah) &middot; Ingat</div>' +
+          '<p class="vr-sub" id="vrAuto">Ditanda <b>Ingat</b> dalam 3 saat. <button type="button" class="vr-link" id="vrUndo">Batal</button></p>'
+      : r.pct >= 50 ? '<div class="vr-head mid">Hampir &middot; ' + r.pct + '% (' + r.ok + '/' + r.total + ' kalimah)</div>' +
+          '<p class="vr-sub">Kalimah merah tidak didengar. Mungkin terlupa, atau telefon tersalah dengar.</p>'
+      : '<div class="vr-head low">Bacaan kurang jelas &middot; ' + r.pct + '% (' + r.ok + '/' + r.total + ' kalimah)</div>' +
+          '<p class="vr-sub">Baca lebih perlahan dan dekat dengan mikrofon, atau tanda sendiri di bawah.</p>';
+    var again = !pass && v.tries < VOICE_TRIES ? '<button type="button" class="voicebtn" id="vrAgain"><span class="vb-ic">&#127908;</span><span class="vb-tx">Cuba lagi dari ingatan</span></button>' : '';
+    return '<div class="voiceresult ' + (pass ? 'pass' : '') + '">' + head +
+      '<p class="voice-words" lang="ar" dir="rtl">' + r.marks.map(function(m){ return '<span class="' + (m.ok ? 'vw-ok' : 'vw-no') + '">' + escapeHtml(m.w) + '</span>'; }).join(' ') + '</p>' +
+      again + '</div>';
+  }
   function renderFolioBody(entry){
     var el = document.getElementById('folioBody');
+    clearVoiceAuto();
+    if(voicePre && voicePre.id !== entry.id) voicePre = null;
     if(!revealed){
+      var tries = voicePre ? voicePre.tries : 0;
       el.innerHTML =
         '<h3 class="folio-title">' + escapeHtml(displayTitle(entry.title)) + '</h3>' +
         '<p class="folio-hint">Cuba ingat &amp; lafazkan ayat ini serta maksudnya sebelum menekan Dedah.</p>' +
+        '<div class="voicebox pre"><button type="button" class="voicebtn" id="voiceBtn"><span class="vb-ic">&#127908;</span><span class="vb-tx">Baca dari ingatan</span></button>' +
+          '<span class="voice-note">' + (tries ? 'Cubaan ' + (tries + 1) + '/' + VOICE_TRIES + '. ' : '') + VOICE_PASS + '% ke atas: Ingat automatik. Semak kalimah sahaja, bukan tajwid.</span>' +
+          '<div class="voice-out" id="voiceOut"></div></div>' +
         '<button class="revealbtn" id="revealBtn">Dedah ayat &amp; maksud</button>';
+      bindVoice(el, entry, { pre: true, onDone: function(r){
+        voicePre = { id: entry.id, tries: (voicePre ? voicePre.tries : 0) + 1, r: r };
+        revealed = true;
+        renderFolioBody(entry);
+        el.classList.remove('reveal-in'); void el.offsetWidth; el.classList.add('reveal-in');
+      } });
       document.getElementById('revealBtn').onclick = function(){
         revealed = true;
         renderFolioBody(entry);
@@ -2531,6 +2570,7 @@
     } else {
       el.innerHTML =
         '<h3 class="folio-title">' + escapeHtml(displayTitle(entry.title)) + '</h3>' +
+        (voicePre ? voiceResultHtml(entry) : '') +
         '<hr class="divider">' +
         renderArabic(entry) +
         '<div class="folio-text-label">Maksud</div>' +
@@ -2545,8 +2585,22 @@
       applyWbw(el);
       bindVoice(el, entry);
       var btns = el.querySelectorAll('.gradebtn');
+      if(voicePre){
+        var again = document.getElementById('vrAgain');
+        if(again) again.onclick = function(){ revealed = false; renderFolioBody(entry); };
+        if(voicePre.r.pct >= VOICE_PASS){
+          var good = el.querySelector('.gradebtn.good');
+          good.classList.add('auto');
+          voiceAutoT = setTimeout(function(){ voiceAutoT = null; if(good.isConnected) good.click(); }, 3000);
+          document.getElementById('vrUndo').onclick = function(){
+            clearVoiceAuto(); good.classList.remove('auto');
+            document.getElementById('vrAuto').innerHTML = 'Dibatalkan. Tanda sendiri di bawah.';
+          };
+        }
+      }
       btns.forEach(function(b){
         b.onclick = function(){
+          clearVoiceAuto(); voicePre = null;
           recordKaji(entry.id, parseInt(b.getAttribute('data-g'),10));
           renderStudy();
           window.scrollTo(0, 0);
@@ -2563,7 +2617,7 @@
   var voiceRec = null;
   function voiceHtml(){
     return '<div class="voicebox"><button type="button" class="voicebtn" id="voiceBtn"><span class="vb-ic">&#127908;</span><span class="vb-tx">Cuba baca</span></button>' +
-      '<span class="voice-note">Semak perkataan sahaja, bukan tajwid. Ujian.</span><div class="voice-out" id="voiceOut"></div></div>';
+      '<span class="voice-note">Latihan, tiada tanda automatik. Semak kalimah sahaja, bukan tajwid.</span><div class="voice-out" id="voiceOut"></div></div>';
   }
   function vNorm(w){ return arSkeleton(w).replace(/ا/g, '').replace(/ء/g, '').replace(/[ؤئ]/g, ''); }
   function vEdit(a, b){
@@ -2585,25 +2639,47 @@
     if(strip(t) === strip(h)) return true;
     return t.length >= 4 && vEdit(t, h) <= 1;
   }
-  // Marks each ayat word as heard (in order, allowing a few skipped or extra words).
+  // Marks each ayat word as heard, in order. Works on the letters of the whole reading, so a word the
+  // recogniser joined to the next one, or split in two, still counts; skipped or extra words are allowed.
   function voiceMatch(arabic, transcript){
     // Uthmani text sometimes has a space before a dagger alif or small mark; keep those inside the word
-    var target = String(arabic).replace(/\s+(?=[\u064B-\u065F\u0670\u06D6-\u06ED])/g, '').split(/\s+/).filter(function(w){ return vNorm(w).length; });
-    var heard = String(transcript).split(/\s+/).map(vNorm).filter(Boolean);
+    var target = String(arabic).replace(/\s+(?=[ً-ٰٟۖ-ۭ])/g, '').split(/\s+/).filter(function(w){ return vNorm(w).length; });
+    var words = String(transcript).split(/\s+/).map(vNorm).filter(Boolean);
+    var H = '', starts = [];
+    words.forEach(function(w){ starts.push(H.length); H += w; });
     var p = 0, ok = 0;
     var marks = target.map(function(w){
-      var t = vNorm(w), hit = -1;
-      for(var k = p; k < Math.min(heard.length, p + 4); k++){ if(vSame(t, heard[k])){ hit = k; break; } }
-      if(hit < 0 && t.length >= 6){   // a long word split in two by the recogniser
-        for(var k2 = p; k2 < Math.min(heard.length - 1, p + 4); k2++){ if(vSame(t, heard[k2] + heard[k2+1])){ hit = k2 + 1; break; } }
+      var t = vNorm(w), at = -1, len = 0, i, k;
+      var cands = [t];
+      if(t.length > 2 && /^[وفب]/.test(t)) cands.push(t.slice(1));   // wa-/fa-/bi- dropped
+      if(t.length <= 2){
+        // short words (la, ma, min...) must be a whole heard word, or follow straight on
+        if(H.substr(p, t.length) === t){ at = p; len = t.length; }
+        for(k = 0; at < 0 && k < words.length; k++){
+          if(starts[k] < p) continue;
+          if(starts[k] > p + 12) break;
+          if(words[k] === t){ at = starts[k]; len = t.length; }
+        }
+      } else {
+        var win = H.slice(p, p + t.length + 12);
+        for(i = 0; at < 0 && i < cands.length; i++){ var x = win.indexOf(cands[i]); if(x >= 0){ at = p + x; len = cands[i].length; } }
+        if(at < 0 && t.length >= 4){   // one letter different, missing or extra
+          for(i = 0; at < 0 && i <= Math.min(12, win.length - t.length + 1); i++){
+            [t.length, t.length - 1, t.length + 1].forEach(function(L){
+              if(at < 0 && i + L <= win.length && vEdit(t, win.substr(i, L)) <= 1){ at = p + i; len = L; }
+            });
+          }
+        }
       }
-      if(hit >= 0){ p = hit + 1; ok++; return { w: w, ok: true }; }
+      if(at >= 0){ p = at + len; ok++; return { w: w, ok: true }; }
       return { w: w, ok: false };
     });
-    return { marks: marks, ok: ok, total: target.length };
+    var total = target.length;
+    return { marks: marks, ok: ok, total: total, pct: total ? Math.round(ok / total * 100) : 0 };
   }
   var IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  function bindVoice(el, entry){
+  function bindVoice(el, entry, opts){
+    opts = opts || {};
     var btn = el.querySelector('#voiceBtn'), out = el.querySelector('#voiceOut');
     if(!btn) return;
     if(!SpeechRec){
@@ -2613,12 +2689,18 @@
     var text = '', started = false, ended = true, timers = [];
     function msg(m){ out.innerHTML = '<p class="voice-msg">' + m + '</p>'; }
     function show(){
-      if(!text.trim()){ msg(started ? 'Mendengar&hellip; bacalah ayat ini.' : 'Menyediakan mikrofon&hellip;'); return; }
+      if(!text.trim()){ msg(started ? (opts.pre ? 'Mendengar&hellip; bacalah ayat ini dari ingatan.' : 'Mendengar&hellip; bacalah ayat ini.') : 'Menyediakan mikrofon&hellip;'); return; }
+      if(opts.pre){   // before Dedah: do not show the ayat while the student recites
+        var n = text.trim().split(/\s+/).length;
+        out.innerHTML = '<p class="voice-msg">Mendengar&hellip; ' + n + ' kalimah didengar. Tekan <b>Selesai</b> apabila habis membaca.</p>' +
+          '<p class="voice-heard" lang="ar" dir="rtl">' + escapeHtml(text.trim()) + '</p>';
+        return;
+      }
       var r = voiceMatch(entry.arabic, text);
       out.innerHTML = '<p class="voice-words" lang="ar" dir="rtl">' + r.marks.map(function(m){
           return '<span class="' + (m.ok ? 'vw-ok' : 'vw-no') + '">' + escapeHtml(m.w) + '</span>';
         }).join(' ') + '</p>' +
-        '<p class="voice-score"><b>' + r.ok + '/' + r.total + '</b> perkataan didengar' + (r.ok === r.total ? ' &#10003;' : '') + '</p>' +
+        '<p class="voice-score"><b>' + r.pct + '%</b> (' + r.ok + '/' + r.total + ' kalimah)' + (r.ok === r.total ? ' &#10003;' : '') + '</p>' +
         '<p class="voice-heard" lang="ar" dir="rtl">' + escapeHtml(text.trim()) + '</p>';
     }
     // Always leaves the button usable again, even if the recogniser never reports back.
@@ -2626,33 +2708,29 @@
       timers.forEach(clearTimeout); timers = [];
       if(voiceRec){ var r = voiceRec; voiceRec = null; r.onresult = r.onerror = r.onend = r.onstart = r.onaudiostart = null; try{ r.abort(); }catch(e){} }
       ended = true;
-      btn.classList.remove('on'); btn.querySelector('.vb-tx').textContent = 'Cuba baca lagi';
-      if(note) msg(note); else if(text.trim()) show(); else msg('Tiada bacaan didengar. Tekan Cuba baca lagi.');
+      btn.classList.remove('on'); btn.querySelector('.vb-tx').textContent = opts.pre ? 'Baca dari ingatan' : 'Cuba baca lagi';
+      if(note) msg(note);
+      else if(text.trim() && opts.onDone){ opts.onDone(voiceMatch(entry.arabic, text)); }
+      else if(text.trim()) show();
+      else msg('Tiada bacaan didengar. Cuba lagi.');
     }
-    btn.onclick = function(ev){
-      if(ev) ev.stopPropagation();
-      if(!ended){   // Berhenti: ask politely, then force it after 1.5 s
-        try{ voiceRec && voiceRec.stop(); }catch(e){}
-        timers.push(setTimeout(function(){ if(!ended) finish(); }, 1500));
-        return;
-      }
-      // one sound at a time: pause the Dengar player or the ayat audio if they are playing
-      try{ if(typeof lpAudio !== 'undefined' && !lpAudio.paused) lpAudio.pause(); }catch(e){}
-      try{ if(typeof hpAudio !== 'undefined' && !hpAudio.paused) hpAudio.pause(); }catch(e){}
-      text = ''; started = false; ended = false;
+    var userStop = false, t0 = 0;
+    // base: text heard before the phone stopped by itself (a pause on iPhone); listening carries on after it
+    function makeRec(base){
       var rec = new SpeechRec();
       rec.lang = 'ar-SA';
-      rec.continuous = !IS_IOS;   // iPhone: one reading at a time is more reliable
+      rec.continuous = !IS_IOS;   // iPhone: one stretch at a time is more reliable
       rec.interimResults = true; rec.maxAlternatives = 1;
       rec.onstart = rec.onaudiostart = function(){ if(!started){ started = true; show(); } };
       rec.onresult = function(e){
         started = true;
         var t = '';
         for(var i = 0; i < e.results.length; i++) t += ' ' + e.results[i][0].transcript;
-        text = t;
+        text = base + ' ' + t;
         show();
       };
       rec.onerror = function(e){
+        if(text.trim() && (e.error === 'no-speech' || e.error === 'aborted')){ finish(); return; }
         var m = e.error === 'not-allowed' || e.error === 'service-not-allowed'
             ? 'Mikrofon atau pengecaman suara tidak dibenarkan.' + (IS_IOS ? ' Di iPhone: Tetapan &gt; Safari &gt; Mikrofon, dan pastikan Siri &amp; Dikte dihidupkan.' : ' Benarkan mikrofon untuk laman ini, kemudian cuba lagi.')
           : e.error === 'no-speech' ? 'Tiada suara didengar. Cuba lagi dan baca lebih dekat dengan mikrofon.'
@@ -2660,9 +2738,30 @@
           : e.error === 'aborted' ? null : 'Tidak dapat mendengar (' + e.error + '). Cuba lagi.';
         finish(m);
       };
-      rec.onend = function(){ finish(); };
+      rec.onend = function(){
+        // before Dedah the student may pause mid-ayat: keep listening until they press Selesai
+        if(opts.pre && !userStop && !ended && text.trim() && Date.now() - t0 < 55000){
+          try{ var next = makeRec(text); voiceRec = next; next.start(); return; }catch(err){}
+        }
+        finish();
+      };
+      return rec;
+    }
+    btn.onclick = function(ev){
+      if(ev) ev.stopPropagation();
+      if(!ended){   // Berhenti / Selesai: ask politely, then force it after 1.5 s
+        userStop = true;
+        try{ voiceRec && voiceRec.stop(); }catch(e){}
+        timers.push(setTimeout(function(){ if(!ended) finish(); }, 1500));
+        return;
+      }
+      // one sound at a time: pause the Dengar player or the ayat audio if they are playing
+      try{ if(typeof lpAudio !== 'undefined' && !lpAudio.paused) lpAudio.pause(); }catch(e){}
+      try{ if(typeof hpAudio !== 'undefined' && !hpAudio.paused) hpAudio.pause(); }catch(e){}
+      text = ''; started = false; ended = false; userStop = false; t0 = Date.now();
+      var rec = makeRec('');
       voiceRec = rec;
-      btn.classList.add('on'); btn.querySelector('.vb-tx').textContent = 'Berhenti';
+      btn.classList.add('on'); btn.querySelector('.vb-tx').textContent = opts.pre ? 'Selesai' : 'Berhenti';
       show();
       try{ rec.start(); }catch(e){ finish('Tidak dapat mula mendengar. Cuba lagi.'); return; }
       // watchdogs: never leave the page waiting on a recogniser that went silent
