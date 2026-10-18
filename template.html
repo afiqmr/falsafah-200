@@ -363,6 +363,22 @@
   .folio-text{
     font-size:16px; line-height:1.65; color:var(--muted);
   }
+  .voicebox{ margin:12px 0 4px; }
+  .voicebtn{ display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:100px; border:1px solid var(--border);
+    background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+  .voicebtn.on{ border-color:var(--rose); color:var(--rose); }
+  .voicebtn.on .vb-ic{ animation:vpulse 1.1s ease-in-out infinite; }
+  @keyframes vpulse{ 50%{ opacity:.35; } }
+  .voice-note{ display:inline-block; margin-left:10px; font-size:11.5px; color:var(--muted); }
+  .voice-out:empty{ display:none; }
+  .voice-out{ margin-top:10px; padding:12px 14px; border-radius:12px; background:var(--surface-2); border:1px solid var(--border); }
+  .voice-words{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:23px; line-height:2; margin:0; }
+  .voice-words .vw-ok{ color:var(--emerald); }
+  .voice-words .vw-no{ color:var(--rose); text-decoration:underline dotted; text-underline-offset:6px; }
+  .voice-score{ font-size:13px; color:var(--muted); margin:6px 0 0; }
+  .voice-score b{ color:var(--ink); }
+  .voice-heard{ font-size:15px; color:var(--muted); margin:6px 0 0; opacity:.8; }
+  .voice-msg{ font-size:13px; color:var(--muted); margin:0; line-height:1.5; }
   .surah-ref{
     font-size:12px; color:var(--muted); margin-top:10px; font-weight:600;
   }
@@ -843,6 +859,23 @@
   .qopt.correct{ background:var(--emerald-soft); border-color:var(--emerald); color:var(--emerald); font-weight:800; }
   .qopt.wrong{ background:var(--rose-soft); border-color:var(--rose); color:var(--rose); font-weight:800; }
   .qopt[disabled]{ cursor:default; }
+  .quizq .qtext.qstem{ font-size:16.5px; font-weight:600; line-height:1.6; }
+  .qopt.qopt-ayat{ display:flex; gap:12px; align-items:flex-start; line-height:1.55; }
+  .qopt-ayat .qletter{ flex:0 0 26px; height:26px; border-radius:50%; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:var(--muted); margin-top:1px; }
+  .qopt-ayat .qbody{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+  .qopt-ayat .qsurah{ font-size:12px; color:var(--muted); font-weight:600; }
+  .qopt-ayat .qwho{ font-size:12px; font-weight:700; }
+  .qopt-ayat .qwho:empty{ display:none; }
+  .qopt.qopt-ayat.correct, .qopt.qopt-ayat.wrong{ font-weight:600; }
+  .qopt.qopt-ayat.correct .qletter{ border-color:var(--emerald); color:var(--emerald); }
+  .qopt.qopt-ayat.wrong .qletter{ border-color:var(--rose); color:var(--rose); }
+  .qopt.dim{ opacity:.6; }
+  .qverdict{ font-size:14px; margin-bottom:10px; line-height:1.5; }
+  .qverdict.ok{ color:var(--emerald); } .qverdict.no{ color:var(--rose); }
+  .qverdict b{ color:var(--ink); }
+  .quiz-reveal .qarabic{ font-size:22px; margin:6px 0 12px; }
+  .qexplain-label{ font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-cite); margin:14px 0 8px; }
+  .qpicked{ font-size:13px; color:var(--muted); line-height:1.6; margin:10px 0 0; padding-top:10px; border-top:1px dashed var(--border); }
   .quiznext{
     margin-top:14px; background:var(--gold); color:var(--gold-ink); border:0;
     border-radius:10px; padding:11px 20px; font-family:inherit; font-weight:700; font-size:15px;
@@ -984,6 +1017,10 @@
   .missionbar .mi + .mi{ border-left:1px solid var(--border); }
   .missionbar .mi-num{ font-size:19px; font-weight:700; color:var(--gold-cite); font-variant-numeric:tabular-nums; line-height:1.1; }
   .missionbar .mi-num.mi-done{ color:var(--emerald); }
+  .missionbar .mi-streak .mi-num{ color:var(--muted); }
+  .missionbar .mi-streak .flame{ font-size:.85em; margin-right:3px; filter:grayscale(1); opacity:.55; }
+  .missionbar .mi-streak.on .mi-num{ color:#E8772E; }
+  .missionbar .mi-streak.on .flame{ filter:none; opacity:1; }
   .missionbar .mi-lbl{ font-size:10px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; font-weight:700; margin-top:3px; }
   .missionbar .mi-track{
     height:4px; border-radius:100px; background:var(--surface-2); margin-top:7px; overflow:hidden;
@@ -1101,7 +1138,7 @@
   body[data-theme="light"] .detailsheet{ box-shadow:0 -12px 40px -12px rgba(16,33,43,.3); }
   body[data-theme="light"] .namecard .namebtn{ background:var(--coral-btn); color:#FFFFFF; font-weight:700; }
   body[data-theme="light"] .quiznext{ background:var(--coral-btn); color:#FFFFFF; }
-  body[data-theme="light"] .missionbar .mi:first-child .mi-num{ color:var(--coral-deep); }
+  body[data-theme="light"] .missionbar .mi-streak.on .mi-num{ color:#D35F16; }
   body[data-theme="light"] .missionbar .mi-track{ background:var(--gold-soft); }
 
   /* ---------- Phones: header scrolls away, larger reading sizes ---------- */
@@ -1209,9 +1246,9 @@
       <nav class="tabs" style="width:100%;" role="tablist">
         <span class="tab-glass" aria-hidden="true"></span>
         <button data-view="study" class="active" role="tab">Kaji</button>
+        <button data-view="quiz" role="tab">Kuiz</button>
         <button data-view="kemajuan" role="tab">Progres</button>
         <button data-view="browse" role="tab">Senarai</button>
-        <button data-view="quiz" role="tab">Kuiz</button>
         <button data-view="notes" role="tab">Nota</button>
       </nav>
     </div>
@@ -1255,7 +1292,7 @@
     <!-- QUIZ -->
     <section class="view" id="view-quiz">
       <div class="quizmeta">
-        <h2 style="font-size:20px;">Kuiz ingatan</h2>
+        <h2 style="font-size:20px;">Kuiz Jilid 7</h2>
         <div class="quizscore">Skor sesi ini: <b id="quizScore">0</b>/<span id="quizTotal">0</span></div>
       </div>
       <button class="rangechip" type="button"></button>
@@ -1317,6 +1354,7 @@
 
 <script id="falsafah-data" type="application/json">__DATA_JSON__</script>
 <script id="notes-data" type="application/json">__NOTES_JSON__</script>
+<script id="quiz-data" type="application/json">__QUIZ_JSON__</script>
 <script>
 (function(){
   "use strict";
@@ -1374,8 +1412,8 @@
   var BOX_BADGE_CLASS = ['badge-neutral','badge-gold','badge-gold','badge-gold','badge-emerald','badge-emerald'];
 
   var DEADLINE = new Date('2026-10-13T00:00:00');
-  var DAILY_KAJI_GOAL = 20;
-  var DAILY_KUIZ_GOAL = 20;
+  var DAILY_KAJI_GOAL = 10;
+  var DAILY_KUIZ_GOAL = 3;
   var DAILY_KEY = 'falsafah200_daily_v1';
 
   function todayStr(){
@@ -1394,7 +1432,7 @@
   // cheerKaji / cheerKuiz: the "target reached" ribbon has been shown today.
   function freshDaily(){
     return { date: todayStr(), kajiIds: [], kuizCount: 0, results: {}, again: [], summaryShown: false,
-             repeating: false, cheerKaji: false, cheerKuiz: false };
+             repeating: false, cheerKaji: false, cheerKuiz: false, cheerStreak: false };
   }
   function loadDaily(){
     var fresh = freshDaily();
@@ -1434,8 +1472,32 @@
     saveDaily(daily);
     if(!daily.cheerKuiz && daily.kuizCount >= DAILY_KUIZ_GOAL){
       daily.cheerKuiz = true; saveDaily(daily);
-      celebrate('Sasaran ' + DAILY_KUIZ_GOAL + ' kuiz hari ini tercapai.');
+      if(!checkStreak()) celebrate('Sasaran ' + DAILY_KUIZ_GOAL + ' kuiz hari ini tercapai.');
     }
+  }
+
+  // Streak: a day counts when both daily targets are met (Kaji and Kuiz). Days kept as 'YYYY-MM-DD'.
+  var STREAK_KEY = 'falsafah200_streak_v1';
+  var streakDays = (function(){ try{ var o = JSON.parse(localStorage.getItem(STREAK_KEY) || '{}'); return (o && Array.isArray(o.days)) ? o.days : []; }catch(e){ return []; } })();
+  function dayComplete(){ return daily.kajiIds.length >= kajiGoal() && (daily.kuizCount||0) >= DAILY_KUIZ_GOAL; }
+  function streakCount(){
+    var t = todayStr(), d = streakDays.indexOf(t) >= 0 ? t : addDays(t, -1), n = 0;
+    while(streakDays.indexOf(d) >= 0){ n++; d = addDays(d, -1); }
+    return n;
+  }
+  // Returns true when today was just added (and the streak cheer shown).
+  function checkStreak(){
+    rolloverDailyIfNeeded();
+    var t = todayStr();
+    if(!dayComplete() || streakDays.indexOf(t) >= 0) return false;
+    streakDays.push(t); streakDays.sort(); if(streakDays.length > 400) streakDays = streakDays.slice(-400);
+    try{ localStorage.setItem(STREAK_KEY, JSON.stringify({ days: streakDays })); }catch(e){}
+    if(daily.cheerStreak) return false;
+    daily.cheerStreak = true; saveDaily(daily);
+    var n = streakCount();
+    celebrate('&#128293; Streak ' + n + ' hari! Sasaran Kaji dan Kuiz hari ini selesai.');
+    renderMissionBar();
+    return true;
   }
   // Target reached: ribbons from both sides and a short note. Closes by itself; the session carries on.
   function celebrate(msg){
@@ -1535,10 +1597,7 @@
 
   function renderMissionBar(){
     rolloverDailyIfNeeded();
-    var msLeft = DEADLINE.getTime() - Date.now();
-    var daysLeft = Math.ceil(msLeft / 86400000);
-    var dayLabel = daysLeft > 0 ? daysLeft : 0;
-    var dayNote = daysLeft > 0 ? 'hari lagi' : (daysLeft === 0 ? 'hari ini!' : 'tamat tempoh');
+    var streak = streakCount(), doneToday = streakDays.indexOf(todayStr()) >= 0;
 
     var goal = kajiGoal();
     var kajiDone = Math.min(daily.kajiIds.length, goal);
@@ -1547,9 +1606,9 @@
     var kuizPct = Math.round(kuizDone/DAILY_KUIZ_GOAL*100);
 
     document.getElementById('missionBar').innerHTML =
-      '<div class="mi">' +
-        '<div class="mi-num">'+dayLabel+'</div>' +
-        '<div class="mi-lbl">'+dayNote+' &middot; 13 Okt</div>' +
+      '<div class="mi mi-streak'+(doneToday?' on':'')+'" id="streakTile" title="Hari berturut-turut sasaran Kaji dan Kuiz selesai">' +
+        '<div class="mi-num"><span class="flame">&#128293;</span>'+streak+'</div>' +
+        '<div class="mi-lbl">'+(doneToday ? 'Streak hari' : (streak ? 'Siapkan hari ini' : 'Streak hari'))+'</div>' +
       '</div>' +
       '<div class="mi">' +
         '<div class="mi-num'+(kajiDone>=goal?' mi-done':'')+'">'+kajiDone+'/'+goal+'</div>' +
@@ -1824,9 +1883,10 @@
   /* ---------------- FIRST-TIME TOUR ---------------- */
   var TOUR_KEY = 'falsafah200_tour_pending';
   var TOUR = [
-    { sel:'nav.tabs button[data-view="study"]', title:'Kaji', text:'Kad hafalan harian. Cuba ingat ayat dahulu, tekan <b>Dedah</b>, kemudian pilih <b>Ingat</b> atau <b>Belum ingat</b>. Sasaran: 20 falsafah sehari.' },
+    { sel:'nav.tabs button[data-view="study"]', title:'Kaji', text:'Kad hafalan harian. Cuba ingat ayat dahulu, tekan <b>Dedah</b>, kemudian pilih <b>Ingat</b> atau <b>Belum ingat</b>. Sasaran: 10 falsafah sehari.' },
+    { sel:'nav.tabs button[data-view="quiz"]', title:'Kuiz', text:'Soalan berfikir daripada huraian Jilid 7: pilih ayat yang paling tepat antara 2 atau 3 ayat yang hampir sama tema. Sasaran: 3 soalan sehari.' },
+    { sel:'#streakTile', title:'Streak', text:'Siapkan sasaran Kaji dan Kuiz setiap hari untuk menyambung api &#128293;. Terlepas sehari, kiraan bermula semula.' },
     { sel:'nav.tabs button[data-view="browse"]', title:'Senarai', text:'Semua 200 falsafah. Cari ikut nombor, tajuk, surah atau sebutan ayat. Tekan mana-mana kad untuk butiran penuh dan <b>Word by word</b>.' },
-    { sel:'nav.tabs button[data-view="quiz"]', title:'Kuiz', text:'Uji ingatan anda: teka tajuk daripada ayat, atau pilih ayat yang sepadan dengan tajuk.' },
     { sel:'nav.tabs button[data-view="notes"]', title:'Nota', text:'Nota ringkas peperiksaan bagi empat kaedah, dengan huraian penuh.' },
     { sel:'#view-study .rangechip', title:'Julat', text:'Falsafah yang anda kaji. Tekan <b>Tukar</b> untuk pilih Tahun 1, Tahun 2, Semua atau julat sendiri.' },
     { sel:'#progBtn', title:'Butiran', text:'Senarai <b>Ingat</b> dan <b>Perlu ulang</b> hari ini, dengan butang <b>Uji</b> untuk ulang yang belum ingat.' },
@@ -2080,7 +2140,7 @@
     saveDaily(daily);
     if(!daily.cheerKaji && daily.kajiIds.length >= kajiGoal()){
       daily.cheerKaji = true; saveDaily(daily);
-      celebrate('Sasaran ' + kajiGoal() + ' kaji hari ini tercapai.');
+      if(!checkStreak()) celebrate('Sasaran ' + kajiGoal() + ' kaji hari ini tercapai.');
     }
   }
 
@@ -2476,12 +2536,14 @@
         '<div class="folio-text-label">Maksud</div>' +
         '<p class="folio-text">' + escapeHtml(entry.text) + '</p>' +
         '<p class="surah-ref">' + escapeHtml(entry.surahDisplay) + '</p>' +
+        voiceHtml() +
         '<div class="gradebar">' +
           '<button class="gradebtn again" data-g="0"><span class="g-label">Belum ingat</span></button>' +
           '<button class="gradebtn good" data-g="1"><span class="g-label">Ingat</span></button>' +
         '</div>' +
         renderExtras(entry);
       applyWbw(el);
+      bindVoice(el, entry);
       var btns = el.querySelectorAll('.gradebtn');
       btns.forEach(function(b){
         b.onclick = function(){
@@ -2492,6 +2554,101 @@
       });
     }
   }
+
+  /* ---------------- VOICE CHECK (test) ---------------- */
+  // "Cuba baca": the phone's speech recogniser (Google on Android/Chrome, Apple on iPhone) turns the
+  // student's recitation into Arabic text, and each word of the ayat is marked heard or not heard.
+  // Words only, not tajwid or makhraj.
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  var voiceRec = null;
+  function voiceHtml(){
+    return '<div class="voicebox"><button type="button" class="voicebtn" id="voiceBtn"><span class="vb-ic">&#127908;</span><span class="vb-tx">Cuba baca</span></button>' +
+      '<span class="voice-note">Semak perkataan sahaja, bukan tajwid. Ujian.</span><div class="voice-out" id="voiceOut"></div></div>';
+  }
+  function vNorm(w){ return arSkeleton(w).replace(/ا/g, '').replace(/ء/g, '').replace(/[ؤئ]/g, ''); }
+  function vEdit(a, b){
+    if(Math.abs(a.length - b.length) > 1) return 2;
+    var prev = [], cur, i, j;
+    for(j = 0; j <= b.length; j++) prev[j] = j;
+    for(i = 1; i <= a.length; i++){
+      cur = [i];
+      for(j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+  function vSame(t, h){
+    if(!t || !h) return false;
+    if(t === h) return true;
+    // the recogniser often joins or drops wa-/fa-/bi- prefixes
+    var strip = function(x){ return x.length > 3 ? x.replace(/^[وفب]/, '') : x; };
+    if(strip(t) === strip(h)) return true;
+    return t.length >= 4 && vEdit(t, h) <= 1;
+  }
+  // Marks each ayat word as heard (in order, allowing a few skipped or extra words).
+  function voiceMatch(arabic, transcript){
+    // Uthmani text sometimes has a space before a dagger alif or small mark; keep those inside the word
+    var target = String(arabic).replace(/\s+(?=[\u064B-\u065F\u0670\u06D6-\u06ED])/g, '').split(/\s+/).filter(function(w){ return vNorm(w).length; });
+    var heard = String(transcript).split(/\s+/).map(vNorm).filter(Boolean);
+    var p = 0, ok = 0;
+    var marks = target.map(function(w){
+      var t = vNorm(w), hit = -1;
+      for(var k = p; k < Math.min(heard.length, p + 4); k++){ if(vSame(t, heard[k])){ hit = k; break; } }
+      if(hit < 0 && t.length >= 6){   // a long word split in two by the recogniser
+        for(var k2 = p; k2 < Math.min(heard.length - 1, p + 4); k2++){ if(vSame(t, heard[k2] + heard[k2+1])){ hit = k2 + 1; break; } }
+      }
+      if(hit >= 0){ p = hit + 1; ok++; return { w: w, ok: true }; }
+      return { w: w, ok: false };
+    });
+    return { marks: marks, ok: ok, total: target.length };
+  }
+  function bindVoice(el, entry){
+    var btn = el.querySelector('#voiceBtn'), out = el.querySelector('#voiceOut');
+    if(!btn) return;
+    if(!SpeechRec){
+      btn.onclick = function(){ out.innerHTML = '<p class="voice-msg">Peranti atau pelayar ini belum menyokong pengecaman suara. Cuba Chrome (Android/komputer) atau Safari terkini (iPhone).</p>'; };
+      return;
+    }
+    var finalText = '', live = '';
+    function show(){
+      var text = (finalText + ' ' + live).trim();
+      if(!text){ out.innerHTML = '<p class="voice-msg">Mendengar&hellip; bacalah ayat ini.</p>'; return; }
+      var r = voiceMatch(entry.arabic, text);
+      out.innerHTML = '<p class="voice-words" lang="ar" dir="rtl">' + r.marks.map(function(m){
+          return '<span class="' + (m.ok ? 'vw-ok' : 'vw-no') + '">' + escapeHtml(m.w) + '</span>';
+        }).join(' ') + '</p>' +
+        '<p class="voice-score"><b>' + r.ok + '/' + r.total + '</b> perkataan didengar' + (r.ok === r.total ? ' &#10003;' : '') + '</p>' +
+        '<p class="voice-heard" lang="ar" dir="rtl">' + escapeHtml(text) + '</p>';
+    }
+    btn.onclick = function(){
+      if(voiceRec){ try{ voiceRec.stop(); }catch(e){} return; }
+      finalText = ''; live = '';
+      var rec = new SpeechRec();
+      rec.lang = 'ar-SA'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
+      rec.onresult = function(ev){
+        live = '';
+        for(var i = ev.resultIndex; i < ev.results.length; i++){
+          if(ev.results[i].isFinal) finalText += ' ' + ev.results[i][0].transcript;
+          else live += ' ' + ev.results[i][0].transcript;
+        }
+        show();
+      };
+      rec.onerror = function(ev){
+        var msg = ev.error === 'not-allowed' || ev.error === 'service-not-allowed' ? 'Mikrofon tidak dibenarkan. Benarkan akses mikrofon untuk laman ini, kemudian cuba lagi.'
+          : ev.error === 'no-speech' ? 'Tiada suara didengar. Cuba lagi dan baca lebih dekat dengan mikrofon.'
+          : ev.error === 'network' ? 'Pengecaman suara perlukan internet. Cuba lagi.' : 'Tidak dapat mendengar (' + ev.error + '). Cuba lagi.';
+        finalText = ''; out.innerHTML = '<p class="voice-msg">' + msg + '</p>';
+      };
+      rec.onend = function(){
+        voiceRec = null; btn.classList.remove('on'); btn.querySelector('.vb-tx').textContent = 'Cuba baca lagi';
+        live = ''; if(finalText.trim()) show();
+      };
+      try{ rec.start(); }catch(e){ out.innerHTML = '<p class="voice-msg">Tidak dapat mula mendengar. Cuba lagi.</p>'; return; }
+      voiceRec = rec; btn.classList.add('on'); btn.querySelector('.vb-tx').textContent = 'Berhenti';
+      show();
+    };
+  }
+  document.addEventListener('visibilitychange', function(){ if(document.hidden && voiceRec){ try{ voiceRec.abort(); }catch(e){} } });
 
   /* ---------------- BROWSE VIEW ---------------- */
   // Collapses common romanisation variants (dz/dh/z, sy/sh, ts/th, q/k, doubled
@@ -2855,112 +3012,94 @@
   })();
 
   /* ---------------- QUIZ VIEW ---------------- */
-  var quizScore = 0, quizTotal = 0, quizCurrent = null;
+  // One question per falsafah, written from its Jilid 7 notes (quiz.json, built from quiz_bank.py).
+  // The answer is that falsafah's ayat; the other 1-2 options are ayat with a similar theme.
+  var QUIZ_BY = {};
+  try{ JSON.parse(document.getElementById('quiz-data').textContent).forEach(function(q){ QUIZ_BY[q.id] = q; }); }catch(e){}
+  var quizScore = 0, quizTotal = 0, quizCurrent = null, quizRecent = [];
 
-  // Exclude by VALUE, not just id: several falsafah share an identical title,
-  // or, rarely, an identical ayat (the source book itself repeats an ayat
-  // across two consecutive falsafah numbers). Guard both directions - a
-  // distractor must differ from the correct answer AND from every other
-  // distractor already picked - otherwise the same label could appear twice
-  // in one question, or a duplicate of the correct answer could render as if
-  // it were a second correct option.
-  // Distractors come from the chosen range first; a very small range is topped
-  // up from the full list so every question still has four options.
-  function pickDistractors(correct, key, n){
-    var seenVals = {};
-    seenVals[correct[key]] = true;
-    var out = [];
-    [STUDY_POOL, DATA].forEach(function(source){
-      var pool = source.filter(function(e){ return e.id!==correct.id && e[key]; });
-      while(out.length < n && pool.length){
-        var idx = Math.floor(Math.random()*pool.length);
-        var cand = pool.splice(idx,1)[0];
-        if(seenVals[cand[key]]) continue;
-        seenVals[cand[key]] = true;
-        out.push(cand);
-      }
-    });
-    return out;
-  }
-
-  function newQuiz(){
-    var entry;
+  function pickQuizEntry(){
     if(focus && focus.mode === 'kuiz'){
       if(!focus.queue.length) focus.queue = shuffle(focus.ids.slice());
       if(focus.ids.length > 1 && quizCurrent && focus.queue[0] === quizCurrent.entry.id) focus.queue.push(focus.queue.shift());
-      entry = entryById(focus.queue.shift());
-    } else {
-      entry = STUDY_POOL[Math.floor(Math.random()*STUDY_POOL.length)];
+      return entryById(focus.queue.shift());
     }
-    var mode = Math.random() < 0.5 ? 'title-from-arabic' : 'arabic-from-title';
-    quizCurrent = { entry: entry, mode: mode };
+    var pool = STUDY_POOL.filter(function(e){ return QUIZ_BY[e.id]; });
+    if(!pool.length) pool = DATA.filter(function(e){ return QUIZ_BY[e.id]; });
+    // weaker falsafah come up more often; recent questions wait their turn
+    var keep = Math.min(quizRecent.length, Math.max(0, pool.length - 3));
+    var recent = quizRecent.slice(-keep);
+    var fresh = pool.filter(function(e){ return recent.indexOf(e.id) === -1; });
+    if(!fresh.length) fresh = pool;
+    var weighted = [];
+    fresh.forEach(function(e){ var n = inFocus(e.id) ? 3 : 1; for(var i = 0; i < n; i++) weighted.push(e); });
+    return weighted[Math.floor(Math.random() * weighted.length)];
+  }
+
+  function newQuiz(){
+    var entry = pickQuizEntry(), q = QUIZ_BY[entry.id];
+    quizRecent.push(entry.id); if(quizRecent.length > 40) quizRecent.shift();
+    var ds = shuffle(q.d.slice()).slice(0, q.d.length >= 2 && Math.random() < 0.7 ? 2 : 1);
+    var opts = shuffle([entry.id].concat(ds)).map(entryById);
+    quizCurrent = { entry: entry, opts: opts };
     var stage = document.getElementById('quizStage');
-
-    if(mode === 'title-from-arabic'){
-      var d1 = pickDistractors(entry, 'title', 3);
-      var opts1 = shuffle(d1.concat([entry]).map(function(e){ return e.title; }));
-      stage.innerHTML =
-        '<div class="quizq"><div class="eyebrow">'+entry.rangeLabel+'</div>' +
-        '<p class="arabic-text" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p></div>' +
-        '<div class="eyebrow" style="margin-bottom:10px;">Apakah tajuk falsafah bagi ayat ini?</div>' +
-        '<div class="quizoptions" id="quizOpts"></div>';
-      renderOptions(opts1, entry.title, false, true);
-
-    } else {
-      var d2 = pickDistractors(entry, 'arabic', 3);
-      var opts2 = shuffle(d2.concat([entry]).map(function(e){ return e.arabic; }));
-      stage.innerHTML =
-        '<div class="quizq"><div class="eyebrow">'+entry.rangeLabel+'</div>' +
-        '<p class="qtext">' + escapeHtml(displayTitle(entry.title)) + '</p></div>' +
-        '<div class="eyebrow" style="margin-bottom:10px;">Pilih ayat yang sepadan dengan falsafah ini.</div>' +
-        '<div class="quizoptions" id="quizOpts"></div>';
-      renderOptions(opts2, entry.arabic, true, false);
-    }
+    stage.innerHTML =
+      '<div class="quizq"><div class="eyebrow">Soalan &middot; Jilid 7</div>' +
+      '<p class="qtext qstem">' + escapeHtml(q.q) + '</p></div>' +
+      '<div class="eyebrow" style="margin-bottom:10px;">Pilih satu daripada ' + opts.length + ' ayat.</div>' +
+      '<div class="quizoptions" id="quizOpts">' + opts.map(function(e, i){
+        return '<button class="qopt qopt-ayat" data-id="' + e.id + '"><span class="qletter">' + 'ABC'.charAt(i) + '</span>' +
+          '<span class="qbody"><span class="qmaksud">' + escapeHtml(e.text) + '</span>' +
+          '<span class="qsurah">' + escapeHtml(e.surahDisplay) + '</span><span class="qwho"></span></span></button>';
+      }).join('') + '</div>';
     if(focus && focus.mode === 'kuiz'){
       stage.insertAdjacentHTML('afterbegin', focusBar());
       document.getElementById('focusEnd').onclick = endFocus;
     }
+    stage.querySelectorAll('.qopt').forEach(function(btn){ btn.onclick = function(){ answerQuiz(btn); }; });
   }
 
-  function renderOptions(options, correctVal, isArabic, titleSentenceCase){
-    var wrap = document.getElementById('quizOpts');
-    wrap.innerHTML = options.map(function(opt){
-      var cls = 'qopt' + (isArabic ? ' qopt-arabic' : '');
-      var attrs = isArabic ? ' lang="ar" dir="rtl"' : '';
-      var label = titleSentenceCase ? displayTitle(opt) : opt;
-      return '<button class="'+cls+'" data-val="'+escapeAttr(opt)+'"'+attrs+'>'+escapeHtml(label)+'</button>';
-    }).join('');
-    wrap.querySelectorAll('.qopt').forEach(function(btn){
-      btn.onclick = function(){
-        var chosen = btn.getAttribute('data-val');
-        wrap.querySelectorAll('.qopt').forEach(function(b){
-          b.disabled = true;
-          if(b.getAttribute('data-val') === correctVal) b.classList.add('correct');
-          else if(b === btn) b.classList.add('wrong');
-        });
-        quizTotal++;
-        if(chosen === correctVal) quizScore++;
-        if(quizCurrent && quizCurrent.entry) recordQuizAnswer(quizCurrent.entry.id, chosen === correctVal);
-        markKuizAnsweredToday();
-        renderMissionBar();
-        document.getElementById('quizScore').textContent = quizScore;
-        document.getElementById('quizTotal').textContent = quizTotal;
-
-        var reveal = document.createElement('div');
-        reveal.className = 'quiz-reveal';
-        reveal.innerHTML =
-          '<div class="folio-text-label">Maksud</div>' +
-          '<p class="folio-text">' + escapeHtml(quizCurrent.entry.text) + '</p>' +
-          '<p class="surah-ref">' + escapeHtml(quizCurrent.entry.surahDisplay) + '</p>';
-        document.getElementById('quizStage').appendChild(reveal);
-
-        var next = document.createElement('button');
-        next.className = 'quiznext';
-        next.textContent = 'Soalan seterusnya';
-        next.onclick = newQuiz;
-        document.getElementById('quizStage').appendChild(next);
-      };
+  function answerQuiz(btn){
+    var entry = quizCurrent.entry, wrap = document.getElementById('quizOpts');
+    var chosen = +btn.getAttribute('data-id'), ok = chosen === entry.id;
+    wrap.querySelectorAll('.qopt').forEach(function(b){
+      var id = +b.getAttribute('data-id'), e = entryById(id);
+      b.disabled = true;
+      if(id === entry.id) b.classList.add('correct');
+      else if(b === btn) b.classList.add('wrong');
+      else b.classList.add('dim');
+      b.querySelector('.qwho').textContent = 'Falsafah ' + id + ' · ' + displayTitle(e.title);
     });
+    quizTotal++; if(ok) quizScore++;
+    recordQuizAnswer(entry.id, ok);
+    markKuizAnsweredToday();
+    renderMissionBar();
+    document.getElementById('quizScore').textContent = quizScore;
+    document.getElementById('quizTotal').textContent = quizTotal;
+
+    var pick = entryById(chosen);
+    var reveal = document.createElement('div');
+    reveal.className = 'quiz-reveal';
+    reveal.innerHTML =
+      '<div class="qverdict ' + (ok ? 'ok' : 'no') + '">' + (ok ? '&#10003; Tepat.' : '&#10007; Belum tepat.') +
+        ' Jawapan: <b>Falsafah ' + entry.id + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</b></div>' +
+      '<p class="arabic-text qarabic" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>' +
+      '<div class="folio-text-label">Maksud</div>' +
+      '<p class="folio-text">' + escapeHtml(entry.text) + '</p>' +
+      '<p class="surah-ref">' + escapeHtml(entry.surahDisplay) + '</p>' +
+      '<div class="qexplain-label">Huraian Jilid 7</div>' +
+      renderExtras(entry).replace('<hr class="divider">', '') +
+      (ok ? '' : '<p class="qpicked">Pilihan anda ialah ayat Falsafah ' + pick.id + ' (' + escapeHtml(displayTitle(pick.title)) + '). ' +
+        'Kata kunci: ' + escapeHtml((pick.kataKunci || []).join(' ').replace(/\s*\.\s*/g, ' ').trim()) + '.</p>');
+    var stage = document.getElementById('quizStage');
+    stage.appendChild(reveal);
+
+    var next = document.createElement('button');
+    next.className = 'quiznext';
+    next.textContent = 'Soalan seterusnya';
+    next.onclick = function(){ newQuiz(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    stage.appendChild(next);
+    setTimeout(function(){ reveal.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 120);
   }
 
   function shuffle(arr){
@@ -3593,7 +3732,7 @@
   document.getElementById('miniPlayer').onclick = lpControl;
   document.getElementById('listenBtn').onclick = openListen;
 
-  window.FN_APP = { startTour: function(){ startTour(); }, weeklyCheck: function(){ weeklyCheck(); }, openWeekly: function(){ openWeekly(); }, displayTitle: function(t){ return displayTitle(t); }, refreshProgress: function(){ renderKajiStats(); if(document.getElementById('view-kemajuan').classList.contains('active')) renderKemajuan(); } };
+  window.FN_APP = { voiceMatch: function(a, t){ return voiceMatch(a, t); }, startTour: function(){ startTour(); }, weeklyCheck: function(){ weeklyCheck(); }, openWeekly: function(){ openWeekly(); }, displayTitle: function(t){ return displayTitle(t); }, refreshProgress: function(){ renderKajiStats(); if(document.getElementById('view-kemajuan').classList.contains('active')) renderKemajuan(); } };
 
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, function(c){
@@ -3912,6 +4051,7 @@
   renderGroupPicker();
   moveTabGlass(false);
   renderStudy();
+  checkStreak();   // targets met before this version: count today too
   if(!getName() || !rangeSaved){
     setTimeout(openNameModal, 400);
   } else {

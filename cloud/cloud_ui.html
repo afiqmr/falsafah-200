@@ -124,7 +124,7 @@
 </script>
 <script type="module">
 const CFG = window.FIREBASE_CONFIG;
-const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1', history: 'falsafah200_history_v1' };
+const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1', history: 'falsafah200_history_v1', streak: 'falsafah200_streak_v1' };
 const ADMIN_EMAILS = ['afiqmonsieur@gmail.com'];   // must match the Firestore rules
 const isAdminUser = () => !!(user && ADMIN_EMAILS.includes((user.email || '').toLowerCase()));
 const SYNCED = new Set(Object.values(KEYS));
@@ -479,7 +479,7 @@ function mergeDaily(a, b) {
   const again = [...new Set([...(a.again || []), ...(b.again || [])])].filter(id => results[id] === 'again');
   return { date: a.date, kajiIds: kaji, kuizCount: Math.max(a.kuizCount || 0, b.kuizCount || 0), results, again,
     summaryShown: !!(a.summaryShown || b.summaryShown), repeating: !!a.repeating && again.length > 0,
-    cheerKaji: !!(a.cheerKaji || b.cheerKaji), cheerKuiz: !!(a.cheerKuiz || b.cheerKuiz) };
+    cheerKaji: !!(a.cheerKaji || b.cheerKaji), cheerKuiz: !!(a.cheerKuiz || b.cheerKuiz), cheerStreak: !!(a.cheerStreak || b.cheerStreak) };
 }
 function mergeHistory(a, b) {   // per day: union, and a falsafah remembered on either device counts as remembered
   if (!a) return b; if (!b) return a;
@@ -504,6 +504,8 @@ function merge(local, remote) {
   out.range = remote.range || local.range; if (!out.range) delete out.range;
   out.theme = local.theme || remote.theme; if (!out.theme) delete out.theme;
   const h = mergeHistory(parse(local.history), parse(remote.history)); if (h) out.history = JSON.stringify(h);
+  const sl = parse(local.streak), sr = parse(remote.streak);   // days with both daily targets met, from either device
+  if (sl || sr) out.streak = JSON.stringify({ days: [...new Set([...((sl && sl.days) || []), ...((sr && sr.days) || [])])].sort().slice(-400) });
   return out;
 }
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
