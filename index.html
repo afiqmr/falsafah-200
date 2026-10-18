@@ -2602,6 +2602,7 @@
     });
     return { marks: marks, ok: ok, total: target.length };
   }
+  var IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   function bindVoice(el, entry){
     var btn = el.querySelector('#voiceBtn'), out = el.querySelector('#voiceOut');
     if(!btn) return;
@@ -2609,46 +2610,67 @@
       btn.onclick = function(){ out.innerHTML = '<p class="voice-msg">Peranti atau pelayar ini belum menyokong pengecaman suara. Cuba Chrome (Android/komputer) atau Safari terkini (iPhone).</p>'; };
       return;
     }
-    var finalText = '', live = '';
+    var text = '', started = false, ended = true, timers = [];
+    function msg(m){ out.innerHTML = '<p class="voice-msg">' + m + '</p>'; }
     function show(){
-      var text = (finalText + ' ' + live).trim();
-      if(!text){ out.innerHTML = '<p class="voice-msg">Mendengar&hellip; bacalah ayat ini.</p>'; return; }
+      if(!text.trim()){ msg(started ? 'Mendengar&hellip; bacalah ayat ini.' : 'Menyediakan mikrofon&hellip;'); return; }
       var r = voiceMatch(entry.arabic, text);
       out.innerHTML = '<p class="voice-words" lang="ar" dir="rtl">' + r.marks.map(function(m){
           return '<span class="' + (m.ok ? 'vw-ok' : 'vw-no') + '">' + escapeHtml(m.w) + '</span>';
         }).join(' ') + '</p>' +
         '<p class="voice-score"><b>' + r.ok + '/' + r.total + '</b> perkataan didengar' + (r.ok === r.total ? ' &#10003;' : '') + '</p>' +
-        '<p class="voice-heard" lang="ar" dir="rtl">' + escapeHtml(text) + '</p>';
+        '<p class="voice-heard" lang="ar" dir="rtl">' + escapeHtml(text.trim()) + '</p>';
     }
-    btn.onclick = function(){
-      if(voiceRec){ try{ voiceRec.stop(); }catch(e){} return; }
-      finalText = ''; live = '';
+    // Always leaves the button usable again, even if the recogniser never reports back.
+    function finish(note){
+      timers.forEach(clearTimeout); timers = [];
+      if(voiceRec){ var r = voiceRec; voiceRec = null; r.onresult = r.onerror = r.onend = r.onstart = r.onaudiostart = null; try{ r.abort(); }catch(e){} }
+      ended = true;
+      btn.classList.remove('on'); btn.querySelector('.vb-tx').textContent = 'Cuba baca lagi';
+      if(note) msg(note); else if(text.trim()) show(); else msg('Tiada bacaan didengar. Tekan Cuba baca lagi.');
+    }
+    btn.onclick = function(ev){
+      if(ev) ev.stopPropagation();
+      if(!ended){   // Berhenti: ask politely, then force it after 1.5 s
+        try{ voiceRec && voiceRec.stop(); }catch(e){}
+        timers.push(setTimeout(function(){ if(!ended) finish(); }, 1500));
+        return;
+      }
+      // one sound at a time: pause the Dengar player or the ayat audio if they are playing
+      try{ if(typeof lpAudio !== 'undefined' && !lpAudio.paused) lpAudio.pause(); }catch(e){}
+      try{ if(typeof hpAudio !== 'undefined' && !hpAudio.paused) hpAudio.pause(); }catch(e){}
+      text = ''; started = false; ended = false;
       var rec = new SpeechRec();
-      rec.lang = 'ar-SA'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
-      rec.onresult = function(ev){
-        live = '';
-        for(var i = ev.resultIndex; i < ev.results.length; i++){
-          if(ev.results[i].isFinal) finalText += ' ' + ev.results[i][0].transcript;
-          else live += ' ' + ev.results[i][0].transcript;
-        }
+      rec.lang = 'ar-SA';
+      rec.continuous = !IS_IOS;   // iPhone: one reading at a time is more reliable
+      rec.interimResults = true; rec.maxAlternatives = 1;
+      rec.onstart = rec.onaudiostart = function(){ if(!started){ started = true; show(); } };
+      rec.onresult = function(e){
+        started = true;
+        var t = '';
+        for(var i = 0; i < e.results.length; i++) t += ' ' + e.results[i][0].transcript;
+        text = t;
         show();
       };
-      rec.onerror = function(ev){
-        var msg = ev.error === 'not-allowed' || ev.error === 'service-not-allowed' ? 'Mikrofon tidak dibenarkan. Benarkan akses mikrofon untuk laman ini, kemudian cuba lagi.'
-          : ev.error === 'no-speech' ? 'Tiada suara didengar. Cuba lagi dan baca lebih dekat dengan mikrofon.'
-          : ev.error === 'network' ? 'Pengecaman suara perlukan internet. Cuba lagi.' : 'Tidak dapat mendengar (' + ev.error + '). Cuba lagi.';
-        finalText = ''; out.innerHTML = '<p class="voice-msg">' + msg + '</p>';
+      rec.onerror = function(e){
+        var m = e.error === 'not-allowed' || e.error === 'service-not-allowed'
+            ? 'Mikrofon atau pengecaman suara tidak dibenarkan.' + (IS_IOS ? ' Di iPhone: Tetapan &gt; Safari &gt; Mikrofon, dan pastikan Siri &amp; Dikte dihidupkan.' : ' Benarkan mikrofon untuk laman ini, kemudian cuba lagi.')
+          : e.error === 'no-speech' ? 'Tiada suara didengar. Cuba lagi dan baca lebih dekat dengan mikrofon.'
+          : e.error === 'network' ? 'Pengecaman suara perlukan internet. Cuba lagi.'
+          : e.error === 'aborted' ? null : 'Tidak dapat mendengar (' + e.error + '). Cuba lagi.';
+        finish(m);
       };
-      rec.onend = function(){
-        voiceRec = null; btn.classList.remove('on'); btn.querySelector('.vb-tx').textContent = 'Cuba baca lagi';
-        live = ''; if(finalText.trim()) show();
-      };
-      try{ rec.start(); }catch(e){ out.innerHTML = '<p class="voice-msg">Tidak dapat mula mendengar. Cuba lagi.</p>'; return; }
-      voiceRec = rec; btn.classList.add('on'); btn.querySelector('.vb-tx').textContent = 'Berhenti';
+      rec.onend = function(){ finish(); };
+      voiceRec = rec;
+      btn.classList.add('on'); btn.querySelector('.vb-tx').textContent = 'Berhenti';
       show();
+      try{ rec.start(); }catch(e){ finish('Tidak dapat mula mendengar. Cuba lagi.'); return; }
+      // watchdogs: never leave the page waiting on a recogniser that went silent
+      timers.push(setTimeout(function(){ if(!ended && !started) finish('Mikrofon tidak bermula. ' + (IS_IOS ? 'Cuba buka laman ini terus dalam Safari, dan pastikan Siri &amp; Dikte dihidupkan.' : 'Semak kebenaran mikrofon, kemudian cuba lagi.')); }, 7000));
+      timers.push(setTimeout(function(){ if(!ended) finish(); }, 60000));
     };
   }
-  document.addEventListener('visibilitychange', function(){ if(document.hidden && voiceRec){ try{ voiceRec.abort(); }catch(e){} } });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden && voiceRec){ try{ voiceRec.abort(); }catch(e){} } });   // onend then resets the button
 
   /* ---------------- BROWSE VIEW ---------------- */
   // Collapses common romanisation variants (dz/dh/z, sy/sh, ts/th, q/k, doubled
