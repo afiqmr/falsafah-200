@@ -1672,10 +1672,11 @@
     var streak = streakCount(), doneToday = streakDays.indexOf(todayStr()) >= 0;
 
     var goal = kajiGoal();
-    var kajiDone = Math.min(daily.kajiIds.length, goal);
-    var kuizDone = Math.min(daily.kuizCount||0, DAILY_KUIZ_GOAL);
-    var kajiPct = Math.round(kajiDone/goal*100);
-    var kuizPct = Math.round(kuizDone/DAILY_KUIZ_GOAL*100);
+    // the real count for the day, even past the target (e.g. 14/10); the bar stops at full
+    var kajiDone = daily.kajiIds.length;
+    var kuizDone = daily.kuizCount || 0;
+    var kajiPct = Math.min(100, Math.round(kajiDone/goal*100));
+    var kuizPct = Math.min(100, Math.round(kuizDone/DAILY_KUIZ_GOAL*100));
 
     document.getElementById('missionBar').innerHTML =
       '<div class="mi mi-streak'+(doneToday?' on':'')+'" id="streakTile" title="Hari berturut-turut sasaran Kaji dan Kuiz selesai">' +
