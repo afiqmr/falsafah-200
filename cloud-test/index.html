@@ -2823,7 +2823,7 @@
         return;
       }
       // one sound at a time: pause the Dengar player or the ayat audio if they are playing
-      try{ if(typeof lpAudio !== 'undefined' && !lpAudio.paused) lpAudio.pause(); }catch(e){}
+      try{ if(typeof lpAudio !== 'undefined' && !lpAudio.paused){ lpAudio.pause(); } if(typeof LP !== 'undefined' && LP.active){ LP.userPaused = true; lpBedOff(); } }catch(e){}
       try{ if(typeof hpAudio !== 'undefined' && !hpAudio.paused) hpAudio.pause(); }catch(e){}
       text = ''; started = false; ended = false; userStop = false; t0 = Date.now();
       var rec = makeRec('');
@@ -3476,17 +3476,57 @@
     return 'data:audio/wav;base64,' + btoa(s);
   }
   var SILENT = silentWav(800);
-  // 5 seconds of silence between falsafah; played as real audio so the lock screen and car keep the session alive
-  var GAP_OPTS = [3, 5, 7, 10], GAP_SRCS = {};
+  // The "bed": a second element playing silence whenever the voice is not sounding (the pause between
+  // ulangan and falsafah, and while the next clip loads). With the screen locked or another app in front
+  // (Google Maps), iPhone stops the page as soon as no audio plays, so the next ulangan would wait until
+  // the app is opened again. The bed keeps the audio going, and the voice element keeps its loaded file,
+  // so an ulangan starts with no download and no gap in the sound.
+  var GAP_OPTS = [3, 5, 7, 10];
   function gapSecs(){ return GAP_OPTS.indexOf(lpSet.pause) >= 0 ? lpSet.pause : 5; }
-  function gapSrc(){ var n = gapSecs(); return GAP_SRCS[n] || (GAP_SRCS[n] = silentWav(8000 * n)); }
-  function lpUnlock(){ LP.switching = true; try{ lpAudio.src = SILENT; var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
+  var BED_SECS = 40, BED_SRC = null;
+  var lpBed = new Audio();
+  lpBed.setAttribute('playsinline', ''); lpBed.loop = true; lpBed.preload = 'auto';
+  function bedSrc(){ return BED_SRC || (BED_SRC = silentWav(8000 * BED_SECS)); }
+  function lpBedOn(){
+    try{
+      if(lpBed.getAttribute('src') !== bedSrc()) lpBed.src = bedSrc();
+      if(lpBed.paused){ var p = lpBed.play(); if(p && p.catch) p.catch(function(){}); }
+    }catch(e){}
+  }
+  function lpBedOff(){ try{ if(!lpBed.paused) lpBed.pause(); }catch(e){} }
+  function bedTime(){ return lpBed.currentTime || 0; }
+  function gapElapsed(){ var d = bedTime() - (LP.gapT0 || 0); return d < 0 ? d + BED_SECS : d; }
+  // inside the student's tap: unlock both elements so iPhone allows the later plays
+  function lpUnlock(){
+    LP.switching = true;
+    try{ lpAudio.src = SILENT; var p = lpAudio.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
+    lpBedOn();
+  }
   // what the student asked for (playing or paused), so the icon does not flicker while clips change
   function lpPlaying(){ return LP.active && !LP.userPaused && !LP.done; }
   function lpPlayNow(){
     var p = lpAudio.play();
-    if(p && p.catch) p.catch(function(err){ if(err && err.name === 'AbortError') return; LP.switching = false; LP.userPaused = true; lpUpdateUI(); });
+    if(p && p.catch) p.catch(function(err){
+      if(err && err.name === 'AbortError') return;
+      LP.switching = false;
+      if(document.hidden){ lpInterrupted(); return; }   // phone refused in the background: retry, resume on return
+      LP.userPaused = true; lpUpdateUI();
+    });
   }
+  // Another app took the sound (a navigation prompt, a call) or the phone refused to start: not the
+  // student's pause. Keep the bed going, try again a few times, and resume when the app is opened.
+  function lpInterrupted(){
+    if(!LP.active || LP.userPaused || LP.done) return;
+    LP.interrupted = true; lpBedOn(); lpUpdateUI();
+    [2000, 5000, 10000, 20000].forEach(function(ms){ setTimeout(lpResumeIfInterrupted, ms); });
+  }
+  function lpResumeIfInterrupted(){
+    if(!LP.interrupted || !LP.active || LP.userPaused || LP.done) return;
+    if(LP.gap){ LP.interrupted = false; lpBedOn(); return; }
+    if(!lpAudio.paused){ LP.interrupted = false; return; }
+    if(LP.clips){ LP.switching = true; lpPlayNow(); }
+  }
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) lpResumeIfInterrupted(); });
   // short volume ramps so recitations start and stop softly (phones that lock volume simply skip the ramp)
   var FADE_OUT = 0.18;
   function lpFade(to, ms, cb){
@@ -3514,7 +3554,7 @@
     lpFade(0, FADE_OUT * 1000, function(){
       LP.ending = false;
       if(tok !== LP.token || ci !== LP.clip || rp !== LP.rep) return;
-      LP.switching = true; lpAudio.pause(); lpAdvance();
+      LP.switching = true; lpAdvance();
     });
   }
   // a user skip fades the current voice out first
@@ -3559,6 +3599,7 @@
     if(!entry) return;
     var token = ++LP.token;
     clearTimeout(LP.endT); LP.gap = false; LP.done = false; LP.userPaused = false; LP.switching = true; LP.loadSlow = false;
+    lpBedOn();   // silence while the next audio loads keeps the phone from pausing the page
     if(!lpAudio.paused && lpAudio.src !== SILENT) lpAudio.pause();   // the old voice stops as the new card slides in
     LP.rep = 0; LP.clip = 0; LP.clips = null; LP.loading = true; LP.msg = '';
     lpUpdateUI(); lpMeta(entry);
@@ -3576,7 +3617,7 @@
       var nx = entryById(LP.ids[LP.idx + 1]); if(nx) lpPrefetch(nx);
     }).catch(function(){
       if(token !== LP.token) return;
-      LP.loading = false; LP.switching = false;
+      LP.loading = false; LP.switching = true;
       LP.msg = 'Audio tidak dapat dimuatkan (perlu internet). Beralih ke falsafah seterusnya…';
       lpUpdateUI();
       setTimeout(function(){ if(token === LP.token) lpNext(); }, 1500);
@@ -3595,6 +3636,7 @@
     };
     clearTimeout(LP.endT); LP.switching = true; LP.ending = false;
     if(lpAudio.src !== c.url){
+      lpBedOn();
       lpAudio.src = c.url;
       lpAudio.addEventListener('loadedmetadata', function once(){ lpAudio.removeEventListener('loadedmetadata', once); go(); });
       lpAudio.load();
@@ -3614,20 +3656,31 @@
   function lpGap(then){
     clearTimeout(LP.endT); lpCancelFade();
     LP.gap = true; LP.gapThen = then; LP.gapLeft = gapSecs(); LP.switching = true;
-    lpAudio.src = gapSrc();
-    if(LP.userPaused) LP.switching = false; else lpPlayNow();
+    if(!LP.userPaused) lpBedOn();      // start the silence first, then stop the voice: the sound never stops
+    LP.gapT0 = bedTime();
+    if(!lpAudio.paused) lpAudio.pause();
+    if(LP.userPaused) LP.switching = false;
     lpUpdateUI();
   }
+  function lpGapDone(){
+    if(!LP.gap) return;
+    LP.gap = false;
+    if(LP.gapThen === 'repeat' && LP.clips) lpPlayClip(); else lpNext();
+  }
   function lpGapTick(){
-    var left = Math.max(1, Math.ceil(gapSecs() - (lpAudio.currentTime || 0)));
+    if(!LP.gap || LP.userPaused) return;
+    var el = gapElapsed();
+    if(el >= gapSecs()){ lpGapDone(); return; }
+    var left = Math.max(1, Math.ceil(gapSecs() - el));
     if(left === LP.gapLeft) return;
     LP.gapLeft = left;
     document.querySelectorAll('.lp-status').forEach(function(el){ el.innerHTML = lpStatusText(); });
   }
+  lpBed.addEventListener('timeupdate', lpGapTick);
   function lpNext(){
     if(!LP.active) return;
     if(LP.idx + 1 >= LP.ids.length){
-      LP.done = true; clearTimeout(LP.endT); lpAudio.pause(); lpCancelFade();
+      LP.done = true; clearTimeout(LP.endT); lpAudio.pause(); lpBedOff(); lpCancelFade();
       LP.msg = 'Selesai. Semua ' + LP.ids.length + ' falsafah dalam julat ini telah didengar.';
       LP.clips = null; LP.gap = false; lpUpdateUI(); return;
     }
@@ -3636,41 +3689,50 @@
   function lpPrev(force){
     if(!LP.active) return;
     if(force === true && LP.idx > 0){ LP.dir = -1; LP.idx--; lpPlayItem(); return; }
-    if(LP.gap){ LP.gap = false; LP.rep = 0; LP.clip = 0; LP.userPaused = false; if(LP.clips) lpPlayClip(); return; }
+    if(LP.gap){ LP.gap = false; LP.rep = 0; LP.clip = 0; LP.userPaused = false; LP.interrupted = false; if(LP.clips) lpPlayClip(); return; }
     if(lpAudio.currentTime > 3 || LP.idx === 0){ LP.rep = 0; LP.clip = 0; LP.userPaused = false; if(LP.clips) lpPlayClip(); return; }
     LP.dir = -1; LP.idx--; lpPlayItem();
   }
   function lpToggle(){
     if(!LP.active) return;
     if(!LP.clips && !LP.loading){ if(LP.done || (LP.msg && LP.idx + 1 >= LP.ids.length)){ LP.idx = 0; } lpUnlock(); lpPlayItem(); return; }
-    if(lpPlaying()){ LP.userPaused = true; clearTimeout(LP.endT); lpCancelFade(); lpAudio.pause(); }
-    else { LP.userPaused = false; if(!LP.loading) lpPlayNow(); }   // still loading: it starts by itself when ready
+    if(lpPlaying()){ LP.userPaused = true; LP.interrupted = false; clearTimeout(LP.endT); lpCancelFade(); lpAudio.pause(); lpBedOff(); }
+    else {
+      LP.userPaused = false; LP.interrupted = false;
+      if(LP.gap){ lpBedOn(); LP.gapT0 = bedTime(); }        // the pause starts again from the full count
+      else if(!LP.loading) lpPlayNow();                     // still loading: it starts by itself when ready
+    }
     lpUpdateUI();
   }
   function lpStop(){
-    LP.token++; LP.active = false; LP.clips = null; LP.gap = false; LP.done = false; clearTimeout(LP.endT); lpAudio.pause(); lpCancelFade();
+    LP.token++; LP.active = false; LP.clips = null; LP.gap = false; LP.done = false; LP.interrupted = false; clearTimeout(LP.endT); lpAudio.pause(); lpBedOff(); lpCancelFade();
     try{ lpAudio.removeAttribute('src'); lpAudio.load(); }catch(e){}
     if('mediaSession' in navigator){ navigator.mediaSession.playbackState = 'none'; }
     lpUpdateUI();
   }
   lpAudio.addEventListener('ended', function(){
-    if(LP.gap){ LP.gap = false; if(LP.gapThen === 'repeat' && LP.clips) lpPlayClip(); else lpNext(); return; }
+    if(LP.gap) return;
     if(lpAudio.src !== SILENT && LP.clips) lpAdvance();
   });
   lpAudio.addEventListener('timeupdate', function(){
-    if(LP.gap){ lpGapTick(); return; }
-    if(!LP.clips || LP.switching) return;
+    if(LP.gap || !LP.clips || LP.switching) return;
     var c = LP.clips[LP.clip];
     // backup for the timer (timers slow down when the screen is locked)
     if(c && c.end && lpAudio.currentTime >= c.end - FADE_OUT) lpClipEnd();
   });
   lpAudio.addEventListener('play', function(){ if(LP.active && !LP.done) LP.userPaused = false; lpUpdateUI(); });
-  lpAudio.addEventListener('playing', function(){ LP.switching = false; lpArmEnd(); });
+  lpAudio.addEventListener('playing', function(){
+    LP.switching = false; LP.interrupted = false; lpArmEnd();
+    if(!LP.gap && lpAudio.src !== SILENT) lpBedOff();   // the voice is sounding: the silence can stop
+  });
   lpAudio.addEventListener('seeked', function(){ if(!lpAudio.paused) lpArmEnd(); });
   lpAudio.addEventListener('pause', function(){
     clearTimeout(LP.endT);
     // pauses from clip changes or the end of a clip are not the student's pause
-    if(LP.active && !LP.switching && !LP.ending && !lpAudio.ended) LP.userPaused = true;
+    if(LP.active && !LP.switching && !LP.ending && !lpAudio.ended && !LP.userPaused && !LP.gap){
+      if(document.hidden) lpInterrupted();   // the student cannot tap the app now: another app took the sound
+      else LP.userPaused = true;
+    }
     lpUpdateUI();
   });
   lpAudio.addEventListener('error', function(){
@@ -3963,6 +4025,7 @@
   function hpToggle(id, btn){
     if(hpId === id && hpAudio.src){ if(hpAudio.paused){ hpAudio.play().catch(function(){}); } else hpAudio.pause(); return; }
     if(LP.active && !lpAudio.paused) lpAudio.pause();   // one voice at a time
+    if(LP.active){ LP.userPaused = true; lpBedOff(); }
     hpId = id; hpAudio.pause();
     btn.classList.add('loading');
     window.FN_HALON.get(id).then(function(url){

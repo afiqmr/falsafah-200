@@ -2,6 +2,14 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-10-25
+
+### Fixed
+
+- Dengar keeps playing ulangan and the next falsafah with the screen locked or another app in
+  front (such as Google Maps). A silent track now fills every pause and load, so the phone never
+  stops the page, and a pause caused by another app is resumed by itself.
+
 ## 2026-10-22
 
 ### Changed

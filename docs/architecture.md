@@ -37,7 +37,7 @@ All app code is one IIFE at the end of `template.html`. Main areas, in file orde
 | Senarai              | Search, opening-word groups, detail sheet, share card                     |
 | Kuiz                 | Question bank, Arabic-only options, reveal with Jilid 7 explanation       |
 | Nota                 | Topic switch by subject year and the note cards                           |
-| Dengar               | Audio player, word by word, Media Session controls                        |
+| Dengar               | Audio player, word by word, Media Session controls, silent "bed" track   |
 | Word by word         | Quran.com words aligned to the quoted part of each ayat, cached on device |
 | Tour and init        | First-time walkthrough, theme, initial render                             |
 
