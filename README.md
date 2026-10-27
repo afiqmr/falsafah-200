@@ -28,9 +28,9 @@ Professor Dr. HALO-N, made for students of the Advanced Diploma in Al-Quranic Ph
 <tr>
 <td align="center" width="25%">
 
-**Kaji**: read the ayat from memory, then Dedah
+**Kaji**: recite from memory, then Dedah
 
-<img src="docs/screenshots/kaji.png" alt="Kaji card after reading from memory, marked Ingat at 100%" width="100%">
+<img src="docs/screenshots/kaji.png" alt="Kaji card after Dedah with the ayat, maksud and Ingat buttons" width="100%">
 
 </td>
 <td align="center" width="25%">
@@ -77,9 +77,8 @@ Screens are the running app with a demo account and demo progress.
 
 ## ✨ Features
 
-- **Kaji**: flashcards over the whole chosen julat every day. "Baca dari ingatan" listens to the
-  student recite before Dedah and marks Ingat automatically at 80% or more of the kalimah heard.
-  After Dedah: Arabic, word by word (EN and BM), maksud, Kata Kunci, Catitan and the book page.
+- **Kaji**: flashcards over the whole chosen julat every day. The student recites from memory,
+  then presses Dedah to see the Arabic, word by word (EN and BM), maksud, Kata Kunci, Catitan and the book page.
   A day summary keeps every falsafah missed even once under Belum ingat, with "Ulang belum ingat".
 - **Kuiz**: one critical-thinking question per falsafah, written from the Jilid 7 notes. Two or
   three similar-theme ayat as answers, in Arabic only. The answer reveals the ayat, maksud,
@@ -150,9 +149,6 @@ docs/                 Architecture, data formats, security, testing, decisions, 
 
 ## ⚠️ Known boundaries
 
-- The voice check uses the phone's own speech recogniser (Google on Android, Apple on iPhone).
-  It checks words, not tajwid or makhraj, and needs internet. It can mishear a correct reading,
-  so it never marks Belum ingat by itself.
 - Kuiz questions were written for the app from the Jilid 7 notes. Some open with an everyday
   scenario that is not in the book. They should be reviewed by an ustaz before being treated as
   official exam material.

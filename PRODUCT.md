@@ -26,8 +26,8 @@ and explain each one without looking.
 
 - **Faithful to the book.** Titles, maksud, Kata Kunci, Catitan and page numbers come from Jilid 7.
 - **Recall before reveal.** Kaji asks the student to remember first, then shows the answer.
-- **Honest scoring.** Gred comes from recent answers only. Voice can pass a student but never
-  fails one, because the phone can mishear.
+- **Honest scoring.** Gred comes from recent answers only, and the student marks Ingat or Belum
+  ingat honestly after Dedah.
 - **Small daily habit.** Targets are small (Kaji 10, Kuiz 3) and a streak rewards coming back.
 - **Bahasa Melayu first.** Labels and messages are in BM. A few familiar English terms stay, such
   as Word by word and Share.

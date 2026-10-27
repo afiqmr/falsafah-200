@@ -32,7 +32,6 @@ All app code is one IIFE at the end of `template.html`. Main areas, in file orde
 | Markah and gred      | Last 10 answers per falsafah (Kaji ±1, Kuiz ±½) mapped to A+ … G           |
 | History              | Per-day Ingat / Belum ingat / missed-once lists, kept 120 days            |
 | Kaji                 | Card queue over the julat, Dedah, grading, day summary, focus sessions    |
-| Voice check          | "Baca dari ingatan" and "Cuba baca" using the Web Speech API              |
 | Progres              | Gred tiles, Perlu fokus, markah list, chart, history, weekly popups       |
 | Senarai              | Search, opening-word groups, detail sheet, share card                     |
 | Kuiz                 | Question bank, Arabic-only options, reveal with Jilid 7 explanation       |
@@ -74,4 +73,3 @@ motif).
 | Firebase         | Sign-in, sync, class stats, recordings     | App works; syncs on next sign-in     |
 | Quran.com API    | Word by word, murattal audio and timings   | Word by word works for cached ayat   |
 | Google Fonts     | Noto Sans and Scheherazade New             | Falls back to system fonts           |
-| Speech services  | Voice check (inside the browser)           | Voice check shows a message          |

@@ -43,7 +43,6 @@ wait for READY.
 - **Interface text** is short, plain BM. Keep both themes and phone width (390 px) working.
 - **Pandangan**: the author name always comes from the account profile. Only admin-published
   opinions reach other students, and a student's delete only hides it (`deleted: true`).
-- **Voice check** never marks Belum ingat by itself and must never leave the page waiting.
 
 ## Where things are
 

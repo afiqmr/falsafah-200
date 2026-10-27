@@ -94,11 +94,9 @@ recordings. To change the admin, change the email in both `ADMIN_EMAILS` and the
 | Firebase (Google)           | Account email, username, name and study progress        |
 | Quran.com                   | Requests for verse words and audio (no student data)    |
 | Google Fonts                | Font requests                                           |
-| Google or Apple speech      | The student's voice, only while the voice check listens |
 | Vercel                      | Standard web request logs                               |
 
-The app has no analytics or tracking. The voice check tells students it checks words only; the
-recording itself is handled by the phone's speech service, not by this app.
+The app has no analytics or tracking and does not use the microphone.
 
 ## Rules for contributors
 

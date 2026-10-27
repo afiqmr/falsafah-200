@@ -1,7 +1,12 @@
 # ADR 0003: Voice check with the browser's speech recogniser
 
-- Status: Accepted (test feature)
+- Status: Withdrawn on 2026-10-27
 - Date: 2026-10-18
+
+> Removed from the app. In real use a fluent, correct reading by an experienced reader scored only
+> 60 to 65%, even after the letter-swap and idgham fixes, so the score could not be trusted. The
+> code remains in Git history (commit `be4bc37`). A future attempt should use a Quran-trained
+> speech model rather than the phone's general recogniser.
 
 ## Context
 

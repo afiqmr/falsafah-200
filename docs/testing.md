@@ -16,7 +16,6 @@ with Firebase replaced by local mocks.
 | Area     | Check                                                                                  |
 | -------- | -------------------------------------------------------------------------------------- |
 | Kaji     | Dedah, Ingat, Belum ingat; day summary; Ulang belum ingat; target ribbon; streak        |
-| Voice    | Baca dari ingatan: Selesai, 80% auto Ingat and Batal, Hampir, Cuba lagi, no mic        |
 | Kuiz     | 2 or 3 Arabic options; right and wrong answers; reveal; count in the mission bar      |
 | Progres  | Gred tiles open their lists; Perlu fokus; markah list; chart; history                  |
 | Senarai  | Search by number, title and pronunciation; detail sheet; word by word; share          |
@@ -30,12 +29,8 @@ with Firebase replaced by local mocks.
 - Route `**/firebasejs/**` to local mock modules and abort other `https://` requests, so tests
   never touch the real project.
 - Seed localStorage in an init script (range, theme, progress) to reach a state quickly.
-- Replace `window.webkitSpeechRecognition` with a mock that returns a chosen transcript, to test
-  the voice check without a microphone.
 - Route `fonts.googleapis.com` to local Fontsource files so Arabic renders as students see it.
-- `window.FN_APP.voiceMatch(arabic, transcript)` exposes the word matcher for direct checks.
 
 ## Known gaps
 
-- The real speech recognisers on iPhone and Android can only be checked on the devices.
 - Installing to the home screen, the iPhone status bar and lock-screen audio need a real phone.

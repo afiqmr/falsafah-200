@@ -10,11 +10,10 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
   from the account menu or "Kongsi pandangan" in Senarai. They see their own and the published
   ones. The admin reads all of them first and chooses Terbit or Simpan in the admin panel.
 
-### Changed
+### Removed
 
-- Voice check is more forgiving of the phone's mishearing: letters it often swaps (ص/س, ط/ت,
-  ض/د, ذ/ظ/ز, ق/ك, ح/ه) count as the same, merged idgham words count, and on Android the best of
-  several guesses is used. A wrong ayat still scores low.
+- The voice check ("Baca dari ingatan" and "Cuba baca"). The phone's speech recogniser scored
+  correct, fluent readings at only 60 to 65%, so it was not useful. See ADR 0003.
 
 ## 2026-10-25
 
