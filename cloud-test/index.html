@@ -4432,7 +4432,7 @@ function render() {
       <button class="namebtn acct-ghost" id="acctPd" style="margin-top:10px">${T('Pandangan', 'Reflections')}</button>
       <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">${T('Panduan aplikasi', 'App guide')}</button>
       <button class="namebtn acct-ghost" id="acctLang" style="margin-top:10px">${T('English version', 'Versi Bahasa Melayu')}</button>
-      ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">Papan pentadbir</button>' : ''}
+      ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">' + T('Papan pentadbir', 'Admin panel') + '</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">${T('Log keluar', 'Log out')}</button><button class="namebtn acct-ghost" id="acctClose">${T('Tutup', 'Close')}</button></div>
       <p class="acct-note">${T('Di telefon atau komputer lain, log masuk dengan nama pengguna & PIN yang sama untuk sambung kemajuan anda.', 'On another phone or computer, log in with the same username & PIN to carry on with your progress.')}</p>`;
     $('acctSyncNow').onclick = async () => { msg('Syncing…'); dirty = true; await push(); await pullMerge(true); msg('Progress synced ✓', 'ok'); };

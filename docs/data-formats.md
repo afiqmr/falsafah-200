@@ -29,7 +29,8 @@ An array of 200 objects, one per falsafah, in number order.
 
 Same fields and ids as `data.json`. `title` is an app translation of the BM title; `text`,
 `kataKunci` and `catitan` come from Al-Fathun Nawa Volume 7 (English edition), and `bookPages` are
-its printed pages (PDF page minus 65). Ayat ranges, `arabic` and `translit` stay as in BM. One extra
+its printed pages (PDF page minus 65). Each English Notes text opens "Whenever reciting this ayat, there are …"
+(the book's opening transliteration fragment is left out, matching the BM Catitan). Ayat ranges, `arabic` and `translit` stay as in BM. One extra
 field, `textExtra` `{ ayat, text, source }`, holds Sahih International for class-extended ayat the
 English book does not quote (falsafah 46, 53 and 117).
 
