@@ -1201,6 +1201,9 @@
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; animation:none !important; }
   }
+  /* English build: the extra ayat the class adds beyond the English book's quote (Sahih International) */
+  .text-extra{ margin:8px 0 0; font-size:.95em; line-height:1.6; color:var(--muted); }
+  .text-extra small{ display:block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-bottom:2px; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;700&display=swap">
@@ -1339,19 +1342,23 @@
   </div>
 </div>
 
+<script>window.FN_LANG = '__LANG__';</script>
 <script id="falsafah-data" type="application/json">__DATA_JSON__</script>
 <script id="notes-data" type="application/json">__NOTES_JSON__</script>
 <script id="quiz-data" type="application/json">__QUIZ_JSON__</script>
 <script>
 (function(){
   "use strict";
+  // Language of this build: 'ms' (BM, main) or 'en'. build.py writes it into window.FN_LANG.
+  var EN = window.FN_LANG === 'en';
+  function T(ms, en){ return EN ? en : ms; }
   var DATA = JSON.parse(document.getElementById('falsafah-data').textContent);
   // Kaji and Kuiz use the student's chosen range; Senarai always lists everything.
   var RANGE_KEY = 'falsafah200_range_v1';
   var RANGE_PRESETS = [
-    { name:'Tahun 1', from:1, to:100 },
-    { name:'Tahun 2', from:101, to:200 },
-    { name:'Semua', from:1, to:200 }
+    { name:T('Tahun 1','Year 1'), from:1, to:100 },
+    { name:T('Tahun 2','Year 2'), from:101, to:200 },
+    { name:T('Semua','All'), from:1, to:200 }
   ];
   function poolFor(from, to){
     return DATA.filter(function(e){ return e.noEnd >= from && e.noStart <= to; });
@@ -1384,6 +1391,7 @@
   var PROTECTED_CANON = {};
   PROTECTED_WORDS.forEach(function(w){ PROTECTED_CANON[w.toLowerCase().replace(/\u2019/g, "'")] = w; });
   function displayTitle(t){
+    if(EN) return String(t || '');   // English titles are already in title case
     var s = String(t || '').toLowerCase();
     s = s.charAt(0).toUpperCase() + s.slice(1);
     return s.replace(PROTECTED_RE, function(all, pre, word, suf){
@@ -1395,7 +1403,7 @@
   var THEME_KEY = 'falsafah200_theme_v1';
 
   var BOX_INTERVALS = [0,1,3,7,16,35]; // days until due, index = box
-  var BOX_LABELS = ['Baru','Belajar','Semakan','Kukuh','Mahir','Dikuasai'];
+  var BOX_LABELS = EN ? ['New','Learning','Review','Steady','Skilled','Mastered'] : ['Baru','Belajar','Semakan','Kukuh','Mahir','Dikuasai'];
   var BOX_BADGE_CLASS = ['badge-neutral','badge-gold','badge-gold','badge-gold','badge-emerald','badge-emerald'];
 
   var DEADLINE = new Date('2026-10-13T00:00:00');
@@ -1459,7 +1467,7 @@
     saveDaily(daily);
     if(!daily.cheerKuiz && daily.kuizCount >= DAILY_KUIZ_GOAL){
       daily.cheerKuiz = true; saveDaily(daily);
-      if(!checkStreak()) celebrate('Sasaran ' + DAILY_KUIZ_GOAL + ' kuiz hari ini tercapai.');
+      if(!checkStreak()) celebrate(T('Sasaran ' + DAILY_KUIZ_GOAL + ' kuiz hari ini tercapai.', 'Target of ' + DAILY_KUIZ_GOAL + ' quiz questions reached today.'));
     }
   }
 
@@ -1482,7 +1490,7 @@
     if(daily.cheerStreak) return false;
     daily.cheerStreak = true; saveDaily(daily);
     var n = streakCount();
-    celebrate('&#128293; Streak ' + n + ' hari! Sasaran Kaji dan Kuiz hari ini selesai.');
+    celebrate(T('&#128293; Streak ' + n + ' hari! Sasaran Kaji dan Kuiz hari ini selesai.', '&#128293; ' + n + '-day streak! Study and Quiz targets done today.'));
     renderMissionBar();
     return true;
   }
@@ -1500,7 +1508,7 @@
         ';--d:' + (Math.random() * .35).toFixed(2) + 's"></i>';
     }
     el.innerHTML = '<div class="cheer-bits">' + bits + '</div>' +
-      '<div class="cheer-note" role="status"><b>&#127881; Tahniah!</b><span>' + msg + ' Teruskan!</span></div>';
+      '<div class="cheer-note" role="status"><b>&#127881; ' + T('Tahniah!', 'Well done!') + '</b><span>' + msg + T(' Teruskan!', ' Keep going!') + '</span></div>';
     document.body.appendChild(el);
     el.querySelector('.cheer-note').onclick = function(){ el.remove(); };
     setTimeout(function(){ el.classList.add('out'); }, 3200);
@@ -1566,7 +1574,7 @@
   }
   // Mark beside each Belum ingat falsafah: fixed later the same day, or still not
   function fixMark(L){
-    return function(id){ return L.fixed.indexOf(id) >= 0 ? '<span class="lbl-ok">&#10003; dibaiki</span>' : '<span class="lbl-re">&#10007; belum</span>'; };
+    return function(id){ return L.fixed.indexOf(id) >= 0 ? '<span class="lbl-ok">&#10003; ' + T('dibaiki', 'fixed') + '</span>' : '<span class="lbl-re">&#10007; ' + T('belum', 'not yet') + '</span>'; };
   }
   function renderKajiStats(){
     var el = document.getElementById('kajiStats');
@@ -1574,11 +1582,11 @@
     var L = todayLists(), n = L.ok.length + L.re.length;
     el.innerHTML =
       '<div class="ks-main">' +
-        '<div class="ks-line"><span class="ks-ok">&#10003; <b>' + L.ok.length + '</b> Ingat</span>' +
-        '<span class="ks-re">&#8635; <b>' + L.re.length + '</b> Belum ingat</span></div>' +
+        '<div class="ks-line"><span class="ks-ok">&#10003; <b>' + L.ok.length + '</b> ' + T('Ingat', 'Remembered') + '</span>' +
+        '<span class="ks-re">&#8635; <b>' + L.re.length + '</b> ' + T('Belum ingat', 'Not yet') + '</span></div>' +
         '<div class="ks-bar">' + (n ? '<span class="ok" style="width:' + (L.ok.length/n*100) + '%"></span><span class="re" style="width:' + (L.re.length/n*100) + '%"></span>' : '') + '</div>' +
       '</div>' +
-      '<button type="button" class="progbtn" id="progBtn">&#128203; Butiran</button>';
+      '<button type="button" class="progbtn" id="progBtn">&#128203; ' + T('Butiran', 'Details') + '</button>';
     document.getElementById('progBtn').onclick = function(){ openButiran(); };
   }
 
@@ -1594,18 +1602,18 @@
     var kuizPct = Math.min(100, Math.round(kuizDone/DAILY_KUIZ_GOAL*100));
 
     document.getElementById('missionBar').innerHTML =
-      '<div class="mi mi-streak'+(doneToday?' on':'')+'" id="streakTile" title="Hari berturut-turut sasaran Kaji dan Kuiz selesai">' +
+      '<div class="mi mi-streak'+(doneToday?' on':'')+'" id="streakTile" title="' + T('Hari berturut-turut sasaran Kaji dan Kuiz selesai', 'Days in a row with Study and Quiz targets done') + '">' +
         '<div class="mi-num"><span class="flame">&#128293;</span>'+streak+'</div>' +
-        '<div class="mi-lbl">'+(doneToday ? 'Streak hari' : (streak ? 'Siapkan hari ini' : 'Streak hari'))+'</div>' +
+        '<div class="mi-lbl">'+(doneToday ? T('Streak hari', 'Day streak') : (streak ? T('Siapkan hari ini', 'Finish today') : T('Streak hari', 'Day streak')))+'</div>' +
       '</div>' +
       '<div class="mi">' +
         '<div class="mi-num'+(kajiDone>=goal?' mi-done':'')+'">'+kajiDone+'/'+goal+'</div>' +
-        '<div class="mi-lbl">Kaji hari ini</div>' +
+        '<div class="mi-lbl">' + T('Kaji hari ini', 'Study today') + '</div>' +
         '<div class="mi-track"><span class="'+(kajiDone>=goal?'mi-fill-done':'')+'" style="width:'+kajiPct+'%;"></span></div>' +
       '</div>' +
       '<div class="mi">' +
         '<div class="mi-num'+(kuizDone>=DAILY_KUIZ_GOAL?' mi-done':'')+'">'+kuizDone+'/'+DAILY_KUIZ_GOAL+'</div>' +
-        '<div class="mi-lbl">Kuiz hari ini</div>' +
+        '<div class="mi-lbl">' + T('Kuiz hari ini', 'Quiz today') + '</div>' +
         '<div class="mi-track"><span class="'+(kuizDone>=DAILY_KUIZ_GOAL?'mi-fill-done':'')+'" style="width:'+kuizPct+'%;"></span></div>' +
       '</div>';
 
@@ -1711,7 +1719,7 @@
   function fmtMarkah(m){ var s = (Math.abs(m) % 1 ? Math.abs(m).toFixed(1) : String(Math.abs(m))); return (m > 0 ? '+' : m < 0 ? '−' : '') + s; }
   function gredBadge(id){
     var g = gredOf(id);
-    return g ? '<span class="badge ' + g.cls + '">Gred ' + gredLabel(g.g) + '</span>' : '<span class="badge badge-neutral">Baru</span>';
+    return g ? '<span class="badge ' + g.cls + '">' + T('Gred ', 'Grade ') + gredLabel(g.g) + '</span>' : '<span class="badge badge-neutral">' + T('Baru', 'New') + '</span>';
   }
   function gredKey(id){ var g = gredOf(id); return g ? g.g : '-'; }
   function recordQuizAnswer(id, ok){ if(!entryById(id)) return; pushLog(id, ok ? 'Q' : 'q'); saveState(srs); }
@@ -1797,9 +1805,9 @@
   function setName(n){ try{ localStorage.setItem(NAME_KEY, n); }catch(e){} }
   function renderGreeting(){
     var n = getName();
-    document.getElementById('greetBtn').textContent = n ? ('Assalamualaikum, ' + n) : 'Jilid 7';
+    document.getElementById('greetBtn').textContent = n ? ('Assalamualaikum, ' + n) : T('Jilid 7', 'Volume 7');
   }
-  var RANGE_HINT = 'Atau tetapkan julat sendiri, cth. 101&ndash;130. Senarai tetap memaparkan semua falsafah.';
+  var RANGE_HINT = T('Atau tetapkan julat sendiri, cth. 101&ndash;130. Senarai tetap memaparkan semua falsafah.', 'Or set your own range, e.g. 101&ndash;130. The List tab always shows all falsafah.');
   function presetFor(from, to){
     return RANGE_PRESETS.filter(function(p){ return p.from === from && p.to === to; })[0] || null;
   }
@@ -1809,7 +1817,7 @@
   }
   function renderRangeChips(){
     document.querySelectorAll('.rangechip').forEach(function(chip){
-      chip.innerHTML = 'Julat: <b>' + rangeText() + '</b> <span class="rc-edit">&middot; Tukar</span>';
+      chip.innerHTML = T('Julat: <b>', 'Range: <b>') + rangeText() + '</b> <span class="rc-edit">&middot; ' + T('Tukar', 'Change') + '</span>';
     });
   }
   function readRangeInputs(){
@@ -1881,6 +1889,17 @@
     { sel:'#listenBtn', title:'Dengar', text:'Dengar bacaan ayat ikut julat, ulang 1&ndash;3 kali. Sesuai semasa memandu; kawalan ada di skrin kunci.' },
     { sel:'nav.tabs button[data-view="kemajuan"]', title:'Progres', text:'Kemajuan keseluruhan 200 falsafah: gred hafalan, <b>Perlu fokus</b>, carta 14 hari dan sejarah harian.' }
   ];
+  if(EN) TOUR = [
+    { sel:'nav.tabs button[data-view="study"]', title:'Study', text:'Daily memory cards. Try to recall the ayat first, tap <b>Reveal</b>, then choose <b>Remembered</b> or <b>Not yet</b>. Target: 10 falsafah a day.' },
+    { sel:'nav.tabs button[data-view="quiz"]', title:'Quiz', text:'Thinking questions from the Volume 7 explanations: pick the right ayat out of 2 or 3 with a similar theme. Target: 3 questions a day.' },
+    { sel:'#streakTile', title:'Streak', text:'Meet the Study and Quiz targets every day to keep the flame &#128293; going. Miss a day and the count starts again.' },
+    { sel:'nav.tabs button[data-view="browse"]', title:'List', text:'All 200 falsafah. Search by number, title, surah or how the ayat sounds. Tap any card for the full details and <b>Word by word</b>.' },
+    { sel:'nav.tabs button[data-view="notes"]', title:'Notes', text:'Short exam notes on four methods, with full explanations.' },
+    { sel:'#view-study .rangechip', title:'Range', text:'The falsafah you are studying. Tap <b>Change</b> to pick Year 1, Year 2, All or your own range.' },
+    { sel:'#progBtn', title:'Details', text:'Today\'s <b>Remembered</b> and <b>Review again</b> lists, with a <b>Test</b> button to go over the ones not yet remembered.' },
+    { sel:'#listenBtn', title:'Listen', text:'Listen to the ayat in your range, repeated 1&ndash;3 times. Good for driving; the controls are on the lock screen.' },
+    { sel:'nav.tabs button[data-view="kemajuan"]', title:'Progress', text:'Overall progress on the 200 falsafah: memory grades, <b>Needs focus</b>, a 14-day chart and daily history.' }
+  ];
   var tourStep = -1, tourTip = null, tourTarget = null, tourSpot = null, tourBlock = null, tourMoveT = null;
   function startTour(){
     try{ document.dispatchEvent(new Event('fn-tour-start')); }catch(e){}
@@ -1917,8 +1936,8 @@
     tourTip.classList.remove('show');
     tourTip.innerHTML = '<span class="tt-arrow"></span><span class="tt-num">' + (i + 1) + ' / ' + TOUR.length + '</span>' +
       '<h5>' + s.title + '</h5><p>' + s.text + '</p>' +
-      '<div class="tt-row"><button type="button" class="tt-skip">Langkau panduan</button>' +
-      '<button type="button" class="tt-next">' + (i === TOUR.length - 1 ? 'Selesai' : 'Seterusnya &rsaquo;') + '</button></div>';
+      '<div class="tt-row"><button type="button" class="tt-skip">' + T('Langkau panduan', 'Skip the guide') + '</button>' +
+      '<button type="button" class="tt-next">' + (i === TOUR.length - 1 ? T('Selesai', 'Done') : T('Seterusnya &rsaquo;', 'Next &rsaquo;')) + '</button></div>';
     tourTip.hidden = false;
     var r = tourTarget.getBoundingClientRect();
     if(r.top < 70 || r.bottom > window.innerHeight - 200){
@@ -1963,11 +1982,11 @@
   document.getElementById('nameSaveBtn').onclick = function(){
     var r = readRangeInputs();
     if(!isValidRange(r.from, r.to)){
-      setRangeHint('Julat tidak sah. Masukkan nombor 1&ndash;200, dengan &ldquo;Dari&rdquo; tidak melebihi &ldquo;Hingga&rdquo;.', true);
+      setRangeHint(T('Julat tidak sah. Masukkan nombor 1&ndash;200, dengan &ldquo;Dari&rdquo; tidak melebihi &ldquo;Hingga&rdquo;.', 'That range does not work. Enter numbers 1&ndash;200, with &ldquo;From&rdquo; no higher than &ldquo;To&rdquo;.'), true);
       return;
     }
     if(!poolFor(r.from, r.to).length){
-      setRangeHint('Tiada falsafah dalam julat ini. Sila pilih julat lain.', true);
+      setRangeHint(T('Tiada falsafah dalam julat ini. Sila pilih julat lain.', 'There are no falsafah in this range. Choose another range.'), true);
       return;
     }
     var v = document.getElementById('nameInput').value.trim();
@@ -2014,6 +2033,12 @@
   }
 
   function entryById(id){ return DATA.find(function(e){ return e.id === id; }); }
+  // The ayat meaning. In English, ayat the class adds beyond the book's quote carry a Sahih International line.
+  function textHtml(e, cls){
+    var x = e.textExtra;
+    return '<p class="' + (cls || 'folio-text') + '">' + escapeHtml(e.text) + '</p>' +
+      (x ? '<p class="text-extra"><small>' + T('Ayat ', 'Ayat ') + escapeHtml(x.ayat) + ' &middot; ' + escapeHtml(x.source) + T(', bukan daripada buku', ', not from the book') + '</small>' + escapeHtml(x.text) + '</p>' : '');
+  }
 
   // Order of play: every due falsafah in the chosen range once (wrong ones are only recorded),
   // then a summary of the whole day. The Belum ingat cards are tested again only if the student
@@ -2047,12 +2072,12 @@
       stage.innerHTML =
         '<div class="folio"><div class="kaji-goal-done">' +
         '<div class="big">' + (n ? '&#8635;' : '&#10003;') + '</div>' +
-        '<h3>' + (daily.kajiIds.length ? 'Julat ini sudah dikaji hari ini' : 'Tiada falsafah tertunggak') + '</h3>' +
+        '<h3>' + (daily.kajiIds.length ? T('Julat ini sudah dikaji hari ini', 'This range is done for today') : T('Tiada falsafah tertunggak', 'Nothing left to study')) + '</h3>' +
         '<p>' + (n
-          ? 'Ada ' + n + ' falsafah belum ingat hari ini. Ulang sekarang, atau pilih julat lain di atas.'
-          : 'Semua falsafah dalam julat ini sudah dikaji hari ini. Pilih julat lain di atas, atau kaji semula esok.') + '</p>' +
-        (n ? '<button class="namebtn kaji-ulang-btn" id="ulangBtn">Ulang belum ingat (' + n + ')</button>' : '') +
-        '<button class="kaji-extra-btn" id="sumAgainBtn">Lihat ringkasan hari ini</button>' +
+          ? T('Ada ' + n + ' falsafah belum ingat hari ini. Ulang sekarang, atau pilih julat lain di atas.', n + ' falsafah not yet remembered today. Go over them now, or pick another range above.')
+          : T('Semua falsafah dalam julat ini sudah dikaji hari ini. Pilih julat lain di atas, atau kaji semula esok.', 'Every falsafah in this range was studied today. Pick another range above, or study again tomorrow.')) + '</p>' +
+        (n ? '<button class="namebtn kaji-ulang-btn" id="ulangBtn">' + T('Ulang belum ingat (', 'Go over not yet (') + n + ')</button>' : '') +
+        '<button class="kaji-extra-btn" id="sumAgainBtn">' + T('Lihat ringkasan hari ini', 'See today\'s summary') + '</button>' +
         '</div></div>';
       var ub = document.getElementById('ulangBtn');
       if(ub) ub.onclick = startRepeat;
@@ -2066,7 +2091,7 @@
     revealed = false;
     var box = getCard(entry.id).box;
     var badge = reviewing
-      ? '<span class="badge badge-gold">Ulang &middot; ' + daily.again.length + ' lagi</span>'
+      ? '<span class="badge badge-gold">' + T('Ulang &middot; ', 'Again &middot; ') + daily.again.length + T(' lagi', ' left') + '</span>'
       : gredBadge(entry.id);
 
     // Progress through the chosen range today: cards due today in the range, done vs left (this card included)
@@ -2074,8 +2099,8 @@
     if(!reviewing){
       var doneHere = STUDY_POOL.filter(function(e){ return daily.kajiIds.indexOf(e.id) >= 0; }).length;
       var totalHere = doneHere + fresh.length;
-      prog = '<div class="julatprog"><div class="jp-txt"><span>' + doneHere + '/' + totalHere + ' dalam julat</span>' +
-        '<span>Tinggal ' + fresh.length + '</span></div>' +
+      prog = '<div class="julatprog"><div class="jp-txt"><span>' + doneHere + '/' + totalHere + T(' dalam julat', ' in range') + '</span>' +
+        '<span>' + T('Tinggal ', 'Left: ') + fresh.length + '</span></div>' +
         '<div class="jp-bar"><span style="width:' + (totalHere ? doneHere / totalHere * 100 : 0) + '%"></span></div></div>';
     }
 
@@ -2130,7 +2155,7 @@
     saveDaily(daily);
     if(!daily.cheerKaji && daily.kajiIds.length >= kajiGoal()){
       daily.cheerKaji = true; saveDaily(daily);
-      if(!checkStreak()) celebrate('Sasaran ' + kajiGoal() + ' kaji hari ini tercapai.');
+      if(!checkStreak()) celebrate(T('Sasaran ' + kajiGoal() + ' kaji hari ini tercapai.', 'Target of ' + kajiGoal() + ' studied today reached.'));
     }
   }
 
@@ -2156,9 +2181,9 @@
   function focusBar(){
     var total = focus.ids.length;
     var txt = focus.mode === 'kaji'
-      ? 'Sesi fokus: <b>' + escapeHtml(focus.label) + '</b> &middot; ' + Math.min(focus.done, total) + '/' + total + ' ingat'
-      : 'Kuiz fokus: <b>' + escapeHtml(focus.label) + '</b> &middot; ' + total + ' falsafah';
-    return '<div class="focusbar"><span>' + txt + '</span><button type="button" id="focusEnd">Tamat</button></div>';
+      ? T('Sesi fokus: <b>', 'Focus session: <b>') + escapeHtml(focus.label) + '</b> &middot; ' + Math.min(focus.done, total) + '/' + total + T(' ingat', ' remembered')
+      : T('Kuiz fokus: <b>', 'Focus quiz: <b>') + escapeHtml(focus.label) + '</b> &middot; ' + total + ' falsafah';
+    return '<div class="focusbar"><span>' + txt + '</span><button type="button" id="focusEnd">' + T('Tamat', 'End') + '</button></div>';
   }
   function renderFocusStudy(){
     var stage = document.getElementById('studyStage');
@@ -2167,9 +2192,9 @@
       stage.innerHTML =
         '<div class="folio"><div class="kaji-goal-done">' +
         '<div class="big">&#127775;</div>' +
-        '<h3>Bagus! Sesi fokus selesai.</h3>' +
-        '<p>Anda telah mengulang ' + focus.ids.length + ' falsafah (' + escapeHtml(focus.label) + '). Markah dan gred setiap falsafah sudah dikemas kini.</p>' +
-        '<button class="kaji-extra-btn" id="focusDone">Kembali ke kaji biasa</button>' +
+        '<h3>' + T('Bagus! Sesi fokus selesai.', 'Good work! Focus session done.') + '</h3>' +
+        '<p>' + T('Anda telah mengulang ' + focus.ids.length + ' falsafah (' + escapeHtml(focus.label) + '). Markah dan gred setiap falsafah sudah dikemas kini.', 'You went over ' + focus.ids.length + ' falsafah (' + escapeHtml(focus.label) + '). The score and grade of each one are updated.') + '</p>' +
+        '<button class="kaji-extra-btn" id="focusDone">' + T('Kembali ke kaji biasa', 'Back to normal study') + '</button>' +
         '</div></div>';
       document.getElementById('focusDone').onclick = endFocus;
       return;
@@ -2182,7 +2207,7 @@
       '<div class="folio">' +
         '<div class="folio-top">' +
           '<span class="rangepill">' + entry.rangeLabel + '</span>' +
-          '<span class="badge badge-gold">Fokus &middot; ' + focus.queue.length + ' lagi</span>' +
+          '<span class="badge badge-gold">' + T('Fokus &middot; ', 'Focus &middot; ') + focus.queue.length + T(' lagi', ' left') + '</span>' +
         '</div>' +
         '<div id="folioBody"></div>' +
       '</div>';
@@ -2197,7 +2222,7 @@
   function inFocus(id){ var g = gredOf(id); return !!g && FOCUS_GREDS.indexOf(g.g) >= 0; }
   function markahMeta(id){
     var g = gredOf(id);
-    return g ? 'markah ' + fmtMarkah(markahOf(id)) + ' &middot; <b class="gred-' + (FOCUS_GREDS.indexOf(g.g) >= 0 ? 'low' : g.min >= 4 ? 'top' : 'mid') + '">' + gredLabel(g.g) + '</b>' : '';
+    return g ? T('markah ', 'score ') + fmtMarkah(markahOf(id)) + ' &middot; <b class="gred-' + (FOCUS_GREDS.indexOf(g.g) >= 0 ? 'low' : g.min >= 4 ? 'top' : 'mid') + '">' + gredLabel(g.g) + '</b>' : '';
   }
   var focusMeta = markahMeta;
   function byMarkah(a, b){ return (markahOf(a) - markahOf(b)) || (a - b); }
@@ -2215,12 +2240,12 @@
   }
   function ujiRow(set, n){
     return '<div class="uji-row">' +
-      '<button type="button" class="primary" data-uji="kaji" data-set="' + set + '">Uji ' + n + ' ini &middot; Kaji</button>' +
-      '<button type="button" data-uji="kuiz" data-set="' + set + '">Uji ' + n + ' ini &middot; Kuiz</button></div>';
+      '<button type="button" class="primary" data-uji="kaji" data-set="' + set + '">' + T('Uji ' + n + ' ini &middot; Kaji', 'Test these ' + n + ' &middot; Study') + '</button>' +
+      '<button type="button" data-uji="kuiz" data-set="' + set + '">' + T('Uji ' + n + ' ini &middot; Kuiz', 'Test these ' + n + ' &middot; Quiz') + '</button></div>';
   }
   function fmtDay(ds, opts){
     var d = new Date(ds + 'T00:00:00');
-    try{ return d.toLocaleDateString('ms-MY', opts || { weekday:'short', day:'numeric', month:'short' }); }catch(e){ return ds; }
+    try{ return d.toLocaleDateString(T('ms-MY', 'en-GB'), opts || { weekday:'short', day:'numeric', month:'short' }); }catch(e){ return ds; }
   }
   function classWeekly(){
     var w = window.fnWeekly;
@@ -2229,7 +2254,8 @@
     return w;
   }
   var progSets = {};
-  var UJI_LABELS = { today: 'Perlu ulang hari ini', focus: 'Perlu fokus', kelas: 'Kelas minggu ini', allre: 'Perlu ulang' };
+  var UJI_LABELS = EN ? { today: 'Review again today', focus: 'Needs focus', kelas: 'Class this week', allre: 'Review again' }
+                     : { today: 'Perlu ulang hari ini', focus: 'Perlu fokus', kelas: 'Kelas minggu ini', allre: 'Perlu ulang' };
   var sheetBack = null;   // { label, open } for the sheet currently showing a list
   function progClick(e){
     var li = e.target.closest('[data-open]') || e.target.closest('.listcard[data-id]');
@@ -2256,22 +2282,22 @@
   // ---------- Butiran: today's Kaji in detail (sheet from the Kaji tab) ----------
   function openButiran(){
     rolloverDailyIfNeeded();
-    sheetBack = { label: 'Butiran', open: openButiran };
+    sheetBack = { label: T('Butiran', 'Details'), open: openButiran };
     var L = todayLists(), n = L.ok.length + L.re.length;
     progSets.today = L.re;
     var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
-      '<h3 class="ptitle">Butiran kaji hari ini</h3>' +
-      '<p class="psub">' + fmtDay(todayStr(), { weekday:'long', day:'numeric', month:'long' }) + ' &middot; ' + n + ' falsafah dikaji</p>';
+      '<h3 class="ptitle">' + T('Butiran kaji hari ini', 'Today\'s study in detail') + '</h3>' +
+      '<p class="psub">' + fmtDay(todayStr(), { weekday:'long', day:'numeric', month:'long' }) + ' &middot; ' + n + T(' falsafah dikaji', ' falsafah studied') + '</p>';
     if(!n){
-      html += '<p class="pnote" style="margin-top:16px;">Belum ada falsafah dikaji hari ini. Tekan Dedah pada kad pertama untuk mula.</p>';
+      html += '<p class="pnote" style="margin-top:16px;">' + T('Belum ada falsafah dikaji hari ini. Tekan Dedah pada kad pertama untuk mula.', 'No falsafah studied yet today. Tap Reveal on the first card to start.') + '</p>';
     } else {
       html += '<div class="ks-bar" style="height:8px;margin:14px 0 4px;"><span class="ok" style="width:' + (L.ok.length/n*100) + '%"></span><span class="re" style="width:' + (L.re.length/n*100) + '%"></span></div>' +
-        '<div class="prog-sec"><div class="sum-label again">&#8635; Belum ingat &middot; ' + L.re.length + '</div>' +
-        (L.re.length ? progItems(L.re, fixMark(L)) + ujiRow('today', L.re.length) : '<p class="pnote">Tiada. Syabas!</p>') + '</div>' +
-        '<div class="prog-sec"><div class="sum-label good">&#10003; Ingat &middot; ' + L.ok.length + '</div>' +
-        (L.ok.length ? progItems(L.ok) : '<p class="pnote">Tiada lagi.</p>') + '</div>';
+        '<div class="prog-sec"><div class="sum-label again">&#8635; ' + T('Belum ingat', 'Not yet') + ' &middot; ' + L.re.length + '</div>' +
+        (L.re.length ? progItems(L.re, fixMark(L)) + ujiRow('today', L.re.length) : '<p class="pnote">' + T('Tiada. Syabas!', 'None. Well done!') + '</p>') + '</div>' +
+        '<div class="prog-sec"><div class="sum-label good">&#10003; ' + T('Ingat', 'Remembered') + ' &middot; ' + L.ok.length + '</div>' +
+        (L.ok.length ? progItems(L.ok) : '<p class="pnote">' + T('Tiada lagi.', 'None yet.') + '</p>') + '</div>';
     }
-    html += '<p class="pnote" style="margin-top:18px;">Progres keseluruhan anda ada di tab Progres.</p></div>';
+    html += '<p class="pnote" style="margin-top:18px;">' + T('Progres keseluruhan anda ada di tab Progres.', 'Your overall progress is on the Progress tab.') + '</p></div>';
     openSheetHtml(html);
   }
 
@@ -2296,20 +2322,20 @@
   // Every list the Kemajuan tab can open: [title, ids, uji set or null, meta]
   function listDef(key){
     var L = todayLists();
-    if(key === 'today-re') return ['Belum ingat hari ini', L.re, 'today', fixMark(L)];
-    if(key === 'today-ok') return ['Ingat hari ini', L.ok, null];
-    if(key === 'all-re') return ['Perlu ulang (semua hari)', recallAll().re, 'allre', function(id){ return 'terlupa ' + missesOf(id) + '&times;'; }];
-    if(key === 'all-ok') return ['Sudah ingat', recallAll().ok, null, markahMeta];
-    if(key === 'markah') return ['Markah setiap falsafah', allMarked(), null, markahMeta];
-    if(key === 'focus') return ['Perlu fokus', allFocus(), 'focus', focusMeta];
-    if(key === 'studied') return ['Pernah dikaji', DATA.filter(function(e){ return (getCard(e.id).seen||0) > 0; }).map(function(e){ return e.id; }), null];
-    if(key === 'unstudied') return ['Belum pernah dikaji', DATA.filter(function(e){ return !(getCard(e.id).seen||0); }).map(function(e){ return e.id; }), null];
-    if(key === 'kelas'){ var W = classWeekly(); return ['Kelas minggu ini', W ? W.top.map(function(x){ return x.id; }) : [], 'kelas']; }
+    if(key === 'today-re') return [T('Belum ingat hari ini', 'Not yet today'), L.re, 'today', fixMark(L)];
+    if(key === 'today-ok') return [T('Ingat hari ini', 'Remembered today'), L.ok, null];
+    if(key === 'all-re') return [T('Perlu ulang (semua hari)', 'Review again (all days)'), recallAll().re, 'allre', function(id){ return T('terlupa ', 'forgot ') + missesOf(id) + '&times;'; }];
+    if(key === 'all-ok') return [T('Sudah ingat', 'Remembered'), recallAll().ok, null, markahMeta];
+    if(key === 'markah') return [T('Markah setiap falsafah', 'Score of each falsafah'), allMarked(), null, markahMeta];
+    if(key === 'focus') return [T('Perlu fokus', 'Needs focus'), allFocus(), 'focus', focusMeta];
+    if(key === 'studied') return [T('Pernah dikaji', 'Studied before'), DATA.filter(function(e){ return (getCard(e.id).seen||0) > 0; }).map(function(e){ return e.id; }), null];
+    if(key === 'unstudied') return [T('Belum pernah dikaji', 'Never studied'), DATA.filter(function(e){ return !(getCard(e.id).seen||0); }).map(function(e){ return e.id; }), null];
+    if(key === 'kelas'){ var W = classWeekly(); return [T('Kelas minggu ini', 'Class this week'), W ? W.top.map(function(x){ return x.id; }) : [], 'kelas']; }
     var m = /^gr(\d)$/.exec(key);
     if(m){
       var gi = +m[1], ids = allGreds()[gi] || [];
-      if(gi === GREDS.length) return ['Belum dikaji', ids, 'gr' + gi];
-      return ['Gred ' + gredLabel(GREDS[gi].g), ids, gi > 0 ? 'gr' + gi : null, markahMeta];
+      if(gi === GREDS.length) return [T('Belum dikaji', 'Not studied yet'), ids, 'gr' + gi];
+      return [T('Gred ', 'Grade ') + gredLabel(GREDS[gi].g), ids, gi > 0 ? 'gr' + gi : null, markahMeta];
     }
     return ['', [], null];
   }
@@ -2322,12 +2348,12 @@
     sheetBack = { label: title, open: function(){ openListSheet(key); } };
     var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
       '<h3 class="ptitle">' + escapeHtml(title) + '</h3>' +
-      '<p class="psub">' + ids.length + ' falsafah' + (ids.length ? ' &middot; tekan untuk lihat butiran' : '') + '</p>';
+      '<p class="psub">' + ids.length + ' falsafah' + (ids.length ? T(' &middot; tekan untuk lihat butiran', ' &middot; tap for details') : '') + '</p>';
     if(!ids.length){
-      html += '<p class="pnote" style="margin-top:16px;">Tiada falsafah dalam senarai ini lagi.</p>';
+      html += '<p class="pnote" style="margin-top:16px;">' + T('Tiada falsafah dalam senarai ini lagi.', 'No falsafah in this list yet.') + '</p>';
     } else {
-      html += '<div class="lv-switch"><button type="button" data-lv="ringkas" class="' + (listView === 'ringkas' ? 'active' : '') + '">Senarai ringkas</button>' +
-        '<button type="button" data-lv="penuh" class="' + (listView === 'penuh' ? 'active' : '') + '">Butiran penuh</button></div>' +
+      html += '<div class="lv-switch"><button type="button" data-lv="ringkas" class="' + (listView === 'ringkas' ? 'active' : '') + '">' + T('Senarai ringkas', 'Short list') + '</button>' +
+        '<button type="button" data-lv="penuh" class="' + (listView === 'penuh' ? 'active' : '') + '">' + T('Butiran penuh', 'Full details') + '</button></div>' +
         (set ? ujiRow(set, ids.length) : '') +
         '<div style="margin-top:12px;">' +
         (listView === 'penuh'
@@ -2356,67 +2382,70 @@
     var histDays = Object.keys(kajiHistory).sort().reverse().filter(function(d){ var h = kajiHistory[d]; return h && ((h.g||[]).length || (h.a||[]).length); }).slice(0, 14);
 
     var html = '<div class="prog kmj">' +
-      '<div class="kmj-head"><h2>Progres anda</h2><span class="psub">Semua 200 falsafah</span></div>' +
+      '<div class="kmj-head"><h2>' + T('Progres anda', 'Your progress') + '</h2><span class="psub">' + T('Semua 200 falsafah', 'All 200 falsafah') + '</span></div>' +
       '<div class="kmj-tiles">' +
-        '<div data-list="focus"><b>' + F.length + '</b>Perlu fokus</div>' +
-        '<div data-list="gr0"><b>' + gr[0].length + '<small>/' + total + '</small></b>Gred A+</div>' +
+        '<div data-list="focus"><b>' + F.length + '</b>' + T('Perlu fokus', 'Needs focus') + '</div>' +
+        '<div data-list="gr0"><b>' + gr[0].length + '<small>/' + total + '</small></b>' + T('Gred A+', 'Grade A+') + '</div>' +
       '</div>';
 
     // Gred hafalan (from each falsafah's markah)
     var grCol = function(i){ return i < GREDS.length ? GREDS[i].col : 'var(--border)'; };
-    var grName = function(i){ return i < GREDS.length ? 'Gred ' + gredLabel(GREDS[i].g) : 'Belum dikaji'; };
-    html += '<div class="prog-sec card-sec"><h4>Gred hafalan &middot; tekan untuk lihat senarai</h4>' +
+    var grName = function(i){ return i < GREDS.length ? T('Gred ', 'Grade ') + gredLabel(GREDS[i].g) : T('Belum dikaji', 'Not studied yet'); };
+    html += '<div class="prog-sec card-sec"><h4>' + T('Gred hafalan &middot; tekan untuk lihat senarai', 'Memory grades &middot; tap to see the list') + '</h4>' +
       '<div class="lvl-bar">' + gr.map(function(v, i){ return v.length ? '<span style="width:' + (v.length/total*100) + '%;background:' + grCol(i) + '"></span>' : ''; }).join('') + '</div>' +
       '<div class="lvl-grid">' + gr.map(function(v, i){ return '<div data-list="gr' + i + '"' + (i >= 5 && i < GREDS.length ? ' class="gr-low"' : '') + '><b>' + v.length + '</b><i style="background:' + grCol(i) + '"></i>' + grName(i) + '</div>'; }).join('') + '</div>' +
-      '<p class="pnote">Markah dikira dari 10 jawapan terakhir setiap falsafah: Kaji <b>Ingat +1</b>, <b>Belum ingat &minus;1</b>, Kuiz betul +&frac12;, salah &minus;&frac12;.</p>' +
-      '<div class="gred-key">' + [
+      '<p class="pnote">' + T('Markah dikira dari 10 jawapan terakhir setiap falsafah: Kaji <b>Ingat +1</b>, <b>Belum ingat &minus;1</b>, Kuiz betul +&frac12;, salah &minus;&frac12;.', 'The score comes from the last 10 answers for each falsafah: Study <b>Remembered +1</b>, <b>Not yet &minus;1</b>, Quiz right +&frac12;, wrong &minus;&frac12;.') + '</p>' +
+      '<div class="gred-key">' + (EN ? [
+        ['A+', '7 and above'], ['A', '5 to 6&frac12;'], ['A&minus;', '4 to 4&frac12;'], ['B+', '3 to 3&frac12;'],
+        ['B', '1 to 2&frac12;'], ['C', '&minus;1 to &frac12;'], ['D', '&minus;3 to &minus;1&frac12;'], ['G', 'below &minus;3']
+      ] : [
         ['A+', '7 dan ke atas'], ['A', '5 hingga 6&frac12;'], ['A&minus;', '4 hingga 4&frac12;'], ['B+', '3 hingga 3&frac12;'],
         ['B', '1 hingga 2&frac12;'], ['C', '&minus;1 hingga &frac12;'], ['D', '&minus;3 hingga &minus;1&frac12;'], ['G', 'bawah &minus;3']
-      ].map(function(r){ return '<span><b>' + r[0] + ':</b> ' + r[1] + '</span>'; }).join('') + '</div>' +
-      (nMarked ? '<button type="button" class="backbtn" data-list="markah" style="margin:12px 0 0;">Senarai markah setiap falsafah (' + nMarked + ') &rsaquo;</button>' : '') +
+      ]).map(function(r){ return '<span><b>' + r[0] + ':</b> ' + r[1] + '</span>'; }).join('') + '</div>' +
+      (nMarked ? '<button type="button" class="backbtn" data-list="markah" style="margin:12px 0 0;">' + T('Senarai markah setiap falsafah (', 'Score of each falsafah (') + nMarked + ') &rsaquo;</button>' : '') +
       '</div>';
 
     // Perlu fokus
-    html += '<div class="prog-sec card-sec focus-sec"><h4>Perlu fokus &middot; <span class="cnt">' + F.length + '</span> &middot; gred C, D, G</h4>' +
+    html += '<div class="prog-sec card-sec focus-sec"><h4>' + T('Perlu fokus', 'Needs focus') + ' &middot; <span class="cnt">' + F.length + '</span> &middot; ' + T('gred C, D, G', 'grades C, D, G') + '</h4>' +
       (F.length ? progItems(F.slice(0, 5), focusMeta) +
-                  '<p class="pnote" style="margin:8px 2px 0;">Markah paling rendah di atas. Keluar dari senarai bila markah naik ke +1 (gred B).</p>' +
-                  (F.length > 5 ? '<button type="button" class="backbtn" data-list="focus" style="margin:10px 0 0;">Lihat semua ' + F.length + ' &rsaquo;</button>' : '') +
+                  '<p class="pnote" style="margin:8px 2px 0;">' + T('Markah paling rendah di atas. Keluar dari senarai bila markah naik ke +1 (gred B).', 'Lowest score first. A falsafah leaves the list when its score reaches +1 (grade B).') + '</p>' +
+                  (F.length > 5 ? '<button type="button" class="backbtn" data-list="focus" style="margin:10px 0 0;">' + T('Lihat semua ', 'See all ') + F.length + ' &rsaquo;</button>' : '') +
                   ujiRow('focus', F.length)
-                : '<p class="pnote">Tiada. Falsafah gred C, D dan G akan muncul di sini, dan keluar bila markah naik ke +1 (gred B).</p>') +
+                : '<p class="pnote">' + T('Tiada. Falsafah gred C, D dan G akan muncul di sini, dan keluar bila markah naik ke +1 (gred B).', 'None. Falsafah with grades C, D and G show up here, and leave when the score reaches +1 (grade B).') + '</p>') +
       '</div>';
 
     // Kelas minggu ini (Fridays)
     if(W){
-      html += '<div class="prog-sec card-sec"><h4>Kelas minggu ini &middot; paling kerap terlupa</h4>' +
-        progItems(progSets.kelas, function(id){ var x = W.top.filter(function(t){ return t.id === id; })[0]; return x ? x.students + ' pelajar' : ''; }) +
+      html += '<div class="prog-sec card-sec"><h4>' + T('Kelas minggu ini &middot; paling kerap terlupa', 'Class this week &middot; most often forgotten') + '</h4>' +
+        progItems(progSets.kelas, function(id){ var x = W.top.filter(function(t){ return t.id === id; })[0]; return x ? x.students + T(' pelajar', ' students') : ''; }) +
         ujiRow('kelas', progSets.kelas.length) +
-        '<p class="pnote">Dikira daripada semua pelajar dalam 7 hari lepas. Dipaparkan setiap Jumaat.</p></div>';
+        '<p class="pnote">' + T('Dikira daripada semua pelajar dalam 7 hari lepas. Dipaparkan setiap Jumaat.', 'Counted from all students over the last 7 days. Shown every Friday.') + '</p></div>';
     }
 
     // 14-day chart
-    html += '<div class="prog-sec card-sec"><h4>14 hari lepas</h4><div class="kmj-chart">' +
+    html += '<div class="prog-sec card-sec"><h4>' + T('14 hari lepas', 'Last 14 days') + '</h4><div class="kmj-chart">' +
       days14.map(function(d){
         var D = dayLists(d), g = D.ok.length, a = D.re.length;
-        return '<div class="kc-col" title="' + fmtDay(d) + ': ' + g + ' ingat, ' + a + ' belum ingat">' +
+        return '<div class="kc-col" title="' + fmtDay(d) + ': ' + g + T(' ingat, ', ' remembered, ') + a + T(' belum ingat', ' not yet') + '">' +
           '<div class="kc-stack"><span class="re" style="height:' + (a/maxN*100) + '%"></span><span class="ok" style="height:' + (g/maxN*100) + '%"></span></div>' +
           '<div class="kc-lbl' + (d === todayStr() ? ' today' : '') + '">' + new Date(d + 'T00:00:00').getDate() + '</div></div>';
       }).join('') + '</div>' +
-      '<div class="kmj-legend"><span><i class="ok"></i>Ingat</span><span><i class="re"></i>Belum ingat</span></div></div>';
+      '<div class="kmj-legend"><span><i class="ok"></i>' + T('Ingat', 'Remembered') + '</span><span><i class="re"></i>' + T('Belum ingat', 'Not yet') + '</span></div></div>';
 
     // Sejarah
-    html += '<div class="prog-sec card-sec hist"><h4>Sejarah harian</h4>' +
+    html += '<div class="prog-sec card-sec hist"><h4>' + T('Sejarah harian', 'Daily history') + '</h4>' +
       (histDays.length ? histDays.map(function(d){
         var D = dayLists(d);
-        return '<details><summary><span class="hd">' + fmtDay(d) + (d === todayStr() ? ' (hari ini)' : '') + '</span>' +
+        return '<details><summary><span class="hd">' + fmtDay(d) + (d === todayStr() ? T(' (hari ini)', ' (today)') : '') + '</span>' +
           '<span class="lbl-ok">&#10003; ' + D.ok.length + '</span><span class="lbl-re">&#8635; ' + D.re.length + '</span></summary>' +
           progItems(D.re.concat(D.ok), function(id){
-            if(D.re.indexOf(id) === -1) return '<span class="lbl-ok">ingat</span>';
-            return '<span class="lbl-re">belum ingat</span>' + (D.fixed.indexOf(id) >= 0 ? ' <span class="lbl-ok">&middot; dibaiki</span>' : '');
+            if(D.re.indexOf(id) === -1) return '<span class="lbl-ok">' + T('ingat', 'remembered') + '</span>';
+            return '<span class="lbl-re">' + T('belum ingat', 'not yet') + '</span>' + (D.fixed.indexOf(id) >= 0 ? ' <span class="lbl-ok">&middot; ' + T('dibaiki', 'fixed') + '</span>' : '');
           }) +
           '</details>';
-      }).join('') : '<p class="pnote">Sejarah akan muncul selepas anda mula mengkaji.</p>') +
+      }).join('') : '<p class="pnote">' + T('Sejarah akan muncul selepas anda mula mengkaji.', 'Your history shows up once you start studying.') + '</p>') +
       (function(){ var Wk = weekLists(weekSaturday()); return (Wk.re.length || Wk.ok.length)
-        ? '<button type="button" class="backbtn" id="weeklyBtn" style="margin:12px 0 0;">Ringkasan minggu lepas (' + (Wk.re.length + Wk.ok.length) + ') &rsaquo;</button>' : ''; })() +
+        ? '<button type="button" class="backbtn" id="weeklyBtn" style="margin:12px 0 0;">' + T('Ringkasan minggu lepas (', 'Last week\'s summary (') + (Wk.re.length + Wk.ok.length) + ') &rsaquo;</button>' : ''; })() +
       '</div></div>';
     stage.innerHTML = html;
     stage.onclick = progClick;
@@ -2440,23 +2469,23 @@
   function openWeekly(sat){
     var W = weekLists(sat || weekSaturday());
     function list(ids){
-      if(!ids.length) return '<p class="sum-empty">Tiada.</p>';
+      if(!ids.length) return '<p class="sum-empty">' + T('Tiada.', 'None.') + '</p>';
       return '<ul class="sum-list">' + ids.map(function(id){
         var e = entryById(id); if(!e) return '';
         return '<li><span class="sl-no">' + e.rangeLabel.replace('Falsafah ', '') + '</span><span class="sl-title">' + escapeHtml(displayTitle(e.title)) + '</span>' +
           '<span class="sl-meta">' + markahMeta(id) + '</span></li>';
       }).join('') + '</ul>';
     }
-    function uji(key, n){ return n ? '<button type="button" class="wk-uji" data-wk="' + key + '">Uji ' + n + ' ini &middot; Kaji</button>' : ''; }
+    function uji(key, n){ return n ? '<button type="button" class="wk-uji" data-wk="' + key + '">' + T('Uji ' + n + ' ini &middot; Kaji', 'Test these ' + n + ' &middot; Study') + '</button>' : ''; }
     document.getElementById('summaryCard').innerHTML =
-      '<h3>Ringkasan minggu lepas</h3>' +
-      '<p class="sum-intro">' + fmtDay(W.from, { weekday:'short', day:'numeric', month:'short' }) + ' hingga ' + fmtDay(W.to, { weekday:'short', day:'numeric', month:'short' }) +
-        ' &middot; ' + (W.re.length + W.ok.length) + ' falsafah dikaji</p>' +
-      '<div class="sum-section"><div class="sum-label again">&#8635; Belum ingat &middot; ' + W.re.length + '</div>' +
-        '<p class="sum-empty" style="margin:0 0 6px;">Salah sekurang-kurangnya sekali minggu lepas. Ulang dahulu.</p>' + list(W.re) + uji('re', W.re.length) + '</div>' +
-      '<div class="sum-section"><div class="sum-label good">&#10003; Ingat &middot; ' + W.ok.length + '</div>' +
-        '<p class="sum-empty" style="margin:0 0 6px;">Sudah ingat. Kukuhkan semula supaya tidak hilang.</p>' + list(W.ok) + uji('ok', W.ok.length) + '</div>' +
-      '<button class="namebtn" id="weeklyClose">Tutup</button>';
+      '<h3>' + T('Ringkasan minggu lepas', 'Last week\'s summary') + '</h3>' +
+      '<p class="sum-intro">' + fmtDay(W.from, { weekday:'short', day:'numeric', month:'short' }) + T(' hingga ', ' to ') + fmtDay(W.to, { weekday:'short', day:'numeric', month:'short' }) +
+        ' &middot; ' + (W.re.length + W.ok.length) + T(' falsafah dikaji', ' falsafah studied') + '</p>' +
+      '<div class="sum-section"><div class="sum-label again">&#8635; ' + T('Belum ingat', 'Not yet') + ' &middot; ' + W.re.length + '</div>' +
+        '<p class="sum-empty" style="margin:0 0 6px;">' + T('Salah sekurang-kurangnya sekali minggu lepas. Ulang dahulu.', 'Wrong at least once last week. Go over these first.') + '</p>' + list(W.re) + uji('re', W.re.length) + '</div>' +
+      '<div class="sum-section"><div class="sum-label good">&#10003; ' + T('Ingat', 'Remembered') + ' &middot; ' + W.ok.length + '</div>' +
+        '<p class="sum-empty" style="margin:0 0 6px;">' + T('Sudah ingat. Kukuhkan semula supaya tidak hilang.', 'Already remembered. Go over them again so they stay.') + '</p>' + list(W.ok) + uji('ok', W.ok.length) + '</div>' +
+      '<button class="namebtn" id="weeklyClose">' + T('Tutup', 'Close') + '</button>';
     var ov = document.getElementById('summaryOverlay');
     ov.classList.add('active');
     function close(){ ov.classList.remove('active'); }
@@ -2465,7 +2494,7 @@
       b.onclick = function(){
         var re = b.getAttribute('data-wk') === 're';
         close();
-        startFocus(re ? W.re : W.ok, 'kaji', re ? 'Belum ingat minggu lepas' : 'Ingat minggu lepas');
+        startFocus(re ? W.re : W.ok, 'kaji', re ? T('Belum ingat minggu lepas', 'Not yet last week') : T('Ingat minggu lepas', 'Remembered last week'));
       };
     });
   }
@@ -2484,7 +2513,7 @@
     saveDaily(daily);
     var L = todayLists(), mark = fixMark(L), n = L.ok.length + L.re.length;
     function list(ids, withMark){
-      if(!ids.length) return '<p class="sum-empty">Tiada.</p>';
+      if(!ids.length) return '<p class="sum-empty">' + T('Tiada.', 'None.') + '</p>';
       return '<ul class="sum-list">' + ids.map(function(id){
         var e = entryById(id); if(!e) return '';
         return '<li><span class="sl-no">' + e.rangeLabel.replace('Falsafah ', '') + '</span><span class="sl-title">' + escapeHtml(displayTitle(e.title)) + '</span>' +
@@ -2493,12 +2522,12 @@
     }
     var left = daily.again.length;
     document.getElementById('summaryCard').innerHTML =
-      '<h3>Ringkasan hari ini</h3>' +
-      '<p class="sum-intro">' + n + ' falsafah dikaji hari ini. Yang salah sekali pun kekal di Belum ingat untuk hari ini.</p>' +
-      '<div class="sum-section"><div class="sum-label again">&#8635; Belum ingat &middot; ' + L.re.length + '</div>' + list(L.re, true) + '</div>' +
-      '<div class="sum-section"><div class="sum-label good">&#10003; Ingat &middot; ' + L.ok.length + '</div>' + list(L.ok, false) + '</div>' +
-      '<button class="namebtn" id="summaryContinue">' + (left ? 'Ulang belum ingat (' + left + ')' : 'Selesai') + '</button>' +
-      (left ? '<button type="button" class="sum-later" id="summaryLater">Nanti</button>' : '');
+      '<h3>' + T('Ringkasan hari ini', 'Today\'s summary') + '</h3>' +
+      '<p class="sum-intro">' + T(n + ' falsafah dikaji hari ini. Yang salah sekali pun kekal di Belum ingat untuk hari ini.', n + ' falsafah studied today. Any you got wrong even once stay under Not yet for today.') + '</p>' +
+      '<div class="sum-section"><div class="sum-label again">&#8635; ' + T('Belum ingat', 'Not yet') + ' &middot; ' + L.re.length + '</div>' + list(L.re, true) + '</div>' +
+      '<div class="sum-section"><div class="sum-label good">&#10003; ' + T('Ingat', 'Remembered') + ' &middot; ' + L.ok.length + '</div>' + list(L.ok, false) + '</div>' +
+      '<button class="namebtn" id="summaryContinue">' + (left ? T('Ulang belum ingat (', 'Go over not yet (') + left + ')' : T('Selesai', 'Done')) + '</button>' +
+      (left ? '<button type="button" class="sum-later" id="summaryLater">' + T('Nanti', 'Later') + '</button>' : '');
     var ov = document.getElementById('summaryOverlay');
     ov.classList.add('active');
     function close(){ ov.classList.remove('active'); window.scrollTo(0, 0); }
@@ -2512,8 +2541,8 @@
     if(!revealed){
       el.innerHTML =
         '<h3 class="folio-title">' + escapeHtml(displayTitle(entry.title)) + '</h3>' +
-        '<p class="folio-hint">Cuba ingat &amp; lafazkan ayat ini serta maksudnya sebelum menekan Dedah.</p>' +
-        '<button class="revealbtn" id="revealBtn">Dedah ayat &amp; maksud</button>';
+        '<p class="folio-hint">' + T('Cuba ingat &amp; lafazkan ayat ini serta maksudnya sebelum menekan Dedah.', 'Try to recall &amp; recite this ayat and its meaning before you tap Reveal.') + '</p>' +
+        '<button class="revealbtn" id="revealBtn">' + T('Dedah ayat &amp; maksud', 'Reveal ayat &amp; meaning') + '</button>';
       document.getElementById('revealBtn').onclick = function(){
         revealed = true;
         renderFolioBody(entry);
@@ -2524,12 +2553,12 @@
         '<h3 class="folio-title">' + escapeHtml(displayTitle(entry.title)) + '</h3>' +
         '<hr class="divider">' +
         renderArabic(entry) +
-        '<div class="folio-text-label">Maksud</div>' +
-        '<p class="folio-text">' + escapeHtml(entry.text) + '</p>' +
+        '<div class="folio-text-label">' + T('Maksud', 'Meaning') + '</div>' +
+        textHtml(entry) +
         '<p class="surah-ref">' + escapeHtml(entry.surahDisplay) + '</p>' +
         '<div class="gradebar">' +
-          '<button class="gradebtn again" data-g="0"><span class="g-label">Belum ingat</span></button>' +
-          '<button class="gradebtn good" data-g="1"><span class="g-label">Ingat</span></button>' +
+          '<button class="gradebtn again" data-g="0"><span class="g-label">' + T('Belum ingat', 'Not yet') + '</span></button>' +
+          '<button class="gradebtn good" data-g="1"><span class="g-label">' + T('Ingat', 'Remembered') + '</span></button>' +
         '</div>' +
         renderExtras(entry);
       applyWbw(el);
@@ -2564,6 +2593,7 @@
   // Falsafah 101-200 grouped by shared opening words of the ayat (curated list;
   // falsafah without a shared opening are left out of the grouped view).
   var AYAT_GROUPS = [{"ar": "يَا أَيُّهَا", "name": "Yaa ayyuhal ladzina aamanu (7), ditambah yaa ayyuhan naas dan yaa ayyuhal insan", "nos": [121, 139, 161, 174, 182, 187, 196, 175, 176]}, {"ar": "قُلْ", "name": "Qul", "nos": [102, 165, 105, 128, 138, 170, 195]}, {"ar": "إِنَّ", "name": "Inna", "nos": [112, 164, 189, 192, 184]}, {"ar": "لَقَدْ", "name": "Laqad", "nos": [118, 186, 193]}, {"ar": "وَلَقَدْ", "name": "Wa laqad", "nos": [124, 173, 178, 199]}, {"ar": "وَمَا", "name": "Wa ma", "nos": [133, 137, 148]}, {"ar": "وَقَالَ", "name": "Wa qala", "nos": [104, 145]}, {"ar": "قَالَ", "name": "Qala", "nos": [114, 183]}, {"ar": "وَمِنْهُم مَّن", "name": "Wa minhum man", "nos": [110, 111]}, {"ar": "وَٱلَّذِينَ", "name": "Walladzina", "nos": [116, 119]}, {"ar": "ثُمَّ جَعَلْنَـٰكَ", "name": "Thumma ja'alna", "nos": [126, 156]}, {"ar": "مَن", "name": "Man", "nos": [135, 177]}, {"ar": "وَقُلْ", "name": "Wa qul", "nos": [143, 153]}, {"ar": "وَإِذَا", "name": "Wa idza", "nos": [147, 185]}, {"ar": "إِنَّمَا ٱلْمُؤْمِنُونَ", "name": "Innamal mu'minun", "nos": [157, 188]}, {"ar": "وَمَن", "name": "Wa man", "nos": [163, 200]}];
+  if(EN) AYAT_GROUPS[0].name = 'Yaa ayyuhal ladzina aamanu (7), plus yaa ayyuhan naas and yaa ayyuhal insan';
   AYAT_GROUPS.forEach(function(g){
     g.entries = g.nos.map(function(n){
       return DATA.find(function(e){ return e.noStart <= n && n <= e.noEnd; });
@@ -2574,9 +2604,9 @@
 
   function renderGroupPicker(){
     var picker = document.getElementById('groupPicker');
-    picker.innerHTML = '<button type="button" data-g="-1">Semua kumpulan</button>' +
+    picker.innerHTML = '<button type="button" data-g="-1">' + T('Semua kumpulan', 'All groups') + '</button>' +
       AYAT_GROUPS.map(function(g, gi){
-        return '<button type="button" data-g="'+gi+'" title="Kumpulan '+(gi+1)+' · '+escapeHtml(g.name)+'">' +
+        return '<button type="button" data-g="'+gi+'" title="' + T('Kumpulan ', 'Group ') + (gi+1)+' · '+escapeHtml(g.name)+'">' +
           '<span class="gp-no">'+(gi+1)+'</span><span class="gp-ar" lang="ar" dir="rtl">'+escapeHtml(g.ar)+'</span></button>';
       }).join('');
     picker.querySelectorAll('button').forEach(function(b){
@@ -2624,14 +2654,14 @@
       AYAT_GROUPS.forEach(function(g, gi){
         if(selectedGroup >= 0 && gi !== selectedGroup) return;
         html += '<div class="grouphead" data-gh="' + gi + '">' +
-          '<span class="gh-label"><b>Kumpulan ' + (gi+1) + '</b> &middot; ' + escapeHtml(g.name) + ' &middot; ' + g.entries.length + ' falsafah</span>' +
+          '<span class="gh-label"><b>' + T('Kumpulan ', 'Group ') + (gi+1) + '</b> &middot; ' + escapeHtml(g.name) + ' &middot; ' + g.entries.length + ' falsafah</span>' +
           '<span class="gh-ar" lang="ar" dir="rtl">' + escapeHtml(g.ar) + '</span>' +
         '</div>' + g.entries.map(function(e){ return listCardHtml(e).replace('<div class="listcard"', '<div class="listcard" data-gi="' + gi + '"'); }).join('');
       });
     } else {
       html = DATA.map(listCardHtml).join('');
     }
-    wrap.innerHTML = html + '<div class="empty" id="browseEmpty" hidden>Tiada padanan ditemui.</div>';
+    wrap.innerHTML = html + '<div class="empty" id="browseEmpty" hidden>' + T('Tiada padanan ditemui.', 'No matches found.') + '</div>';
     wrap.onclick = function(ev){
       var card = ev.target.closest('.listcard');
       if(card) openDetail(parseInt(card.getAttribute('data-id'), 10));
@@ -2666,10 +2696,10 @@
         totalGrouped += AYAT_GROUPS[+gi].entries.length;
       });
       document.getElementById('listCount').textContent = filter
-        ? shown + ' falsafah dalam ' + groupsShown + ' kumpulan'
-        : (selectedGroup >= 0 ? 'Kumpulan ' + (selectedGroup+1) : AYAT_GROUPS.length + ' kumpulan') + ' · ' + totalGrouped + ' falsafah';
+        ? shown + T(' falsafah dalam ', ' falsafah in ') + groupsShown + T(' kumpulan', ' groups')
+        : (selectedGroup >= 0 ? T('Kumpulan ', 'Group ') + (selectedGroup+1) : AYAT_GROUPS.length + T(' kumpulan', ' groups')) + ' · ' + totalGrouped + ' falsafah';
     } else {
-      document.getElementById('listCount').textContent = shown + ' daripada ' + DATA.length + ' falsafah';
+      document.getElementById('listCount').textContent = shown + T(' daripada ', ' of ') + DATA.length + ' falsafah';
     }
     document.getElementById('browseEmpty').hidden = shown > 0;
   }
@@ -2685,13 +2715,13 @@
   });
 
   // ---------- Kongsi: a one-page card (image) + short text, for WhatsApp ----------
-  var APP_URL = 'https://falsafah200.vercel.app';
+  var APP_URL = 'https://falsafah200.vercel.app' + (EN ? '/en' : '');
   var shareCache = {};
-  function shareHook(){ return 'Catitan ringkas pengarang Al-Fathun Nawa tentang ayat ini ada dalam aplikasi Falsafah 200:'; }
+  function shareHook(){ return T('Catitan ringkas pengarang Al-Fathun Nawa tentang ayat ini ada dalam aplikasi Falsafah 200:', 'The Al-Fathun Nawa author\'s short notes on this ayat are in the Falsafah 200 app:'); }
   function shareText(entry, withMaksud){
     return '*' + entry.rangeLabel + ' · ' + displayTitle(entry.title) + '*\n' + entry.surahDisplay + '\n' +
       (withMaksud ? '\n“' + entry.text + '”\n\n' : '') +
-      'Rujukan: Al-Fathun Nawa Jilid 7, ' + msLabel(entry) + '\n\n' + shareHook(entry) + '\n' + APP_URL;
+      T('Rujukan: Al-Fathun Nawa Jilid 7, ', 'Reference: Al-Fathun Nawa Volume 7, ') + msLabel(entry) + '\n\n' + shareHook(entry) + '\n' + APP_URL;
   }
   function loadImg(src){ return new Promise(function(res){ if(!src) return res(null); var i = new Image(); i.onload = function(){ res(i); }; i.onerror = function(){ res(null); }; i.src = src; }); }
   function wrapLines(ctx, text, maxW){
@@ -2716,7 +2746,7 @@
       ctx.font = '800 58px ' + SANS; var tLines = wrapLines(ctx, displayTitle(entry.title), IW);
       ctx.font = '400 50px ' + AR; ctx.direction = 'rtl'; var aLines = wrapLines(ctx, entry.arabic, IW - 80); ctx.direction = 'ltr';
       ctx.font = '400 30px ' + SANS; var mLines = wrapLines(ctx, entry.text, IW);
-      var refL = 'Rujukan: ', refB = 'Al-Fathun Nawa Jilid 7, ' + msLabel(entry), url = APP_URL.replace('https://', '');
+      var refL = T('Rujukan: ', 'Reference: '), refB = T('Al-Fathun Nawa Jilid 7, ', 'Al-Fathun Nawa Volume 7, ') + msLabel(entry), url = APP_URL.replace('https://', '');
       ctx.font = '400 24px ' + SANS; var wRefL = ctx.measureText(refL).width;
       ctx.font = '600 24px ' + SANS; var wRefB = ctx.measureText(refB).width;
       ctx.font = '800 24px ' + SANS; var wUrl = ctx.measureText(url).width;
@@ -2747,7 +2777,7 @@
       var bx = X + (logo ? 86 : 0);
       ctx.font = '800 22px ' + SANS; ctx.fillStyle = '#B8451F';
       var cx = bx; 'AL-FATHUN NAWA'.split('').forEach(function(ch){ ctx.fillText(ch, cx, y0 + 21); cx += ctx.measureText(ch).width + 3.1; });
-      ctx.font = '600 19px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.fillText('Falsafah 200 · Jilid 7', bx, y0 + 50);
+      ctx.font = '600 19px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.fillText(T('Falsafah 200 · Jilid 7', 'Falsafah 200 · Volume 7'), bx, y0 + 50);
       // ---- number + title ----
       ctx.font = '800 30px ' + SANS; ctx.fillStyle = '#B8451F'; ctx.fillText(entry.rangeLabel, X, yNo + 20);
       ctx.font = '800 58px ' + SANS; ctx.fillStyle = '#10212B'; tLines.forEach(function(l, i){ ctx.fillText(l, X, yT + i * 65 + 33); });
@@ -2760,7 +2790,7 @@
       ctx.direction = 'ltr'; ctx.textAlign = 'left';
       // ---- maksud ----
       ctx.font = '800 20px ' + SANS; ctx.fillStyle = '#5F6B6D';
-      cx = X; 'MAKSUD'.split('').forEach(function(ch){ ctx.fillText(ch, cx, yL + 13); cx += ctx.measureText(ch).width + 2.8; });
+      cx = X; T('MAKSUD', 'MEANING').split('').forEach(function(ch){ ctx.fillText(ch, cx, yL + 13); cx += ctx.measureText(ch).width + 2.8; });
       ctx.font = '400 30px ' + SANS; ctx.fillStyle = '#10212B'; mLines.forEach(function(l, i){ ctx.fillText(l, X, yM + i * 45 + 22); });
       ctx.font = '700 26px ' + SANS; ctx.fillStyle = '#0F766E'; ctx.fillText(entry.surahDisplay, X, yS + 18);
       // ---- reference + link ----
@@ -2784,18 +2814,18 @@
   function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
   function shareFalsafah(entry){
     var text = shareText(entry, false), C = shareCache[entry.id];
-    if(!C || !C.blob){ shareToast('Sedang menyediakan gambar. Cuba tekan sekali lagi.'); prepareShare(entry); return; }
+    if(!C || !C.blob){ shareToast(T('Sedang menyediakan gambar. Cuba tekan sekali lagi.', 'Preparing the picture. Tap once more.')); prepareShare(entry); return; }
     var name = entry.rangeLabel.toLowerCase().replace(/\s+/g, '-') + '.png';
     var file = null; try{ file = new File([C.blob], name, { type: 'image/png' }); }catch(e){}
     copyText(text);
     if(file && navigator.canShare && navigator.canShare({ files: [file] })){
       navigator.share({ files: [file], text: text }).catch(function(e){ if(e && e.name !== 'AbortError') downloadCard(C.blob, name); });
       // iPhone keeps the text; WhatsApp on a computer (and some phones) sends only the picture
-      if(!isIOS()) setTimeout(function(){ shareToast('Teks sudah disalin. Jika hanya gambar dihantar, tampal teks sebagai kapsyen.'); }, 600);
+      if(!isIOS()) setTimeout(function(){ shareToast(T('Teks sudah disalin. Jika hanya gambar dihantar, tampal teks sebagai kapsyen.', 'Text copied. If only the picture is sent, paste the text as its caption.')); }, 600);
       return;
     }
     downloadCard(C.blob, name);
-    shareToast('Gambar dimuat turun dan teks sudah disalin. Hantar gambar di WhatsApp, kemudian tampal teks.');
+    shareToast(T('Gambar dimuat turun dan teks sudah disalin. Hantar gambar di WhatsApp, kemudian tampal teks.', 'Picture downloaded and text copied. Send the picture on WhatsApp, then paste the text.'));
   }
   function copyText(text){
     var done = false;
@@ -2823,15 +2853,15 @@
       '<button class="closebtn" id="closeDetail">&times;</button>' +
       (fromProgress ? '<button type="button" class="backbtn" id="backToProg">&lsaquo; ' + escapeHtml(fromProgress.label) + '</button><br>' : '') +
       '<span class="rangepill">'+entry.rangeLabel+'</span> ' +
-      gredBadge(id) + (cardLog(id).length ? ' <span class="markah-pill">Markah ' + fmtMarkah(markahOf(id)) + '</span>' : '') +
+      gredBadge(id) + (cardLog(id).length ? ' <span class="markah-pill">' + T('Markah ', 'Score ') + fmtMarkah(markahOf(id)) + '</span>' : '') +
       '<h3 class="folio-title" style="margin-top:14px;">'+escapeHtml(displayTitle(entry.title))+'</h3>' +
       (true ? '<div class="share-row"><button type="button" class="share-btn" id="shareBtn" aria-label="Share">' + SHARE_ICON + 'Share</button>' +
         '<button type="button" class="share-text" id="shareTextBtn">Copy to clipboard</button>' +
-        (window.FN_PANDANGAN ? '<button type="button" class="share-text" id="pdOpenBtn">Kongsi pandangan</button>' : '') + '</div>' : '') +
+        (window.FN_PANDANGAN ? '<button type="button" class="share-text" id="pdOpenBtn">' + T('Kongsi pandangan', 'Share your view') + '</button>' : '') + '</div>' : '') +
       '<hr class="divider">' +
       renderArabic(entry) +
-      '<div class="folio-text-label">Maksud</div>' +
-      '<p class="folio-text">'+escapeHtml(entry.text)+'</p>' +
+      '<div class="folio-text-label">' + T('Maksud', 'Meaning') + '</div>' +
+      textHtml(entry) +
       '<div class="lc-surah" style="margin-top:14px;">'+escapeHtml(entry.surahDisplay)+'</div>' +
       renderExtras(entry);
     var sheet = document.getElementById('detailSheet');
@@ -2852,7 +2882,7 @@
       sb.onclick = function(){ shareFalsafah(entry); };
       document.getElementById('shareTextBtn').onclick = function(){
         copyText(shareText(entry, true));
-        shareToast('Teks sudah disalin. Tampal di WhatsApp atau mana-mana aplikasi.');
+        shareToast(T('Teks sudah disalin. Tampal di WhatsApp atau mana-mana aplikasi.', 'Text copied. Paste it in WhatsApp or any app.'));
       };
     }
   }
@@ -2940,9 +2970,9 @@
     quizCurrent = { entry: entry, opts: opts };
     var stage = document.getElementById('quizStage');
     stage.innerHTML =
-      '<div class="quizq"><div class="eyebrow">Soalan &middot; Jilid 7</div>' +
+      '<div class="quizq"><div class="eyebrow">' + T('Soalan &middot; Jilid 7', 'Question &middot; Volume 7') + '</div>' +
       '<p class="qtext qstem">' + escapeHtml(q.q) + '</p></div>' +
-      '<div class="eyebrow" style="margin-bottom:10px;">Pilih satu daripada ' + opts.length + ' ayat. Maksud dipaparkan selepas menjawab.</div>' +
+      '<div class="eyebrow" style="margin-bottom:10px;">' + T('Pilih satu daripada ' + opts.length + ' ayat. Maksud dipaparkan selepas menjawab.', 'Choose one of ' + opts.length + ' ayat. The meaning shows after you answer.') + '</div>' +
       '<div class="quizoptions" id="quizOpts">' + opts.map(function(e, i){
         return '<button class="qopt qopt-ayat" data-id="' + e.id + '"><span class="qletter">' + 'ABC'.charAt(i) + '</span>' +
           '<span class="qbody"><span class="qarab" lang="ar" dir="rtl">' + escapeHtml(e.arabic) + '</span>' +
@@ -2977,22 +3007,22 @@
     var reveal = document.createElement('div');
     reveal.className = 'quiz-reveal';
     reveal.innerHTML =
-      '<div class="qverdict ' + (ok ? 'ok' : 'no') + '">' + (ok ? '&#10003; Tepat.' : '&#10007; Belum tepat.') +
-        ' Jawapan: <b>Falsafah ' + entry.id + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</b></div>' +
+      '<div class="qverdict ' + (ok ? 'ok' : 'no') + '">' + (ok ? T('&#10003; Tepat.', '&#10003; Correct.') : T('&#10007; Belum tepat.', '&#10007; Not quite.')) +
+        T(' Jawapan: <b>Falsafah ', ' Answer: <b>Falsafah ') + entry.id + ' &middot; ' + escapeHtml(displayTitle(entry.title)) + '</b></div>' +
       '<p class="arabic-text qarabic" lang="ar" dir="rtl">' + escapeHtml(entry.arabic) + '</p>' +
-      '<div class="folio-text-label">Maksud</div>' +
-      '<p class="folio-text">' + escapeHtml(entry.text) + '</p>' +
+      '<div class="folio-text-label">' + T('Maksud', 'Meaning') + '</div>' +
+      textHtml(entry) +
       '<p class="surah-ref">' + escapeHtml(entry.surahDisplay) + '</p>' +
-      '<div class="qexplain-label">Huraian Jilid 7</div>' +
+      '<div class="qexplain-label">' + T('Huraian Jilid 7', 'Volume 7 explanation') + '</div>' +
       renderExtras(entry).replace('<hr class="divider">', '') +
-      (ok ? '' : '<p class="qpicked">Pilihan anda ialah ayat Falsafah ' + pick.id + ' (' + escapeHtml(displayTitle(pick.title)) + '). ' +
-        'Kata kunci: ' + escapeHtml((pick.kataKunci || []).join(' ').replace(/\s*\.\s*/g, ' ').trim()) + '.</p>');
+      (ok ? '' : '<p class="qpicked">' + T('Pilihan anda ialah ayat Falsafah ', 'You chose the ayat of Falsafah ') + pick.id + ' (' + escapeHtml(displayTitle(pick.title)) + '). ' +
+        T('Kata kunci: ', 'Keywords: ') + escapeHtml((pick.kataKunci || []).join(' ').replace(/\s*\.\s*/g, ' ').trim()) + '.</p>');
     var stage = document.getElementById('quizStage');
     stage.appendChild(reveal);
 
     var next = document.createElement('button');
     next.className = 'quiznext';
-    next.textContent = 'Soalan seterusnya';
+    next.textContent = T('Soalan seterusnya', 'Next question');
     next.onclick = function(){ newQuiz(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
     stage.appendChild(next);
     setTimeout(function(){ reveal.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 120);
@@ -3011,7 +3041,7 @@
   var NOTE_KEY = 'falsafah200_notes_topic_v1';
   var NOTE_ACCENTS = ['#2FA37E','#E07A5F','#3B82C4','#C9972B','#D9534F','#8E6CC9','#1F9E9A','#5B7FE0','#B8792A','#C2588B'];
   // Shown by subject year: Tahun 1 (TM, SK), Tahun 2 (KHW, AAAN)
-  var NOTE_GROUPS = [{ label:'Subjek Tahun 1', ids:['tawil','syariah'] }, { label:'Subjek Tahun 2', ids:['khitab','asbab'] }];
+  var NOTE_GROUPS = [{ label:T('Subjek Tahun 1', 'Year 1 subjects'), ids:['tawil','syariah'] }, { label:T('Subjek Tahun 2', 'Year 2 subjects'), ids:['khitab','asbab'] }];
   var NOTE_ORDER = [].concat.apply([], NOTE_GROUPS.map(function(g){ return g.ids; }));
   NOTES.topics.forEach(function(t){ if(NOTE_ORDER.indexOf(t.id) < 0){ NOTE_ORDER.push(t.id); NOTE_GROUPS[NOTE_GROUPS.length - 1].ids.push(t.id); } });
   NOTES.topics.sort(function(a, b){ return NOTE_ORDER.indexOf(a.id) - NOTE_ORDER.indexOf(b.id); });
@@ -3027,14 +3057,14 @@
   function refs(list){ return paras(list, 'nref'); }
   function noteDetails(d, label){
     if(!d || !d.paras || !d.paras.length) return '';
-    return '<details class="ndetails"><summary>' + (label || 'Huraian penuh') + '</summary>' + paras(d.paras) + refs(d.refs) + '</details>';
+    return '<details class="ndetails"><summary>' + (label || T('Huraian penuh', 'Full explanation')) + '</summary>' + paras(d.paras) + refs(d.refs) + '</details>';
   }
   function noteCard(it, i){
     return '<article class="ncard" style="--acc:'+NOTE_ACCENTS[i % NOTE_ACCENTS.length]+'">' +
       '<div class="ncard-head"><span class="ncard-no">'+escapeHtml(String(it.no))+'</span>' +
         '<div><h4>'+escapeHtml(it.name)+'</h4><div class="ncard-tag">'+escapeHtml(it.tag)+'</div></div></div>' +
       (it.desc ? '<p class="ncard-desc">'+escapeHtml(it.desc)+'</p>' : '') +
-      (it.contoh ? '<div class="ncard-contoh"><b>Contoh:</b> '+escapeHtml(it.contoh)+'</div>' : '') +
+      (it.contoh ? '<div class="ncard-contoh"><b>' + T('Contoh:', 'Example:') + '</b> '+escapeHtml(it.contoh)+'</div>' : '') +
       noteDetails(it.details) +
     '</article>';
   }
@@ -3042,12 +3072,12 @@
 
   function renderNoteTopic(t){
     var h = '';
-    h += '<header class="nhero"><h2>'+escapeHtml(t.title)+'</h2><div class="nh-sub">Nota Ringkas Exam</div>' +
+    h += '<header class="nhero"><h2>'+escapeHtml(t.title)+'</h2><div class="nh-sub">' + T('Nota Ringkas Exam', 'Short Exam Notes') + '</div>' +
       '<p class="nh-tag">'+escapeHtml(t.lead.tagline)+'</p>' +
       '<p class="nh-meta">' + (t.istilah ? escapeHtml(t.istilah) + '<br>' : '') + escapeHtml(t.basis) + '</p></header>';
 
     var k = t.key;
-    h += '<div class="nkey"><div class="nk-label">'+escapeHtml(k.label || 'Soalan kunci')+'</div>' +
+    h += '<div class="nkey"><div class="nk-label">'+escapeHtml(k.label || T('Soalan kunci', 'Key question'))+'</div>' +
       (k.q ? '<p class="nk-q">&ldquo;'+escapeHtml(k.q)+'&rdquo;</p>' : '') +
       (k.pills ? '<div class="nk-pills">'+k.pills.map(function(p){ return '<span>'+escapeHtml(p)+'</span>'; }).join('')+'</div>' : '') +
       '<p class="nk-text">'+escapeHtml(k.text)+'</p></div>';
@@ -3056,7 +3086,7 @@
     t.groups.forEach(function(g){
       h += noteHead(g.heading) + '<div class="ngrid'+(g.compact ? ' compact' : '')+'">' +
         g.items.map(function(it){ return noteCard(it, cardIndex++); }).join('') + '</div>';
-      if(g.details) h += '<div class="nsec" style="margin-top:10px;">' + noteDetails(g.details, 'Huraian penuh istilah') + '</div>';
+      if(g.details) h += '<div class="nsec" style="margin-top:10px;">' + noteDetails(g.details, T('Huraian penuh istilah', 'Full explanation of the terms')) + '</div>';
       if(g.note) h += '<p class="ngroup-note">'+escapeHtml(g.note)+'</p>';
     });
 
@@ -3084,13 +3114,13 @@
       h += noteHead(t.notes.heading) + '<ul class="nnotes">' + t.notes.items.map(function(n){ return '<li>'+escapeHtml(n)+'</li>'; }).join('') + '</ul>';
     }
 
-    h += noteHead('Huraian penuh');
-    var intro = { heading: 'Pengenalan', paras: t.lead.paras, refs: t.lead.refs };
+    h += noteHead(T('Huraian penuh', 'Full explanation'));
+    var intro = { heading: T('Pengenalan', 'Introduction'), paras: t.lead.paras, refs: t.lead.refs };
     h += [intro].concat(t.sections).map(function(sec){
       return '<details class="nsec"><summary>'+escapeHtml(sec.heading)+'</summary>' + paras(sec.paras) + refs(sec.refs) + '</details>';
     }).join('');
 
-    h += '<div class="nfoot"><span><b>Rujukan:</b> '+escapeHtml(t.ref)+'</span><span>Disediakan oleh: <b>'+escapeHtml(NOTES.preparedBy)+'</b></span></div>';
+    h += '<div class="nfoot"><span><b>' + T('Rujukan:', 'Reference:') + '</b> '+escapeHtml(t.ref)+'</span><span>' + T('Disediakan oleh: <b>', 'Prepared by: <b>') +escapeHtml(NOTES.preparedBy)+'</b></span></div>';
     return h;
   }
 
@@ -3326,7 +3356,7 @@
     }).catch(function(){
       if(token !== LP.token) return;
       LP.loading = false; LP.switching = true;
-      LP.msg = 'Audio tidak dapat dimuatkan (perlu internet). Beralih ke falsafah seterusnya…';
+      LP.msg = T('Audio tidak dapat dimuatkan (perlu internet). Beralih ke falsafah seterusnya…', 'The audio could not load (internet needed). Moving to the next falsafah…');
       lpUpdateUI();
       setTimeout(function(){ if(token === LP.token) lpNext(); }, 1500);
     });
@@ -3389,7 +3419,7 @@
     if(!LP.active) return;
     if(LP.idx + 1 >= LP.ids.length){
       LP.done = true; clearTimeout(LP.endT); lpAudio.pause(); lpBedOff(); lpCancelFade();
-      LP.msg = 'Selesai. Semua ' + LP.ids.length + ' falsafah dalam julat ini telah didengar.';
+      LP.msg = T('Selesai. Semua ' + LP.ids.length + ' falsafah dalam julat ini telah didengar.', 'Done. You listened to all ' + LP.ids.length + ' falsafah in this range.');
       LP.clips = null; LP.gap = false; lpUpdateUI(); return;
     }
     LP.dir = 1; LP.idx++; lpPlayItem();
@@ -3445,7 +3475,7 @@
   });
   lpAudio.addEventListener('error', function(){
     if(!LP.active || !LP.clips || LP.gap || lpAudio.src === SILENT || !lpAudio.src) return;
-    LP.msg = 'Audio gagal dimainkan. Beralih ke falsafah seterusnya…'; lpUpdateUI();
+    LP.msg = T('Audio gagal dimainkan. Beralih ke falsafah seterusnya…', 'The audio failed to play. Moving to the next falsafah…'); lpUpdateUI();
     var token = LP.token; setTimeout(function(){ if(token === LP.token) lpNext(); }, 1200);
   });
 
@@ -3473,15 +3503,15 @@
   function lpStatusText(){
     if(!LP.active) return '';
     var s = (LP.idx + 1) + '/' + LP.ids.length + ' falsafah';
-    if(LP.gap) return s + ' &middot; ' + (LP.gapThen === 'repeat' ? 'ulang ' + (LP.rep + 1) + '/' + lpSet.repeat + ' dalam ' : 'seterusnya dalam ') + LP.gapLeft + 's';
-    if(lpSet.repeat > 1 && LP.clips) s += ' &middot; ulang ' + (LP.rep + 1) + '/' + lpSet.repeat;
-    if(LP.loading && LP.loadSlow) s += ' &middot; memuatkan…';
+    if(LP.gap) return s + ' &middot; ' + (LP.gapThen === 'repeat' ? T('ulang ', 'repeat ') + (LP.rep + 1) + '/' + lpSet.repeat + T(' dalam ', ' in ') : T('seterusnya dalam ', 'next in ')) + LP.gapLeft + 's';
+    if(lpSet.repeat > 1 && LP.clips) s += ' &middot; ' + T('ulang ', 'repeat ') + (LP.rep + 1) + '/' + lpSet.repeat;
+    if(LP.loading && LP.loadSlow) s += ' &middot; ' + T('memuatkan…', 'loading…');
     return s;
   }
   function lpIcon(){ return lpPlaying() ? '&#10074;&#10074;' : '&#9654;'; }
   function lpVoiceHtml(entry){
     var h = LP.clips ? !!(LP.clips[0] && LP.clips[0].halon) : (lpVoice() !== 'rifai' && hasHalon(entry.id));
-    return 'Suara: ' + (h ? '<b>Dr. HALO-N</b>' : RECITER_NAME);
+    return T('Suara: ', 'Voice: ') + (h ? '<b>Dr. HALO-N</b>' : RECITER_NAME);
   }
   // Spotify-style track change: the old falsafah slides out while the new one slides in from the
   // same side (left for next, right for previous); the controls and progress bar stay still.
@@ -3527,7 +3557,7 @@
   (function loop(){ if(LP.active && !document.hidden) lpProgPaint(); requestAnimationFrame(loop); })();
   function lpTitleHtml(e){ return '<h4>' + e.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(e.title)) + '</h4><div class="lp-meta lp-voice">' + lpVoiceHtml(e) + '</div>'; }
   function lpBodyHtml(e){
-    return lpWordsHtml(e) + '<div class="lp-maksud"><span>Maksud</span>' + escapeHtml(e.text) + '</div>' +
+    return lpWordsHtml(e) + '<div class="lp-maksud"><span>' + T('Maksud', 'Meaning') + '</span>' + escapeHtml(e.text) + (e.textExtra ? ' ' + escapeHtml(e.textExtra.text) : '') + '</div>' +
       '<div class="lp-meta">' + escapeHtml(e.surahDisplay) + '</div>';
   }
   function lpUpdateUI(){
@@ -3540,10 +3570,10 @@
       mp.hidden = lpSheetOpen; document.body.classList.toggle('has-miniplayer', !lpSheetOpen);
       if(!mp.firstElementChild){
         mp.innerHTML =
-          '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda"></button>' +
+          '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="' + T('Main/jeda', 'Play/pause') + '"></button>' +
           '<div class="mp-info lp-car" data-lp="open"></div>' +
-          '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
-          '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&times;</button>' +
+          '<button type="button" class="mp-btn" data-lp="next" aria-label="' + T('Seterusnya', 'Next') + '">&#9197;</button>' +
+          '<button type="button" class="mp-btn" data-lp="stop" aria-label="' + T('Henti', 'Stop') + '">&times;</button>' +
           '<div class="mp-prog"><i></i></div>';
         lpSwipe(mp.querySelector('.mp-info'));
       }
@@ -3557,13 +3587,13 @@
       if(!entry){ now.innerHTML = ''; }
       else {
         if(!now.firstElementChild){
-          now.innerHTML = '<div class="lp-now"><div class="lp-meta">Sedang dimainkan &middot; <span class="lp-status"></span></div>' +
+          now.innerHTML = '<div class="lp-now"><div class="lp-meta">' + T('Sedang dimainkan', 'Now playing') + ' &middot; <span class="lp-status"></span></div>' +
             '<div class="lp-car" id="lpCarTop"></div>' +
             '<div class="lp-prog"><i></i></div>' +
-            '<div class="lp-ctl"><button type="button" class="mp-btn" data-lp="prev" aria-label="Sebelum">&#9198;</button>' +
-            '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="Main/jeda"></button>' +
-            '<button type="button" class="mp-btn" data-lp="next" aria-label="Seterusnya">&#9197;</button>' +
-            '<button type="button" class="mp-btn" data-lp="stop" aria-label="Henti">&#9632;</button></div>' +
+            '<div class="lp-ctl"><button type="button" class="mp-btn" data-lp="prev" aria-label="' + T('Sebelum', 'Previous') + '">&#9198;</button>' +
+            '<button type="button" class="mp-btn main" data-lp="toggle" aria-label="' + T('Main/jeda', 'Play/pause') + '"></button>' +
+            '<button type="button" class="mp-btn" data-lp="next" aria-label="' + T('Seterusnya', 'Next') + '">&#9197;</button>' +
+            '<button type="button" class="mp-btn" data-lp="stop" aria-label="' + T('Henti', 'Stop') + '">&#9632;</button></div>' +
             '<div class="lp-msg"></div>' +
             '<div class="lp-car" id="lpCarBody"></div></div>';
           lpSwipe(document.getElementById('lpCarTop'));
@@ -3618,28 +3648,28 @@
   function openListen(){
     var from = LP.active ? LP.from : studyRange.from, to = LP.active ? LP.to : studyRange.to, H = halonIds().length;
     var html = '<button class="closebtn" id="closeDetail">&times;</button><div class="prog">' +
-      '<h3 class="ptitle">&#127911; Dengar ayat</h3>' +
-      '<p class="psub">' + (H ? 'Bacaan Dr. HALO-N (' + H + ' falsafah, khas untuk pelajar) dan ' : 'Bacaan ') + RECITER_NAME + ' (murattal, Quran.com)</p>' +
+      '<h3 class="ptitle">&#127911; ' + T('Dengar ayat', 'Listen to the ayat') + '</h3>' +
+      '<p class="psub">' + (H ? T('Bacaan Dr. HALO-N (' + H + ' falsafah, khas untuk pelajar) dan ', 'Recitation by Dr. HALO-N (' + H + ' falsafah, for students only) and ') : T('Bacaan ', 'Recitation by ')) + RECITER_NAME + ' (murattal, Quran.com)</p>' +
       '<div id="lpNow"></div>' +
-      (H ? '<div class="lp-set"><label>Suara</label><div class="lp-seg" id="lpVoice">' +
-        [['campur','Campur'],['rifai','Hani ar-Rifai'],['halon','Dr. HALO-N sahaja']].map(function(v){ return '<button type="button" data-voice="' + v[0] + '" class="' + (lpVoice() === v[0] ? 'active' : '') + '">' + v[1] + '</button>'; }).join('') +
+      (H ? '<div class="lp-set"><label>' + T('Suara', 'Voice') + '</label><div class="lp-seg" id="lpVoice">' +
+        [['campur',T('Campur', 'Mixed')],['rifai','Hani ar-Rifai'],['halon',T('Dr. HALO-N sahaja', 'Dr. HALO-N only')]].map(function(v){ return '<button type="button" data-voice="' + v[0] + '" class="' + (lpVoice() === v[0] ? 'active' : '') + '">' + v[1] + '</button>'; }).join('') +
         '</div><p class="pnote" id="lpVoiceNote" style="margin:6px 2px 0;"></p>' +
-        '<div id="lpHalonPick" class="lp-pick"><div class="lp-pick-all"><button type="button" data-hpall="1">Pilih semua</button><button type="button" data-hpall="0">Kosongkan</button></div>' +
+        '<div id="lpHalonPick" class="lp-pick"><div class="lp-pick-all"><button type="button" data-hpall="1">' + T('Pilih semua', 'Select all') + '</button><button type="button" data-hpall="0">' + T('Kosongkan', 'Clear') + '</button></div>' +
           halonIds().map(function(id){ var e = entryById(id); if(!e) return '';
             return '<button type="button" data-hp="' + id + '" class="' + (lpSet.halonSkip.indexOf(id) < 0 ? 'active' : '') + '"><b>' + id + '</b><span>' + escapeHtml(displayTitle(e.title)) + '</span></button>'; }).join('') +
         '</div></div>' : '') +
-      '<div class="lp-set" id="lpRangeSet"><label>Julat</label>' +
-        '<div class="lp-range">Dari <input id="lpFrom" type="number" min="1" max="200" inputmode="numeric" value="' + from + '"> hingga <input id="lpTo" type="number" min="1" max="200" inputmode="numeric" value="' + to + '"></div>' +
-        '<div class="lp-quick"><button type="button" data-r="' + studyRange.from + '-' + studyRange.to + '">Julat kaji saya</button><button type="button" data-r="1-100">Tahun 1</button><button type="button" data-r="101-200">Tahun 2</button><button type="button" data-r="1-200">Semua</button></div></div>' +
-      '<div class="lp-set"><label>Ulang setiap ayat</label><div class="lp-seg" id="lpRep">' +
+      '<div class="lp-set" id="lpRangeSet"><label>' + T('Julat', 'Range') + '</label>' +
+        '<div class="lp-range">' + T('Dari', 'From') + ' <input id="lpFrom" type="number" min="1" max="200" inputmode="numeric" value="' + from + '"> ' + T('hingga', 'to') + ' <input id="lpTo" type="number" min="1" max="200" inputmode="numeric" value="' + to + '"></div>' +
+        '<div class="lp-quick"><button type="button" data-r="' + studyRange.from + '-' + studyRange.to + '">' + T('Julat kaji saya', 'My study range') + '</button><button type="button" data-r="1-100">' + T('Tahun 1', 'Year 1') + '</button><button type="button" data-r="101-200">' + T('Tahun 2', 'Year 2') + '</button><button type="button" data-r="1-200">' + T('Semua', 'All') + '</button></div></div>' +
+      '<div class="lp-set"><label>' + T('Ulang setiap ayat', 'Repeat each ayat') + '</label><div class="lp-seg" id="lpRep">' +
         [1,2,3].map(function(n){ return '<button type="button" data-rep="' + n + '" class="' + (lpSet.repeat === n ? 'active' : '') + '">' + n + '&times;</button>'; }).join('') + '</div></div>' +
-      '<div class="lp-set"><label>Jeda selepas setiap bacaan (termasuk ulangan)</label><div class="lp-seg" id="lpPause">' +
-        GAP_OPTS.map(function(n){ return '<button type="button" data-pause="' + n + '" class="' + (gapSecs() === n ? 'active' : '') + '">' + n + ' saat</button>'; }).join('') + '</div></div>' +
-      '<div class="lp-set"><label>Turutan</label><div class="lp-seg" id="lpOrd">' +
-        '<button type="button" data-ord="nombor" class="' + (lpSet.order === 'nombor' ? 'active' : '') + '">Ikut nombor</button>' +
-        '<button type="button" data-ord="rawak" class="' + (lpSet.order === 'rawak' ? 'active' : '') + '">Rawak</button></div></div>' +
+      '<div class="lp-set"><label>' + T('Jeda selepas setiap bacaan (termasuk ulangan)', 'Pause after each recitation (repeats included)') + '</label><div class="lp-seg" id="lpPause">' +
+        GAP_OPTS.map(function(n){ return '<button type="button" data-pause="' + n + '" class="' + (gapSecs() === n ? 'active' : '') + '">' + n + T(' saat', ' sec') + '</button>'; }).join('') + '</div></div>' +
+      '<div class="lp-set"><label>' + T('Turutan', 'Order') + '</label><div class="lp-seg" id="lpOrd">' +
+        '<button type="button" data-ord="nombor" class="' + (lpSet.order === 'nombor' ? 'active' : '') + '">' + T('Ikut nombor', 'By number') + '</button>' +
+        '<button type="button" data-ord="rawak" class="' + (lpSet.order === 'rawak' ? 'active' : '') + '">' + T('Rawak', 'Random') + '</button></div></div>' +
       '<button type="button" class="lp-go" id="lpGo"></button>' +
-      '<p class="pnote">Selepas mula, anda boleh tutup panel ini dan terus guna aplikasi. Kawalan juga ada di skrin kunci dan butang kereta (Bluetooth / CarPlay). Perlu internet.</p></div>';
+      '<p class="pnote">' + T('Selepas mula, anda boleh tutup panel ini dan terus guna aplikasi. Kawalan juga ada di skrin kunci dan butang kereta (Bluetooth / CarPlay). Perlu internet.', 'Once it starts, you can close this panel and keep using the app. The controls are also on the lock screen and car buttons (Bluetooth / CarPlay). Internet needed.') + '</p></div>';
     var sheet = document.getElementById('detailSheet');
     sheet.innerHTML = html; sheet.scrollTop = 0;
     lpSheetOpen = true;
@@ -3650,10 +3680,10 @@
       var r = rangeVals(), ok = v === 'halon' || (r.from >= 1 && r.to <= 200 && r.from <= r.to), n = ok ? lpPool(r.from, r.to).length : 0;
       document.getElementById('lpRangeSet').classList.toggle('dim', v === 'halon');
       var pick = document.getElementById('lpHalonPick'); if(pick) pick.hidden = v !== 'halon';
-      if(note) note.innerHTML = v === 'halon' ? 'Pilih rakaman yang mahu didengar (' + n + ' daripada ' + H + ' dipilih). Julat tidak digunakan.'
-        : v === 'campur' ? 'Suara Dr. HALO-N bagi falsafah yang ada rakamannya; selebihnya ' + RECITER_NAME + '.' : 'Semua falsafah dengan suara ' + RECITER_NAME + '.';
+      if(note) note.innerHTML = v === 'halon' ? T('Pilih rakaman yang mahu didengar (' + n + ' daripada ' + H + ' dipilih). Julat tidak digunakan.', 'Choose the recordings to hear (' + n + ' of ' + H + ' chosen). The range is not used.')
+        : v === 'campur' ? T('Suara Dr. HALO-N bagi falsafah yang ada rakamannya; selebihnya ' + RECITER_NAME + '.', 'Dr. HALO-N\'s voice for falsafah he recorded; the rest by ' + RECITER_NAME + '.') : T('Semua falsafah dengan suara ' + RECITER_NAME + '.', 'Every falsafah in the voice of ' + RECITER_NAME + '.');
       go.disabled = !n;
-      go.innerHTML = !n ? (v === 'halon' ? 'Pilih sekurang-kurangnya satu rakaman' : 'Julat tidak sah') : (LP.active ? '&#8635; Mula semula dengan tetapan ini (' + n + ' falsafah)' : '&#9654; Mula dengar (' + n + ' falsafah)');
+      go.innerHTML = !n ? (v === 'halon' ? T('Pilih sekurang-kurangnya satu rakaman', 'Choose at least one recording') : T('Julat tidak sah', 'Range not valid')) : (LP.active ? T('&#8635; Mula semula dengan tetapan ini (' + n + ' falsafah)', '&#8635; Start again with these settings (' + n + ' falsafah)') : T('&#9654; Mula dengar (' + n + ' falsafah)', '&#9654; Start listening (' + n + ' falsafah)'));
     }
     fromEl.oninput = toEl.oninput = refreshGo;
     sheet.onclick = function(e){
@@ -3897,13 +3927,13 @@
     var entry = DATA.find(function(e){ return e.id === id; });
     var box = wrap.querySelector('.wbw'), msg = wrap.querySelector('.wbw-msg');
     if(!entry || wrap.classList.contains('wbw-ready')) return;
-    msg.textContent = 'Memuatkan word by word…';
+    msg.textContent = T('Memuatkan word by word…', 'Loading word by word…');
     lpWbwFor(entry).then(function(words){
       box.innerHTML = wordCells(words);
       msg.textContent = '';
       wrap.classList.add('wbw-ready');
     }).catch(function(){
-      msg.textContent = 'Word by word perlukan internet. Cuba lagi sebentar nanti.';
+      msg.textContent = T('Word by word perlukan internet. Cuba lagi sebentar nanti.', 'Word by word needs the internet. Try again in a moment.');
     });
   }
   // Which meaning lines show under each word: English, BM or both (one setting for the whole app)
@@ -3915,7 +3945,7 @@
     document.querySelectorAll('.wbl-seg button').forEach(function(b){ var l = b.getAttribute('data-wbl'); b.classList.toggle('active', wbl === 'both' || wbl === l); b.setAttribute('aria-pressed', String(wbl === 'both' || wbl === l)); });
   }
   function wblSeg(){
-    return '<span class="wbl-seg" role="group" aria-label="Bahasa terjemahan">' +
+    return '<span class="wbl-seg" role="group" aria-label="' + T('Bahasa terjemahan', 'Translation language') + '">' +
       [['en','EN'],['id','BM']].map(function(o){ var on = wbl === 'both' || wbl === o[0]; return '<button type="button" data-wbl="' + o[0] + '" aria-pressed="' + on + '" class="' + (on ? 'active' : '') + '">' + o[1] + '</button>'; }).join('') + '</span>';
   }
   function wordCells(words){
@@ -3998,13 +4028,13 @@
   function renderExtras(entry){
     var html = '<hr class="divider">';
     if(entry.kataKunci && entry.kataKunci.length){
-      html += '<div class="extra-block"><div class="extra-label">Kata kunci falsafah</div>' +
+      html += '<div class="extra-block"><div class="extra-label">' + T('Kata kunci falsafah', 'Keywords') + '</div>' +
         entry.kataKunci.map(function(k){ return '<p class="kata-kunci">' + escapeHtml(k) + '</p>'; }).join('') +
         '</div>';
     }
     if(entry.catitan && entry.catitan.length){
-      html += '<div class="extra-block"><div class="extra-label">Catitan kaedah pembuka mulut' +
-        (entry.catitanShared ? ' &middot; bersama Falsafah ' + entry.catitanShared : '') + '</div>' +
+      html += '<div class="extra-block"><div class="extra-label">' + T('Catitan kaedah pembuka mulut', 'Notes: Method of Ayat Introduction') +
+        (entry.catitanShared ? T(' &middot; bersama Falsafah ', ' &middot; shared with Falsafah ') + entry.catitanShared : '') + '</div>' +
         entry.catitan.map(function(c){
           return splitCatitanLines(c).map(function(line){
             return '<p class="catitan-text">' + escapeHtml(line) + '</p>';
@@ -4012,15 +4042,15 @@
         }).join('') +
         '</div>';
     }
-    if(entry.bookPages) html += '<p class="book-ref">Rujukan: <b>Al-Fathun Nawa Jilid 7, ' + msLabel(entry) + '</b></p>';
+    if(entry.bookPages) html += '<p class="book-ref">' + T('Rujukan: <b>Al-Fathun Nawa Jilid 7, ', 'Reference: <b>Al-Fathun Nawa Volume 7, ') + msLabel(entry) + '</b></p>';
     return html;
   }
   function msLabel(entry){
     var p = entry.bookPages || []; if(!p[0]) return '';
-    return 'ms. ' + p[0] + (p[1] && p[1] !== p[0] ? '\u2013' + p[1] : '');
+    return T('ms. ', p[1] && p[1] !== p[0] ? 'pp. ' : 'p. ') + p[0] + (p[1] && p[1] !== p[0] ? '\u2013' + p[1] : '');
   }
 
-  var CATITAN_ORDINAL_RE = /(?=\b(?:Satu|Dua|Tiga|Empat|Lima|Enam|Tujuh):)/;
+  var CATITAN_ORDINAL_RE = EN ? /(?=\b(?:One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten)\s*:)/ : /(?=\b(?:Satu|Dua|Tiga|Empat|Lima|Enam|Tujuh):)/;
   function splitCatitanLines(text){
     return text.split(CATITAN_ORDINAL_RE).map(function(s){ return s.trim(); }).filter(Boolean);
   }

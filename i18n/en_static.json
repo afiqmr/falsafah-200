@@ -1,0 +1,133 @@
+{
+ "note": "English build only: exact replacements in template.html, each must occur once. build.py applies them.",
+ "pairs": [
+  [
+   "<meta name=\"description\" content=\"Kaji dan hafaz 200 Falsafah Al Quran dari Al Fathun Nawa Jilid 7, dengan ayat asal, ulang kaji jarak masa, kuiz dan penjejakan kemajuan.\">",
+   "<meta name=\"description\" content=\"Study and memorise the 200 Al Quran falsafah of Al Fathun Nawa Volume 7, with the original ayat, spaced review, quizzes and progress tracking.\">"
+  ],
+  [
+   "aria-label=\"Tukar tema terang/gelap\" title=\"Tukar tema terang/gelap\"",
+   "aria-label=\"Switch light/dark theme\" title=\"Switch light/dark theme\""
+  ],
+  [
+   "Pilih tema yang anda suka: <b>terang</b> atau <b>gelap</b>. Tekan butang ini untuk menukar.",
+   "Pick the theme you like: <b>light</b> or <b>dark</b>. Tap this button to switch."
+  ],
+  [
+   "<button class=\"sub\" id=\"greetBtn\" type=\"button\">Jilid 7</button>",
+   "<button class=\"sub\" id=\"greetBtn\" type=\"button\">Volume 7</button>"
+  ],
+  [
+   "<button data-view=\"study\" class=\"active\" role=\"tab\">Kaji</button>",
+   "<button data-view=\"study\" class=\"active\" role=\"tab\">Study</button>"
+  ],
+  [
+   "<button data-view=\"quiz\" role=\"tab\">Kuiz</button>",
+   "<button data-view=\"quiz\" role=\"tab\">Quiz</button>"
+  ],
+  [
+   "<button data-view=\"kemajuan\" role=\"tab\">Progres</button>",
+   "<button data-view=\"kemajuan\" role=\"tab\">Progress</button>"
+  ],
+  [
+   "<button data-view=\"browse\" role=\"tab\">Senarai</button>",
+   "<button data-view=\"browse\" role=\"tab\">List</button>"
+  ],
+  [
+   "<button data-view=\"notes\" role=\"tab\">Nota</button>",
+   "<button data-view=\"notes\" role=\"tab\">Notes</button>"
+  ],
+  [
+   "<h2>Ulang kaji</h2>",
+   "<h2>Review</h2>"
+  ],
+  [
+   "<span id=\"dueGoal\">20</span> falsafah dikaji hari ini</div>",
+   "<span id=\"dueGoal\">20</span> falsafah studied today</div>"
+  ],
+  [
+   "id=\"listenBtn\">&#127911; Dengar</button>",
+   "id=\"listenBtn\">&#127911; Listen</button>"
+  ],
+  [
+   "role=\"tablist\" aria-label=\"Paparan senarai\">",
+   "role=\"tablist\" aria-label=\"List view\">"
+  ],
+  [
+   "<button type=\"button\" data-mode=\"all\" class=\"active\" role=\"tab\">Semua falsafah</button>",
+   "<button type=\"button\" data-mode=\"all\" class=\"active\" role=\"tab\">All falsafah</button>"
+  ],
+  [
+   "<button type=\"button\" data-mode=\"groups\" role=\"tab\">Kumpulan permulaan ayat</button>",
+   "<button type=\"button\" data-mode=\"groups\" role=\"tab\">Groups by opening words</button>"
+  ],
+  [
+   "Falsafah 101&ndash;200 dikumpulkan mengikut perkataan pembukaan ayat yang sama, supaya mudah dihafal. Falsafah tanpa persamaan permulaan tidak dipaparkan.",
+   "Falsafah 101&ndash;200 grouped by the same opening words of the ayat, so they are easier to memorise. Falsafah without a shared opening are not shown."
+  ],
+  [
+   "hidden aria-label=\"Pilih kumpulan\">",
+   "hidden aria-label=\"Choose a group\">"
+  ],
+  [
+   "placeholder=\"Cari nombor, tajuk, surah, kata kunci atau sebutan ayat (cth: wahuwa ma'akum)&hellip;\"",
+   "placeholder=\"Search number, title, surah, keyword or how the ayat sounds (e.g. wahuwa ma'akum)&hellip;\""
+  ],
+  [
+   "<h2 style=\"font-size:20px;\">Kuiz Jilid 7</h2>",
+   "<h2 style=\"font-size:20px;\">Volume 7 Quiz</h2>"
+  ],
+  [
+   "<div class=\"quizscore\">Skor sesi ini:",
+   "<div class=\"quizscore\">This session:"
+  ],
+  [
+   "role=\"tablist\" aria-label=\"Pilih topik nota\">",
+   "role=\"tablist\" aria-label=\"Choose a notes topic\">"
+  ],
+  [
+   "<h3>Salam Sejahtera &amp; Selamat Datang</h3>",
+   "<h3>Assalamualaikum &amp; Welcome</h3>"
+  ],
+  [
+   "<p>Sila nyatakan nama atau panggilan anda untuk mula menggunakan pembantu hafalan ini dalam lembaran pengajian Falsafah Al-Quran.</p>",
+   "<p>Tell us your name or what you like to be called to start using this memory helper for your Al-Quran Philosophy studies.</p>"
+  ],
+  [
+   "placeholder=\"Nama / Gelaran Rasmi\"",
+   "placeholder=\"Name / Title\""
+  ],
+  [
+   "<div class=\"range-label\">Julat falsafah untuk Kaji &amp; Kuiz</div>",
+   "<div class=\"range-label\">Falsafah range for Study &amp; Quiz</div>"
+  ],
+  [
+   "data-to=\"100\">Tahun 1<span>",
+   "data-to=\"100\">Year 1<span>"
+  ],
+  [
+   "data-to=\"200\">Tahun 2<span>",
+   "data-to=\"200\">Year 2<span>"
+  ],
+  [
+   "data-to=\"200\">Semua<span>",
+   "data-to=\"200\">All<span>"
+  ],
+  [
+   "<label>Dari <input type=\"number\" id=\"rangeFrom\"",
+   "<label>From <input type=\"number\" id=\"rangeFrom\""
+  ],
+  [
+   "<label>Hingga <input type=\"number\" id=\"rangeTo\"",
+   "<label>To <input type=\"number\" id=\"rangeTo\""
+  ],
+  [
+   "<button class=\"namebtn\" id=\"nameSaveBtn\">Mulakan Sesi Pengajian</button>",
+   "<button class=\"namebtn\" id=\"nameSaveBtn\">Start studying</button>"
+  ],
+  [
+   "<button class=\"nameskip\" id=\"nameSkipBtn\">Langkau Fasa Ini</button>",
+   "<button class=\"nameskip\" id=\"nameSkipBtn\">Skip for now</button>"
+  ]
+ ]
+}

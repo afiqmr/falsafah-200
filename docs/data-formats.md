@@ -25,6 +25,17 @@ An array of 200 objects, one per falsafah, in number order.
 | `translit`      | string         | Romanised ayat for pronunciation search                            |
 | `bookPages`     | [start, end]   | Printed page numbers in Jilid 7 (PDF page minus 69)                |
 
+### `data_en.json`: the English version
+
+Same fields and ids as `data.json`. `title` is an app translation of the BM title; `text`,
+`kataKunci` and `catitan` come from Al-Fathun Nawa Volume 7 (English edition), and `bookPages` are
+its printed pages (PDF page minus 65). Ayat ranges, `arabic` and `translit` stay as in BM. One extra
+field, `textExtra` `{ ayat, text, source }`, holds Sahih International for class-extended ayat the
+English book does not quote (falsafah 46, 53 and 117).
+
+`notes_en.json` mirrors `notes.json`. `i18n/quiz_en.json` maps each Kuiz id to its English question;
+`build.py` keeps the answers and distractors from `quiz.json`.
+
 Several falsafah share the same ayat (for example 1 to 3 and 4 to 8). The Kuiz validator treats
 any overlap of surah and ayah as the same ayat.
 
@@ -65,6 +76,7 @@ Firestore.
 | `range_v1`           |   ✓    | Chosen julat `{ from, to }`                                      |
 | `username_v1`        |   ✓    | Display name                                                     |
 | `theme_v1`           |   ✓    | `light` or `dark`                                                |
+| `lang_v1`            |   ✓    | `ms` or `en`; the BM page opens `/en/` when `en`                 |
 | `wbw_v1`             |        | Word by word on or off                                           |
 | `wbwlang_v1`         |        | `en`, `id` (BM) or `both`                                        |
 | `wbwwords_v1`        |        | Cached word-by-word tables per falsafah                          |

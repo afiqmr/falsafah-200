@@ -20,6 +20,9 @@ logo-afiq ─┘    and the logo)           head tags, import.js, SW)          s
   its pattern occurs exactly once, so a template change that breaks a substitution fails the build
   instead of shipping silently. It then appends `cloud/cloud_ui.html` with the Firebase config.
 - `index.html` on its own is a complete offline app without accounts.
+- The English build (`index_en.html`, `cloud-test/en/index.html`) uses the same template with
+  `data_en.json`, `notes_en.json`, the English Kuiz text and `i18n/en_static.json`. It shares the
+  icons, manifest and service worker one folder up.
 
 ## Inside the page
 

@@ -176,7 +176,17 @@
 </script>
 <script type="module">
 const CFG = window.FIREBASE_CONFIG;
-const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1', history: 'falsafah200_history_v1', streak: 'falsafah200_streak_v1' };
+const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1', history: 'falsafah200_history_v1', streak: 'falsafah200_streak_v1', lang: 'falsafah200_lang_v1' };
+// Language of this build ('ms' or 'en'), written by build.py. The other build lives at / (BM) or /en/ (English).
+const EN = window.FN_LANG === 'en';
+const T = (ms, en) => EN ? en : ms;
+// Switch language: remember the choice (synced with the account), then open the other build.
+async function switchLang() {
+  try { localStorage.setItem(KEYS.lang, EN ? 'ms' : 'en'); } catch (e) {}
+  try { await push(); } catch (e) {}
+  location.href = EN ? '/' : '/en/';
+}
+const LANG_BTN = () => `<button type="button" class="nameskip acct-lang" id="acctLangGate">${T('English version', 'Versi Bahasa Melayu')}</button>`;
 const ADMIN_EMAILS = ['afiqmonsieur@gmail.com'];   // must match the Firestore rules
 const isAdminUser = () => !!(user && ADMIN_EMAILS.includes((user.email || '').toLowerCase()));
 const SYNCED = new Set(Object.values(KEYS));
@@ -189,13 +199,13 @@ const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return 
 const lsSet = (k, v) => { try { origSet.call(localStorage, k, v); } catch (e) {} };
 const lsDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
 const maskEmail = e => { const [u, d] = String(e).split('@'); return (u.length <= 2 ? u[0] + '*' : u.slice(0, 2) + '***') + '@' + (d || ''); };
-const firstName = n => String(n || '').trim().split(/\s+/)[0] || 'Akaun';
+const firstName = n => String(n || '').trim().split(/\s+/)[0] || T('Akaun', 'Account');
 
 // ---------- header button ----------
 const actions = document.querySelector('.header-actions');
 const btn = document.createElement('button');
 btn.className = 'acctbtn'; btn.id = 'acctBtn'; btn.type = 'button';
-btn.innerHTML = '<i class="dot"></i><span>Log masuk</span>';
+btn.innerHTML = '<i class="dot"></i><span>' + T('Log masuk', 'Log in') + '</span>';
 actions.insertBefore(btn, actions.firstChild);
 function setBtn(state, text) { btn.classList.toggle('on', state === 'on'); btn.classList.toggle('busy', state === 'busy'); btn.querySelector('span').textContent = text; }
 
@@ -256,11 +266,12 @@ const imported = () => { try { return +(sessionStorage.getItem('fn_imported') ||
 function msg(text, kind) { const m = $('acctMsg'); if (m) { m.textContent = text || ''; m.className = 'acct-msg ' + (kind || ''); } }
 const BRAND = '<p class="brand">Al-Fathun Nawa &middot; Falsafah 1&ndash;200</p>';
 const pinInput = (id, ac) => `<input id="${id}" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="${ac}" placeholder="••••••">`;
-const userInput = v => `<input id="fUser" maxlength="20" autocapitalize="none" autocomplete="username" spellcheck="false" placeholder="cth. ahmad_t1" value="${esc(v || '')}">`;
+const userInput = v => `<input id="fUser" maxlength="20" autocapitalize="none" autocomplete="username" spellcheck="false" placeholder="${T('cth. ahmad_t1', 'e.g. ahmad_t1')}" value="${esc(v || '')}">`;
 
 // ---------- Kongsi aplikasi (share from the account menu) ----------
-const SHARE_URL = 'https://falsafah200.vercel.app/';
-const SHARE_TEXT = 'Assalamualaikum. Saya nak kongsi aplikasi Falsafah 200 untuk ulang kaji Al-Fathun Nawa Jilid 7. Semua 200 falsafah ada di sini. Boleh dengar bacaan ayat, uji ingatan, dan tengok mana yang masih lemah. Daftar percuma, kemajuan tersimpan dalam akaun. Cubalah:';
+const SHARE_URL = 'https://falsafah200.vercel.app/' + (EN ? 'en/' : '');
+const SHARE_TEXT = T('Assalamualaikum. Saya nak kongsi aplikasi Falsafah 200 untuk ulang kaji Al-Fathun Nawa Jilid 7. Semua 200 falsafah ada di sini. Boleh dengar bacaan ayat, uji ingatan, dan tengok mana yang masih lemah. Daftar percuma, kemajuan tersimpan dalam akaun. Cubalah:',
+  'Assalamualaikum. Here is the Falsafah 200 app for studying Al-Fathun Nawa Volume 7. All 200 falsafah are in it. You can listen to the ayat, test your memory, and see which ones are still weak. Sign-up is free and your progress is saved in your account. Try it:');
 async function shareApp() {
   if (navigator.share) {
     try { await navigator.share({ title: 'Falsafah 200', text: SHARE_TEXT, url: SHARE_URL }); return; }
@@ -268,29 +279,30 @@ async function shareApp() {
   }
   try {
     await navigator.clipboard.writeText(SHARE_TEXT + ' ' + SHARE_URL);
-    msg('Mesej dan pautan sudah disalin ✓', 'ok');
+    msg(T('Mesej dan pautan sudah disalin ✓', 'Message and link copied ✓'), 'ok');
   } catch (e) {
-    msg('Tidak dapat menyalin. Hantar pautan ini: ' + SHARE_URL);
+    msg(T('Tidak dapat menyalin. Hantar pautan ini: ', 'Could not copy. Send this link: ') + SHARE_URL);
   }
 }
 
 function render() {
-  if (!CFG) { card.innerHTML = BRAND + '<h3>Akaun</h3><p class="sub">Log masuk belum disediakan untuk versi ini.</p>'; return; }
-  if (mode === 'wait') { card.innerHTML = BRAND + '<h3>Selamat datang</h3><div class="acct-spin"></div><p class="sub">Memuatkan…</p>'; return; }
+  if (!CFG) { card.innerHTML = BRAND + T('<h3>Akaun</h3><p class="sub">Log masuk belum disediakan untuk versi ini.</p>', '<h3>Account</h3><p class="sub">Log in is not set up for this version.</p>'); return; }
+  if (mode === 'wait') { card.innerHTML = BRAND + T('<h3>Selamat datang</h3><div class="acct-spin"></div><p class="sub">Memuatkan…</p>', '<h3>Welcome</h3><div class="acct-spin"></div><p class="sub">Loading…</p>'); return; }
   if (mode === 'install') { renderInstall(); return; }
   if (mode === 'account' && user) {
-    const t = lastSync ? lastSync.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' }) : '—';
-    card.innerHTML = `<h3>Akaun anda</h3>
+    const t = lastSync ? lastSync.toLocaleTimeString(T('ms-MY', 'en-GB'), { hour: '2-digit', minute: '2-digit' }) : '—';
+    card.innerHTML = `<h3>${T('Akaun anda', 'Your account')}</h3>
       <div class="acct-who"><b>${esc(profile?.name || '')}</b><span>@${esc(profile?.username || '')} · ${esc(user.email || '')}</span>
-        <button type="button" class="acct-share" id="acctShare" aria-label="Kongsi Falsafah 200"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Kongsi</button></div>
+        <button type="button" class="acct-share" id="acctShare" aria-label="${T('Kongsi Falsafah 200', 'Share Falsafah 200')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>${T('Kongsi', 'Share')}</button></div>
       <p class="acct-msg ok" id="acctMsg">Progress synced ✓ · ${t}</p>
       <button class="namebtn" id="acctSyncNow">Sync progress</button>
-      ${isStandalone() || installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">Pasang di skrin utama</button>' : ''}
-      <button class="namebtn acct-ghost" id="acctPd" style="margin-top:10px">Pandangan</button>
-      <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">Panduan aplikasi</button>
+      ${isStandalone() || installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">' + T('Pasang di skrin utama', 'Add to home screen') + '</button>' : ''}
+      <button class="namebtn acct-ghost" id="acctPd" style="margin-top:10px">${T('Pandangan', 'Reflections')}</button>
+      <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">${T('Panduan aplikasi', 'App guide')}</button>
+      <button class="namebtn acct-ghost" id="acctLang" style="margin-top:10px">${T('English version', 'Versi Bahasa Melayu')}</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">Papan pentadbir</button>' : ''}
-      <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">Log keluar</button><button class="namebtn acct-ghost" id="acctClose">Tutup</button></div>
-      <p class="acct-note">Di telefon atau komputer lain, log masuk dengan nama pengguna & PIN yang sama untuk sambung kemajuan anda.</p>`;
+      <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">${T('Log keluar', 'Log out')}</button><button class="namebtn acct-ghost" id="acctClose">${T('Tutup', 'Close')}</button></div>
+      <p class="acct-note">${T('Di telefon atau komputer lain, log masuk dengan nama pengguna & PIN yang sama untuk sambung kemajuan anda.', 'On another phone or computer, log in with the same username & PIN to carry on with your progress.')}</p>`;
     $('acctSyncNow').onclick = async () => { msg('Syncing…'); dirty = true; await push(); await pullMerge(true); msg('Progress synced ✓', 'ok'); };
     $('acctOut').onclick = logout; $('acctClose').onclick = closeSheet;
     if ($('acctAdmin')) $('acctAdmin').onclick = () => { closeSheet(); openAdmin(); };
@@ -298,22 +310,25 @@ function render() {
     $('acctTour').onclick = () => { closeSheet(); setTimeout(() => window.FN_APP && window.FN_APP.startTour(), 300); };
     $('acctPd').onclick = () => { closeSheet(); openPandangan('tulis'); };
     $('acctShare').onclick = shareApp;
+    $('acctLang').onclick = switchLang;
     return;
   }
   const reg = mode === 'register', last = lsGet(LAST_USER) || '';
-  card.innerHTML = `${BRAND}<h3>${reg ? 'Daftar akaun' : 'Log masuk'}</h3>
-    <p class="sub">${reg ? 'Sekali daftar sahaja. Kemajuan anda disimpan di awan.' : 'Masukkan nama pengguna dan PIN 6 digit anda.'}</p>
-    ${imported() ? `<p class="acct-moved">&#10003; Kemajuan anda dari pautan lama (${imported()} falsafah) sudah dibawa ke sini. ${reg ? 'Daftar' : 'Log masuk atau daftar'} untuk menyimpannya dalam akaun anda.</p>` : ''}
-    <div class="acct-seg"><button type="button" data-m="login" class="${reg ? '' : 'active'}">Log Masuk</button><button type="button" data-m="register" class="${reg ? 'active' : ''}">Daftar</button></div>
-    ${reg ? '<div class="acct-field"><label>Nama penuh</label><input id="fName" maxlength="60" autocomplete="name" placeholder="cth. Ahmad bin Abdullah"></div>' : ''}
-    <div class="acct-field"><label>Nama pengguna</label>${userInput(reg ? '' : last)}</div>
-    ${reg ? '<div class="acct-field"><label>Emel <span style="text-transform:none;letter-spacing:0;font-weight:600">(untuk Lupa PIN)</span></label><input id="fEmail" type="email" maxlength="80" autocapitalize="none" autocomplete="email" spellcheck="false" placeholder="nama@contoh.com"></div>' : ''}
-    <div class="acct-field"><label>PIN 6 digit</label>${pinInput('fPin', reg ? 'new-password' : 'current-password')}</div>
-    ${reg ? `<div class="acct-field"><label>Sahkan PIN</label>${pinInput('fPin2', 'new-password')}</div>` : ''}
+  card.innerHTML = `${BRAND}<h3>${reg ? T('Daftar akaun', 'Create an account') : T('Log masuk', 'Log in')}</h3>
+    <p class="sub">${reg ? T('Sekali daftar sahaja. Kemajuan anda disimpan di awan.', 'Sign up once. Your progress is saved in the cloud.') : T('Masukkan nama pengguna dan PIN 6 digit anda.', 'Enter your username and 6-digit PIN.')}</p>
+    ${imported() ? T(`<p class="acct-moved">&#10003; Kemajuan anda dari pautan lama (${imported()} falsafah) sudah dibawa ke sini. ${reg ? 'Daftar' : 'Log masuk atau daftar'} untuk menyimpannya dalam akaun anda.</p>`, `<p class="acct-moved">&#10003; Your progress from the old link (${imported()} falsafah) is here. ${reg ? 'Sign up' : 'Log in or sign up'} to keep it in your account.</p>`) : ''}
+    <div class="acct-seg"><button type="button" data-m="login" class="${reg ? '' : 'active'}">${T('Log Masuk', 'Log in')}</button><button type="button" data-m="register" class="${reg ? 'active' : ''}">${T('Daftar', 'Sign up')}</button></div>
+    ${reg ? T('<div class="acct-field"><label>Nama penuh</label><input id="fName" maxlength="60" autocomplete="name" placeholder="cth. Ahmad bin Abdullah"></div>', '<div class="acct-field"><label>Full name</label><input id="fName" maxlength="60" autocomplete="name" placeholder="e.g. Ahmad bin Abdullah"></div>') : ''}
+    <div class="acct-field"><label>${T('Nama pengguna', 'Username')}</label>${userInput(reg ? '' : last)}</div>
+    ${reg ? T('<div class="acct-field"><label>Emel <span style="text-transform:none;letter-spacing:0;font-weight:600">(untuk Lupa PIN)</span></label><input id="fEmail" type="email" maxlength="80" autocapitalize="none" autocomplete="email" spellcheck="false" placeholder="nama@contoh.com"></div>', '<div class="acct-field"><label>Email <span style="text-transform:none;letter-spacing:0;font-weight:600">(for Forgot PIN)</span></label><input id="fEmail" type="email" maxlength="80" autocapitalize="none" autocomplete="email" spellcheck="false" placeholder="name@example.com"></div>') : ''}
+    <div class="acct-field"><label>${T('PIN 6 digit', '6-digit PIN')}</label>${pinInput('fPin', reg ? 'new-password' : 'current-password')}</div>
+    ${reg ? `<div class="acct-field"><label>${T('Sahkan PIN', 'Confirm PIN')}</label>${pinInput('fPin2', 'new-password')}</div>` : ''}
     <p class="acct-msg" id="acctMsg"></p>
-    <button class="namebtn" id="acctGo">${reg ? 'Daftar' : 'Log masuk'}</button>
-    ${reg ? '' : '<button class="nameskip" id="acctForgot" type="button">Lupa PIN?</button>'}
-    <p class="acct-note">${reg ? 'Nama pengguna: 3–20 huruf kecil, nombor, _ atau . Kami simpan nama, nama pengguna, emel dan kemajuan hafalan anda sahaja.' : 'Belum ada akaun? Tekan Daftar.'}</p>`;
+    <button class="namebtn" id="acctGo">${reg ? T('Daftar', 'Sign up') : T('Log masuk', 'Log in')}</button>
+    ${reg ? '' : '<button class="nameskip" id="acctForgot" type="button">' + T('Lupa PIN?', 'Forgot PIN?') + '</button>'}
+    <p class="acct-note">${reg ? T('Nama pengguna: 3–20 huruf kecil, nombor, _ atau . Kami simpan nama, nama pengguna, emel dan kemajuan hafalan anda sahaja.', 'Username: 3–20 lowercase letters, numbers, _ or . We keep only your name, username, email and study progress.') : T('Belum ada akaun? Tekan Daftar.', 'No account yet? Tap Sign up.')}</p>
+    ${LANG_BTN()}`;
+  $('acctLangGate').onclick = switchLang;
   card.querySelectorAll('.acct-seg button').forEach(b => b.onclick = () => { mode = b.dataset.m; render(); });
   $('acctGo').onclick = reg ? register : login;
   if (!reg) $('acctForgot').onclick = forgot;
@@ -326,7 +341,17 @@ const cleanUser = u => (u || '').trim().toLowerCase();
 const validUser = u => /^[a-z0-9_.]{3,20}$/.test(u);
 const cleanEmail = e => (e || '').trim().toLowerCase();
 const validEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
-const ERR = c => ({
+const ERR = c => (EN ? {
+  'auth/email-already-in-use': 'This email is already used by another account.',
+  'auth/invalid-email': 'That email is not valid.',
+  'auth/invalid-credential': 'Wrong username or PIN.', 'auth/wrong-password': 'Wrong username or PIN.', 'auth/user-not-found': 'Wrong username or PIN.',
+  'auth/invalid-login-credentials': 'Wrong username or PIN.',
+  'auth/too-many-requests': 'Too many tries. Try again in a few minutes.',
+  'auth/network-request-failed': 'No internet connection. Try again.',
+  'auth/operation-not-allowed': 'Log in is not switched on in Firebase (Email/Password).',
+  'unavailable': 'No internet connection. Try again.',
+  'permission-denied': 'The database refused access. Check the Firestore rules.'
+} : {
   'auth/email-already-in-use': 'Emel ini sudah didaftarkan dengan akaun lain.',
   'auth/invalid-email': 'Emel tidak sah.',
   'auth/invalid-credential': 'Nama pengguna atau PIN salah.', 'auth/wrong-password': 'Nama pengguna atau PIN salah.', 'auth/user-not-found': 'Nama pengguna atau PIN salah.',
@@ -336,7 +361,7 @@ const ERR = c => ({
   'auth/operation-not-allowed': 'Log masuk belum diaktifkan di Firebase (Email/Password).',
   'unavailable': 'Tiada sambungan internet. Cuba lagi.',
   'permission-denied': 'Pangkalan data menolak akses. Semak peraturan Firestore.'
-}[c] || 'Ralat: ' + c);
+})[c] || T('Ralat: ', 'Error: ') + c;
 
 // ---------- Add to home screen ----------
 const UA = navigator.userAgent;
@@ -359,58 +384,79 @@ const ICO_ADD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 function renderInstall() {
   const k = installDone ? 'done' : installKind(!installFromReg);
   const inApp = isStandalone();
-  const later = installFromReg ? 'Nanti, teruskan dahulu' : 'Tutup';
+  const later = installFromReg ? T('Nanti, teruskan dahulu', 'Later, carry on for now') : T('Tutup', 'Close');
   const uname = esc(profile?.username || lsGet(LAST_USER) || '');
   let body = '', main = '';
+  const site = 'falsafah200.vercel.app' + (EN ? '/en' : '');
   if (k === 'done') {
     body = (isStandalone() && !installDone)
-      ? '<p class="sub">Anda sedang guna Falsafah 200 dari ikon di skrin utama. ✓</p><p class="sub">Jika ikon terpadam: buka <b>falsafah200.vercel.app</b> di ' + (isIOS ? 'Safari' : 'Chrome') + ', tekan butang nama anda di atas, kemudian <b>Pasang di skrin utama</b>.</p>'
-      : '<p class="sub">Siap! Ikon <b>Falsafah 200</b> kini di skrin utama telefon anda. Buka dari situ bila-bila masa.</p>';
-    main = `<button class="namebtn" id="instLater">${installFromReg ? 'Teruskan' : 'Tutup'}</button>`;
+      ? T('<p class="sub">Anda sedang guna Falsafah 200 dari ikon di skrin utama. ✓</p><p class="sub">Jika ikon terpadam: buka <b>falsafah200.vercel.app</b> di ' + (isIOS ? 'Safari' : 'Chrome') + ', tekan butang nama anda di atas, kemudian <b>Pasang di skrin utama</b>.</p>',
+          '<p class="sub">You are using Falsafah 200 from the icon on your home screen. ✓</p><p class="sub">If the icon is deleted: open <b>' + site + '</b> in ' + (isIOS ? 'Safari' : 'Chrome') + ', tap your name button at the top, then <b>Add to home screen</b>.</p>')
+      : T('<p class="sub">Siap! Ikon <b>Falsafah 200</b> kini di skrin utama telefon anda. Buka dari situ bila-bila masa.</p>', '<p class="sub">Done! The <b>Falsafah 200</b> icon is now on your home screen. Open it from there any time.</p>');
+    main = `<button class="namebtn" id="instLater">${installFromReg ? T('Teruskan', 'Continue') : T('Tutup', 'Close')}</button>`;
   } else if (k === 'prompt') {
-    body = '<p class="sub">Satu tekan sahaja. Buka Falsafah 200 terus dari skrin telefon, penuh skrin, tanpa bar pelayar.</p>';
-    main = `<button class="namebtn" id="instGo">Pasang sekarang</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
+    body = T('<p class="sub">Satu tekan sahaja. Buka Falsafah 200 terus dari skrin telefon, penuh skrin, tanpa bar pelayar.</p>', '<p class="sub">One tap. Open Falsafah 200 straight from your phone screen, full screen, with no browser bar.</p>');
+    main = `<button class="namebtn" id="instGo">${T('Pasang sekarang', 'Install now')}</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
   } else if (k === 'ios') {
-    body = (inApp ? `<div class="inst-box">Langkah ini perlu dibuat dalam <b>Safari</b>. Buka Safari, taip <b>falsafah200.vercel.app</b>, kemudian ikut langkah di bawah. Jika anda dibawa ke sini dari aplikasi lain, tekan <b>Buka dalam Safari</b> dahulu.</div>` : '') +
+    body = EN ? ((inApp ? `<div class="inst-box">This has to be done in <b>Safari</b>. Open Safari, type <b>${site}</b>, then follow the steps below. If another app brought you here, tap <b>Open in Safari</b> first.</div>` : '') +
+      `<p class="sub">Apple does not allow a one-tap install. Follow these 3 steps (10 seconds):</p>
+      <ol class="inst-steps">
+        <li><span>Tap the Share icon <span class="inst-ico">${ICO_SHARE}</span> on the Safari bar. If it is not there, tap <span class="inst-ico">&middot;&middot;&middot;</span> first, then Share.</span></li>
+        <li><span>Scroll down and choose <b>Add to Home Screen</b> <span class="inst-ico">${ICO_ADD}</span>.</span></li>
+        <li><span>Tap <b>Add</b> in the top corner.</span></li>
+      </ol>
+      <div class="inst-box">Then open the <b>Falsafah 200</b> icon on your home screen and log in once more with username <b>${uname}</b> and your PIN. Your progress stays safe.</div>`)
+      : ((inApp ? `<div class="inst-box">Langkah ini perlu dibuat dalam <b>Safari</b>. Buka Safari, taip <b>falsafah200.vercel.app</b>, kemudian ikut langkah di bawah. Jika anda dibawa ke sini dari aplikasi lain, tekan <b>Buka dalam Safari</b> dahulu.</div>` : '') +
       `<p class="sub">Apple tidak benarkan pasang dengan satu tekan. Ikut 3 langkah ini (10 saat):</p>
       <ol class="inst-steps">
         <li><span>Tekan ikon Kongsi <span class="inst-ico">${ICO_SHARE}</span> pada bar Safari. Jika tiada, tekan <span class="inst-ico">&middot;&middot;&middot;</span> dahulu, kemudian Kongsi.</span></li>
         <li><span>Leret ke bawah, pilih <b>Tambah ke Skrin Utama</b> <span class="inst-ico">${ICO_ADD}</span> (<i>Add to Home Screen</i>).</span></li>
         <li><span>Tekan <b>Tambah</b> (<i>Add</i>) di penjuru atas.</span></li>
       </ol>
-      <div class="inst-box">Kemudian buka ikon <b>Falsafah 200</b> di skrin utama dan log masuk sekali lagi dengan nama pengguna <b>${uname}</b> dan PIN anda. Kemajuan anda tetap selamat.</div>`;
-    main = `<button class="namebtn" id="instIosDone">Saya sudah pasang</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
+      <div class="inst-box">Kemudian buka ikon <b>Falsafah 200</b> di skrin utama dan log masuk sekali lagi dengan nama pengguna <b>${uname}</b> dan PIN anda. Kemajuan anda tetap selamat.</div>`);
+    main = `<button class="namebtn" id="instIosDone">${T('Saya sudah pasang', 'I have added it')}</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
   } else if (k === 'android') {
-    body = (inApp ? `<div class="inst-box">Langkah ini perlu dibuat dalam <b>Chrome</b>. Buka Chrome, taip <b>falsafah200.vercel.app</b>, kemudian ikut langkah di bawah.</div>` : '') + `<ol class="inst-steps">
+    body = EN ? ((inApp ? `<div class="inst-box">This has to be done in <b>Chrome</b>. Open Chrome, type <b>${site}</b>, then follow the steps below.</div>` : '') + `<ol class="inst-steps">
+        <li><span>Tap the menu <span class="inst-ico">&#8942;</span> in the top corner of the browser.</span></li>
+        <li><span>Choose <b>Install app</b> or <b>Add to Home screen</b>.</span></li>
+        <li><span>Tap <b>Install</b>.</span></li>
+      </ol>`)
+      : ((inApp ? `<div class="inst-box">Langkah ini perlu dibuat dalam <b>Chrome</b>. Buka Chrome, taip <b>falsafah200.vercel.app</b>, kemudian ikut langkah di bawah.</div>` : '') + `<ol class="inst-steps">
         <li><span>Tekan menu <span class="inst-ico">&#8942;</span> di penjuru atas pelayar.</span></li>
         <li><span>Pilih <b>Pasang aplikasi</b> atau <b>Tambah ke skrin utama</b> (<i>Install app / Add to Home screen</i>).</span></li>
         <li><span>Tekan <b>Pasang</b> (<i>Install</i>).</span></li>
-      </ol>`;
-    main = `<button class="namebtn" id="instLater">${installFromReg ? 'Teruskan' : 'Tutup'}</button>`;
+      </ol>`);
+    main = `<button class="namebtn" id="instLater">${installFromReg ? T('Teruskan', 'Continue') : T('Tutup', 'Close')}</button>`;
   } else if (k === 'inapp') {
-    body = `<p class="sub">Anda membuka pautan ini di dalam aplikasi lain (cth. WhatsApp, Instagram). Pemasangan hanya boleh dibuat di ${isIOS ? 'Safari' : 'Chrome'}.</p>
+    body = EN ? `<p class="sub">You opened this link inside another app (e.g. WhatsApp, Instagram). Installing only works in ${isIOS ? 'Safari' : 'Chrome'}.</p>
+      <ol class="inst-steps">
+        <li><span>Tap <b>Copy link</b> below.</span></li>
+        <li><span>Open <b>${isIOS ? 'Safari' : 'Chrome'}</b>, paste the link, and log in with username <b>${uname}</b>.</span></li>
+        <li><span>There, open <b>Account &rsaquo; Add to home screen</b>.</span></li>
+      </ol>`
+      : `<p class="sub">Anda membuka pautan ini di dalam aplikasi lain (cth. WhatsApp, Instagram). Pemasangan hanya boleh dibuat di ${isIOS ? 'Safari' : 'Chrome'}.</p>
       <ol class="inst-steps">
         <li><span>Tekan <b>Salin pautan</b> di bawah.</span></li>
         <li><span>Buka <b>${isIOS ? 'Safari' : 'Chrome'}</b>, tampal pautan, dan log masuk dengan nama pengguna <b>${uname}</b>.</span></li>
         <li><span>Di sana, buka <b>Akaun &rsaquo; Pasang di skrin utama</b>.</span></li>
       </ol>`;
-    main = `<button class="namebtn" id="instCopy">Salin pautan</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
+    main = `<button class="namebtn" id="instCopy">${T('Salin pautan', 'Copy link')}</button><button class="nameskip" id="instLater" type="button">${later}</button>`;
   }
-  card.innerHTML = `<img class="inst-logo" src="icons/logo-240.png" alt="">
-    <h3>${k === 'done' ? (isStandalone() && !installDone ? 'Sudah di skrin utama' : 'Berjaya dipasang') : 'Pasang di skrin utama'}</h3>${body}
+  card.innerHTML = `<img class="inst-logo" src="${EN ? '../' : ''}icons/logo-240.png" alt="">
+    <h3>${k === 'done' ? (isStandalone() && !installDone ? T('Sudah di skrin utama', 'Already on your home screen') : T('Berjaya dipasang', 'Installed')) : T('Pasang di skrin utama', 'Add to home screen')}</h3>${body}
     <p class="acct-msg ok" id="acctMsg">${esc(installNote)}</p>${main}`;
   const later_ = () => { installNote = ''; if (installFromReg) { installFromReg = false; afterLogin(); } else closeSheet(); };
   $('instLater').onclick = later_;
   if ($('instGo')) $('instGo').onclick = async () => {
     const e = window.__bip; if (!e) { render(); return; }
     window.__bip = null;
-    try { e.prompt(); const r = await e.userChoice; if (r && r.outcome === 'accepted') installDone = true; else installNote = 'Tidak mengapa. Anda boleh pasang kemudian di menu Akaun.'; } catch (err) {}
+    try { e.prompt(); const r = await e.userChoice; if (r && r.outcome === 'accepted') installDone = true; else installNote = T('Tidak mengapa. Anda boleh pasang kemudian di menu Akaun.', 'No problem. You can install it later from the Account menu.'); } catch (err) {}
     render();
   };
-  if ($('instIosDone')) $('instIosDone').onclick = () => { installNote = 'Bagus! Sekarang tutup Safari dan buka ikon Falsafah 200 di skrin utama.'; render(); };
+  if ($('instIosDone')) $('instIosDone').onclick = () => { installNote = T('Bagus! Sekarang tutup Safari dan buka ikon Falsafah 200 di skrin utama.', 'Good! Now close Safari and open the Falsafah 200 icon on your home screen.'); render(); };
   if ($('instCopy')) $('instCopy').onclick = async () => {
     const url = location.origin + location.pathname;
-    try { await navigator.clipboard.writeText(url); installNote = 'Pautan disalin. Tampal di ' + (isIOS ? 'Safari' : 'Chrome') + '.'; }
+    try { await navigator.clipboard.writeText(url); installNote = T('Pautan disalin. Tampal di ', 'Link copied. Paste it in ') + (isIOS ? 'Safari' : 'Chrome') + '.'; }
     catch (err) { installNote = url; }
     render();
   };
@@ -435,12 +481,12 @@ async function emailFor(u) { const s = await fb.F.getDoc(nameDoc(u)); return s.e
 
 async function register() {
   const name = ($('fName').value || '').trim().replace(/\s+/g, ' '), u = cleanUser($('fUser').value), email = cleanEmail($('fEmail').value), p = $('fPin').value, p2 = $('fPin2').value;
-  if (name.length < 3) return msg('Sila isi nama penuh anda.', 'err');
-  if (!validUser(u)) return msg('Nama pengguna: 3–20 huruf kecil, nombor, _ atau .', 'err');
-  if (!validEmail(email)) return msg('Sila isi emel yang sah.', 'err');
-  if (!/^\d{6}$/.test(p)) return msg('PIN mesti 6 digit nombor.', 'err');
-  if (p !== p2) return msg('PIN tidak sepadan.', 'err');
-  msg('Mendaftar…'); $('acctGo').disabled = true; registering = true;
+  if (name.length < 3) return msg(T('Sila isi nama penuh anda.', 'Please enter your full name.'), 'err');
+  if (!validUser(u)) return msg(T('Nama pengguna: 3–20 huruf kecil, nombor, _ atau .', 'Username: 3–20 lowercase letters, numbers, _ or .'), 'err');
+  if (!validEmail(email)) return msg(T('Sila isi emel yang sah.', 'Please enter a valid email.'), 'err');
+  if (!/^\d{6}$/.test(p)) return msg(T('PIN mesti 6 digit nombor.', 'The PIN must be 6 digits.'), 'err');
+  if (p !== p2) return msg(T('PIN tidak sepadan.', 'The PINs do not match.'), 'err');
+  msg(T('Mendaftar…', 'Signing up…')); $('acctGo').disabled = true; registering = true;
   let cred = null;
   try {
     await loadFb();
@@ -456,33 +502,33 @@ async function register() {
     else openInstall(true);   // registering stays true so the sign-in listener leaves this screen alone
   } catch (e) {
     registering = false;
-    msg(e.code === 'username-taken' ? 'Nama pengguna ini sudah digunakan. Cuba nama lain.' : ERR(e.code || e.message), 'err');
+    msg(e.code === 'username-taken' ? T('Nama pengguna ini sudah digunakan. Cuba nama lain.', 'This username is taken. Try another one.') : ERR(e.code || e.message), 'err');
     const g = $('acctGo'); if (g) g.disabled = false;
   }
 }
 async function login() {
   const u = cleanUser($('fUser').value), p = $('fPin').value;
-  if (!validUser(u)) return msg('Masukkan nama pengguna anda.', 'err');
-  if (!/^\d{6}$/.test(p)) return msg('Masukkan PIN 6 digit.', 'err');
-  msg('Log masuk…'); $('acctGo').disabled = true;
+  if (!validUser(u)) return msg(T('Masukkan nama pengguna anda.', 'Enter your username.'), 'err');
+  if (!/^\d{6}$/.test(p)) return msg(T('Masukkan PIN 6 digit.', 'Enter your 6-digit PIN.'), 'err');
+  msg(T('Log masuk…', 'Logging in…')); $('acctGo').disabled = true;
   try {
     await loadFb();
     const email = await emailFor(u);
     if (!email) throw { code: 'auth/invalid-credential' };
     await fb.A.signInWithEmailAndPassword(fb.auth, email, p);
     lsSet(LAST_USER, u);
-    msg('Berjaya! Memuatkan kemajuan anda…', 'ok');   // onAuthStateChanged takes over
+    msg(T('Berjaya! Memuatkan kemajuan anda…', 'Done! Loading your progress…'), 'ok');   // onAuthStateChanged takes over
   } catch (e) { msg(ERR(e.code || e.message), 'err'); const g = $('acctGo'); if (g) g.disabled = false; const f = $('fPin'); if (f) { f.value = ''; f.focus(); } }
 }
 async function forgot() {
   const u = cleanUser($('fUser').value);
-  if (!validUser(u)) return msg('Isi nama pengguna anda dahulu, kemudian tekan Lupa PIN.', 'err');
+  if (!validUser(u)) return msg(T('Isi nama pengguna anda dahulu, kemudian tekan Lupa PIN.', 'Enter your username first, then tap Forgot PIN.'), 'err');
   try {
     await loadFb();
     const email = await emailFor(u);
-    if (!email) return msg('Nama pengguna tidak dijumpai.', 'err');
+    if (!email) return msg(T('Nama pengguna tidak dijumpai.', 'Username not found.'), 'err');
     await fb.A.sendPasswordResetEmail(fb.auth, email);
-    msg(`Pautan tetapan semula dihantar ke ${maskEmail(email)}. Tetapkan PIN 6 digit baharu (nombor sahaja). Semak juga folder Spam.`, 'ok');
+    msg(T(`Pautan tetapan semula dihantar ke ${maskEmail(email)}. Tetapkan PIN 6 digit baharu (nombor sahaja). Semak juga folder Spam.`, `A reset link was sent to ${maskEmail(email)}. Set a new 6-digit PIN (numbers only). Check your Spam folder too.`), 'ok');
   } catch (e) { msg(ERR(e.code || e.message), 'err'); }
 }
 async function logout() {
@@ -559,6 +605,7 @@ function merge(local, remote) {
   out.username = remote.username || local.username; if (!out.username) delete out.username;
   out.range = remote.range || local.range; if (!out.range) delete out.range;
   out.theme = local.theme || remote.theme; if (!out.theme) delete out.theme;
+  out.lang = local.lang || remote.lang; if (!out.lang) delete out.lang;
   const h = mergeHistory(parse(local.history), parse(remote.history)); if (h) out.history = JSON.stringify(h);
   const sl = parse(local.streak), sr = parse(remote.streak);   // days with both daily targets met, from either device
   if (sl || sr) out.streak = JSON.stringify({ days: [...new Set([...((sl && sl.days) || []), ...((sr && sr.days) || [])])].sort().slice(-400) });
@@ -818,13 +865,13 @@ function closeAdmin() { panel.classList.remove('active'); document.body.style.ov
 // pandangan/{auto id}: uid, name, username, title, ids[1-5], text, status baru|terbit|simpan, deleted, createdAt
 // A student's "Padam" only hides it from the student (deleted: true); the admin still sees it.
 const PD_MAX = 5, PD_MIN_TEXT = 30, PD_MAX_TEXT = 1500, PD_MAX_TITLE = 80;
-const PD_STATUS = { baru: 'Menunggu semakan', terbit: 'Diterbitkan', simpan: 'Disemak, tidak diterbitkan' };
+const PD_STATUS = EN ? { baru: 'Waiting for review', terbit: 'Published', simpan: 'Reviewed, not published' } : { baru: 'Menunggu semakan', terbit: 'Diterbitkan', simpan: 'Disemak, tidak diterbitkan' };
 const pdPanel = $('pdPanel');
 const pd = { tab: 'tulis', ids: [], title: '', text: '', filter: 0, mine: null, pub: null };
 const pdCol = () => fb.F.collection(fb.db, 'pandangan');
 const pdDoc = id => fb.F.doc(fb.db, 'pandangan', id);
 const pdTime = v => (v && v.toDate ? v.toDate().getTime() : 0);
-const pdWhen = v => { const t = pdTime(v); return t ? new Date(t).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' }) : 'baru tadi'; };
+const pdWhen = v => { const t = pdTime(v); return t ? new Date(t).toLocaleDateString(T('ms-MY', 'en-GB'), { day: 'numeric', month: 'short', year: 'numeric' }) : T('baru tadi', 'just now'); };
 const pdTags = (ids, btn) => '<div class="pd-tags">' + (ids || []).map(id => { const e = byId(id); return e ? (btn ? `<button type="button" class="pd-tag" data-f="${e.id}">` : '<span class="pd-tag">') + `${e.id} · ${esc(title(e))}` + (btn ? '</button>' : '</span>') : ''; }).join('') + '</div>';
 async function pdLoad(q) { const snap = await fb.F.getDocs(q); const out = []; snap.forEach(d => out.push(Object.assign({ id: d.id }, d.data()))); return out; }
 
@@ -837,9 +884,9 @@ function openPandangan(tab, id) {
 }
 function closePandangan() { pdPanel.classList.remove('active'); document.body.style.overflow = ''; }
 function pdRender() {
-  const tabs = [['tulis', 'Tulis'], ['saya', 'Pandangan saya'], ['pelajar', 'Pandangan pelajar']];
-  pdPanel.innerHTML = `<div class="pd"><div class="adm-top"><h2>Pandangan</h2><button id="pdClose">Tutup</button></div>
-    <p class="adm-sub">Kongsi bagaimana ayat dan falsafah ini berkait dengan kehidupan anda, atau dengan ayat lain.</p>
+  const tabs = [['tulis', T('Tulis', 'Write')], ['saya', T('Pandangan saya', 'My reflections')], ['pelajar', T('Pandangan pelajar', 'Students\' reflections')]];
+  pdPanel.innerHTML = `<div class="pd"><div class="adm-top"><h2>${T('Pandangan', 'Reflections')}</h2><button id="pdClose">${T('Tutup', 'Close')}</button></div>
+    <p class="adm-sub">${T('Kongsi bagaimana ayat dan falsafah ini berkait dengan kehidupan anda, atau dengan ayat lain.', 'Share how this ayat and falsafah connect to your life, or to other ayat.')}</p>
     <div class="pd-tabs" role="tablist">${tabs.map(t => `<button type="button" role="tab" data-t="${t[0]}" class="${pd.tab === t[0] ? 'active' : ''}">${t[1]}</button>`).join('')}</div>
     <div id="pdBody"></div></div>`;
   $('pdClose').onclick = closePandangan;
@@ -851,35 +898,35 @@ function pdSaveDraft() { if ($('pdTitle')) pd.title = $('pdTitle').value; if ($(
 function pdWrite(note) {
   const body = $('pdBody');
   body.innerHTML = `
-    <div class="pd-field"><label>Pengarang</label><div class="pd-author"><b>${esc(profile?.name || '')}</b> <span>@${esc(profile?.username || '')}</span></div></div>
-    <div class="pd-field"><label for="pdTitle">Tajuk</label><input id="pdTitle" class="pd-input" maxlength="${PD_MAX_TITLE}" placeholder="cth. Rezeki datang bersama usaha" value="${esc(pd.title)}"></div>
-    <div class="pd-field"><label for="pdFind">Falsafah / ayat yang dikaitkan</label>
+    <div class="pd-field"><label>${T('Pengarang', 'Author')}</label><div class="pd-author"><b>${esc(profile?.name || '')}</b> <span>@${esc(profile?.username || '')}</span></div></div>
+    <div class="pd-field"><label for="pdTitle">${T('Tajuk', 'Title')}</label><input id="pdTitle" class="pd-input" maxlength="${PD_MAX_TITLE}" placeholder="${T('cth. Rezeki datang bersama usaha', 'e.g. Sustenance comes with effort')}" value="${esc(pd.title)}"></div>
+    <div class="pd-field"><label for="pdFind">${T('Falsafah / ayat yang dikaitkan', 'Linked falsafah / ayat')}</label>
       <div class="pd-chips" id="pdChips"></div>
-      <input id="pdFind" class="pd-input" autocomplete="off" placeholder="Cari nombor, tajuk atau surah…">
+      <input id="pdFind" class="pd-input" autocomplete="off" placeholder="${T('Cari nombor, tajuk atau surah…', 'Search number, title or surah…')}">
       <ul class="pd-sugg" id="pdSugg" hidden></ul>
       <div class="pd-ayat" id="pdAyat" lang="ar" dir="rtl"></div>
       <p class="pd-count" id="pdIdsNote"></p></div>
-    <div class="pd-field"><label for="pdText">Pandangan anda</label>
-      <textarea id="pdText" class="pd-input" maxlength="${PD_MAX_TEXT}" placeholder="Terangkan kaitan ayat ini dengan kehidupan anda, atau bagaimana ayat-ayat yang dipilih saling berhubung. Beri contoh.">${esc(pd.text)}</textarea>
+    <div class="pd-field"><label for="pdText">${T('Pandangan anda', 'Your reflection')}</label>
+      <textarea id="pdText" class="pd-input" maxlength="${PD_MAX_TEXT}" placeholder="${T('Terangkan kaitan ayat ini dengan kehidupan anda, atau bagaimana ayat-ayat yang dipilih saling berhubung. Beri contoh.', 'Explain how this ayat connects to your life, or how the chosen ayat relate to each other. Give an example.')}">${esc(pd.text)}</textarea>
       <p class="pd-count" id="pdCount"></p></div>
     <p class="acct-msg ${note ? 'ok' : ''}" id="pdMsg">${note ? esc(note) : ''}</p>
-    <button class="pd-send" id="pdSend">Hantar kepada pentadbir</button>
-    <p class="acct-note">Pandangan anda dibaca oleh pentadbir dahulu. Hanya yang diterbitkan boleh dibaca pelajar lain, bersama nama penuh anda.</p>`;
+    <button class="pd-send" id="pdSend">${T('Hantar kepada pentadbir', 'Send to the admin')}</button>
+    <p class="acct-note">${T('Pandangan anda dibaca oleh pentadbir dahulu. Hanya yang diterbitkan boleh dibaca pelajar lain, bersama nama penuh anda.', 'The admin reads your reflection first. Only published ones can be read by other students, with your full name.')}</p>`;
   const chips = () => {
-    $('pdChips').innerHTML = pd.ids.map((id, k) => { const e = byId(id); return `<span class="pd-chip">${k === 0 ? '<i>Utama</i>' : ''}<span>${e.id} · ${esc(title(e))}</span><button type="button" data-x="${e.id}" aria-label="Buang falsafah ${e.id}">&times;</button></span>`; }).join('');
+    $('pdChips').innerHTML = pd.ids.map((id, k) => { const e = byId(id); return `<span class="pd-chip">${k === 0 ? '<i>' + T('Utama', 'Main') + '</i>' : ''}<span>${e.id} · ${esc(title(e))}</span><button type="button" data-x="${e.id}" aria-label="${T('Buang falsafah ', 'Remove falsafah ')}${e.id}">&times;</button></span>`; }).join('');
     const main = byId(pd.ids[0]);
     $('pdAyat').textContent = main ? main.arabic : '';
-    $('pdIdsNote').textContent = pd.ids.length ? (pd.ids.length < PD_MAX ? 'Boleh tambah ' + (PD_MAX - pd.ids.length) + ' lagi untuk menunjukkan kaitan antara ayat.' : 'Maksimum ' + PD_MAX + ' falsafah.') : 'Wajib pilih sekurang-kurangnya satu.';
+    $('pdIdsNote').textContent = pd.ids.length ? (pd.ids.length < PD_MAX ? T('Boleh tambah ' + (PD_MAX - pd.ids.length) + ' lagi untuk menunjukkan kaitan antara ayat.', 'You can add ' + (PD_MAX - pd.ids.length) + ' more to show how ayat connect.') : T('Maksimum ' + PD_MAX + ' falsafah.', 'Up to ' + PD_MAX + ' falsafah.')) : T('Wajib pilih sekurang-kurangnya satu.', 'Choose at least one.');
     $('pdFind').hidden = pd.ids.length >= PD_MAX;
     $('pdChips').querySelectorAll('[data-x]').forEach(b => b.onclick = () => { pd.ids = pd.ids.filter(x => x !== +b.dataset.x); chips(); });
   };
-  const count = () => { const n = $('pdText').value.trim().length; const c = $('pdCount'); c.textContent = n + ' / ' + PD_MAX_TEXT + ' aksara' + (n < PD_MIN_TEXT ? ' · sekurang-kurangnya ' + PD_MIN_TEXT : ''); c.className = 'pd-count' + (n && n < PD_MIN_TEXT ? ' bad' : ''); };
+  const count = () => { const n = $('pdText').value.trim().length; const c = $('pdCount'); c.textContent = n + ' / ' + PD_MAX_TEXT + T(' aksara', ' characters') + (n < PD_MIN_TEXT ? T(' · sekurang-kurangnya ', ' · at least ') + PD_MIN_TEXT : ''); c.className = 'pd-count' + (n && n < PD_MIN_TEXT ? ' bad' : ''); };
   const find = () => {
     const q = $('pdFind').value.trim().toLowerCase(), list = $('pdSugg');
     if (!q) { list.hidden = true; return; }
     const num = /^\d+$/.test(q);
     const hits = DATA.filter(e => !pd.ids.includes(e.id) && (num ? String(e.id).startsWith(q) : (e.title.toLowerCase().includes(q) || e.surahDisplay.toLowerCase().includes(q) || e.text.toLowerCase().includes(q)))).slice(0, 8);
-    list.innerHTML = hits.length ? hits.map(e => `<li data-id="${e.id}"><b>${e.id}</b>${esc(title(e))}<small>${esc(e.surahDisplay)}</small></li>`).join('') : '<li style="cursor:default;color:var(--muted)">Tiada padanan.</li>';
+    list.innerHTML = hits.length ? hits.map(e => `<li data-id="${e.id}"><b>${e.id}</b>${esc(title(e))}<small>${esc(e.surahDisplay)}</small></li>`).join('') : '<li style="cursor:default;color:var(--muted)">' + T('Tiada padanan.', 'No matches.') + '</li>';
     list.hidden = false;
     list.querySelectorAll('li[data-id]').forEach(li => li.onclick = () => { pd.ids.push(+li.dataset.id); const m = $('pdMsg'); if (m && m.classList.contains('err')) { m.textContent = ''; m.className = 'acct-msg'; } $('pdFind').value = ''; list.hidden = true; chips(); $('pdFind').focus(); });
   };
@@ -893,10 +940,10 @@ function pdWrite(note) {
 }
 async function pdSend() {
   const t = $('pdTitle').value.trim(), x = $('pdText').value.trim(), m = (txt, k) => { $('pdMsg').textContent = txt; $('pdMsg').className = 'acct-msg ' + (k || ''); };
-  if (!t) return m('Isi tajuk dahulu.', 'err');
-  if (!pd.ids.length) return m('Pilih sekurang-kurangnya satu falsafah atau ayat.', 'err');
-  if (x.length < PD_MIN_TEXT) return m('Pandangan terlalu pendek. Tulis sekurang-kurangnya ' + PD_MIN_TEXT + ' aksara.', 'err');
-  const b = $('pdSend'); b.disabled = true; m('Menghantar…');
+  if (!t) return m(T('Isi tajuk dahulu.', 'Add a title first.'), 'err');
+  if (!pd.ids.length) return m(T('Pilih sekurang-kurangnya satu falsafah atau ayat.', 'Choose at least one falsafah or ayat.'), 'err');
+  if (x.length < PD_MIN_TEXT) return m(T('Pandangan terlalu pendek. Tulis sekurang-kurangnya ' + PD_MIN_TEXT + ' aksara.', 'Too short. Write at least ' + PD_MIN_TEXT + ' characters.'), 'err');
+  const b = $('pdSend'); b.disabled = true; m(T('Menghantar…', 'Sending…'));
   try {
     // the name and username come from the account record, so no one can post under another name
     const s = await fb.F.getDoc(userDoc()), pr = (s.exists() && s.data().profile) || profile || {};
@@ -904,17 +951,17 @@ async function pdSend() {
       status: 'baru', deleted: false, createdAt: fb.F.serverTimestamp() });
     pd.ids = []; pd.title = ''; pd.text = ''; pd.mine = null;
     pd.tab = 'saya'; pdRender();
-    setTimeout(() => { const n = $('pdMineMsg'); if (n) { n.textContent = 'Terima kasih. Pandangan anda sudah dihantar kepada pentadbir.'; n.className = 'acct-msg ok'; } }, 0);
+    setTimeout(() => { const n = $('pdMineMsg'); if (n) { n.textContent = T('Terima kasih. Pandangan anda sudah dihantar kepada pentadbir.', 'Thank you. Your reflection was sent to the admin.'); n.className = 'acct-msg ok'; } }, 0);
   } catch (e) { b.disabled = false; m(ERR(e.code || e.message), 'err'); }
 }
 
 function pdCard(o, opts) {
   const st = o.deleted ? '<span class="pd-status padam">Dipadam pelajar</span>' : `<span class="pd-status ${o.status}">${PD_STATUS[o.status] || o.status}</span>`;
   return `<div class="pd-card" data-id="${o.id}"><h4>${esc(o.title)}</h4>
-    <p class="pd-meta">${opts.who ? '<span>oleh <b>' + esc(o.name || '') + '</b>' + (opts.admin ? ' @' + esc(o.username || '') : '') + '</span>' : ''}<span>${pdWhen(o.publishedAt && opts.pub ? o.publishedAt : o.createdAt)}</span>${opts.status ? st : ''}</p>
+    <p class="pd-meta">${opts.who ? '<span>' + T('oleh', 'by') + ' <b>' + esc(o.name || '') + '</b>' + (opts.admin ? ' @' + esc(o.username || '') : '') + '</span>' : ''}<span>${pdWhen(o.publishedAt && opts.pub ? o.publishedAt : o.createdAt)}</span>${opts.status ? st : ''}</p>
     ${pdTags(o.ids, opts.pub)}
     <p class="pd-text">${esc(o.text)}</p>
-    ${opts.pub ? '<p class="pd-note">Pandangan pelajar, bukan tafsiran pengarang.</p>' : ''}
+    ${opts.pub ? '<p class="pd-note">' + T('Pandangan pelajar, bukan tafsiran pengarang.', 'A student\'s reflection, not the author\'s interpretation.') + '</p>' : ''}
     ${opts.extra ? opts.extra(o) : ''}</div>`;
 }
 async function pdMine() {
@@ -924,10 +971,10 @@ async function pdMine() {
     if (!pd.mine) pd.mine = (await pdLoad(fb.F.query(pdCol(), fb.F.where('uid', '==', user.uid)))).filter(o => !o.deleted).sort((a, b) => pdTime(b.createdAt) - pdTime(a.createdAt));
     const list = $('pdMineList');
     if (!list) return;
-    list.innerHTML = pd.mine.length ? pd.mine.map(o => pdCard(o, { status: true, extra: () => '<button type="button" class="pd-del" data-del="' + o.id + '">Padam</button>' })).join('')
-      : '<p class="pd-empty">Anda belum menghantar pandangan. Tekan <b>Tulis</b> untuk mula.</p>';
+    list.innerHTML = pd.mine.length ? pd.mine.map(o => pdCard(o, { status: true, extra: () => '<button type="button" class="pd-del" data-del="' + o.id + '">' + T('Padam', 'Delete') + '</button>' })).join('')
+      : '<p class="pd-empty">' + T('Anda belum menghantar pandangan. Tekan <b>Tulis</b> untuk mula.', 'You have not sent a reflection yet. Tap <b>Write</b> to start.') + '</p>';
     list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
-      if (!confirm('Pandangan ini akan disembunyikan daripada anda, tetapi pentadbir masih boleh melihatnya. Padam?')) return;
+      if (!confirm(T('Pandangan ini akan disembunyikan daripada anda, tetapi pentadbir masih boleh melihatnya. Padam?', 'This reflection will be hidden from you, but the admin can still see it. Delete?'))) return;
       try {
         await fb.F.updateDoc(pdDoc(b.dataset.del), { deleted: true, deletedAt: fb.F.serverTimestamp() });
         pd.mine = pd.mine.filter(o => o.id !== b.dataset.del); pd.pub = null; pdMine();
@@ -942,10 +989,10 @@ async function pdPublic() {
     if (!pd.pub) pd.pub = (await pdLoad(fb.F.query(pdCol(), fb.F.where('status', '==', 'terbit')))).filter(o => !o.deleted).sort((a, b) => pdTime(b.publishedAt) - pdTime(a.publishedAt));
     const list = $('pdPubList');
     if (!list) return;
-    if (!pd.pub.length) { list.innerHTML = '<p class="pd-empty">Belum ada pandangan yang diterbitkan.</p>'; return; }
+    if (!pd.pub.length) { list.innerHTML = '<p class="pd-empty">' + T('Belum ada pandangan yang diterbitkan.', 'No reflections published yet.') + '</p>'; return; }
     const counts = {}; pd.pub.forEach(o => (o.ids || []).forEach(id => { counts[id] = (counts[id] || 0) + 1; }));
     const shown = pd.filter ? pd.pub.filter(o => (o.ids || []).includes(pd.filter)) : pd.pub;
-    list.innerHTML = `<div class="pd-filter"><button type="button" class="pd-tag ${pd.filter ? '' : 'on'}" data-f="0">Semua (${pd.pub.length})</button>` +
+    list.innerHTML = `<div class="pd-filter"><button type="button" class="pd-tag ${pd.filter ? '' : 'on'}" data-f="0">${T('Semua', 'All')} (${pd.pub.length})</button>` +
       Object.keys(counts).map(Number).sort((a, b) => a - b).map(id => `<button type="button" class="pd-tag ${pd.filter === id ? 'on' : ''}" data-f="${id}">F${id} (${counts[id]})</button>`).join('') + '</div>' +
       shown.map(o => pdCard(o, { who: true, pub: true })).join('');
     list.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { pd.filter = +b.dataset.f; pdPublic(); window.scrollTo(0, 0); pdPanel.scrollTop = 0; });
@@ -991,17 +1038,18 @@ openSheet('wait');
     await loadFb();
     fb.A.onAuthStateChanged(fb.auth, async u => {
       user = u;
-      if (!u) { if (!overlay.classList.contains('active') || mode === 'wait') openGate(); setBtn('', 'Log masuk'); return; }
+      if (!u) { if (!overlay.classList.contains('active') || mode === 'wait') openGate(); setBtn('', T('Log masuk', 'Log in')); return; }
       if (registering) return;   // register() finishes the hand-off itself
       profile = profile || { name: lsGet(KEYS.username) || '', username: lsGet(LAST_USER) || '', email: u.email };
       setBtn('busy', firstName(profile.name));
       try {
         if (await pullMerge(false)) return;   // reloading with merged progress
-      } catch (e) { setBtn('', 'Luar talian'); }
+      } catch (e) { setBtn('', T('Luar talian', 'Offline')); }
       afterLogin();
     });
   } catch (e) {
-    card.innerHTML = BRAND + '<h3>Tiada sambungan</h3><p class="sub">Aplikasi perlu internet untuk log masuk kali pertama. Semak sambungan anda, kemudian cuba lagi.</p><button class="namebtn" onclick="location.reload()">Cuba lagi</button>';
+    card.innerHTML = BRAND + T('<h3>Tiada sambungan</h3><p class="sub">Aplikasi perlu internet untuk log masuk kali pertama. Semak sambungan anda, kemudian cuba lagi.</p><button class="namebtn" onclick="location.reload()">Cuba lagi</button>',
+      '<h3>No connection</h3><p class="sub">The app needs the internet to log in the first time. Check your connection, then try again.</p><button class="namebtn" onclick="location.reload()">Try again</button>');
   }
 })();
 </script>

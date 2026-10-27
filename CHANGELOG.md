@@ -2,6 +2,19 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-10-28
+
+### Added
+
+- English version at `/en/`, same site, same accounts and progress. The account menu (and the
+  login screen) has a switch between "English version" and "Versi Bahasa Melayu"; the choice is
+  synced with the account, and the BM page opens `/en/` for students who chose English.
+- English content from Al-Fathun Nawa Volume 7 (English edition): ayat translation, Keywords,
+  Notes (Method of Ayat Introduction) and English page numbers. Book spelling errors are fixed.
+  Titles are app translations of the BM titles. The three class-extended ayat (46, 53, 117) show
+  Sahih International for the ayat the English book does not quote, labelled as not from the book.
+- English Kuiz questions (same answers and distractors) and an English translation of Nota.
+
 ## 2026-10-27
 
 ### Added
