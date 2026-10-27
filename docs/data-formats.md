@@ -87,5 +87,6 @@ right/wrong Kuiz answer. Markah is the sum (K +1, k −1, Q +½, q −½) and de
 | `stats/weekly`       | admin      | The class's most-missed falsafah of the last 7 days    |
 | `stats/halon-index`  | admin      | Ids of falsafah that have a Dr. HALO-N recording       |
 | `stats/halon-{id}`   | admin      | One recording as base64 MP3 (under 740 KB)             |
+| `pandangan/{auto}`   | student    | An opinion: `uid`, `name`, `username`, `title`, `ids` (1 to 5 falsafah, the first is the main one), `text` (30 to 1,500 characters), `status` (`baru`, `terbit`, `simpan`), `deleted`, `createdAt`; the admin adds `publishedAt` and `reviewedAt` |
 
 The rules are in [security.md](security.md).

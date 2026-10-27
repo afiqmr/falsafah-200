@@ -92,6 +92,9 @@ Screens are the running app with a demo account and demo progress.
   card or as text with the app link.
 - **Dengar**: plays the ayat of a julat with the Quran.com murattal (Hani ar-Rifai), or Dr. HALO-N's
   own recordings for signed-in students, with word by word and lock-screen controls.
+- **Pandangan**: students write how a falsafah relates to their life or to other ayat (title,
+  1 to 5 linked falsafah, opinion), from the menu or a falsafah's detail sheet. The admin reads
+  every one first and publishes the good ones, which other students then read with the writer's name.
 - **Nota**: exam notes for the four pentafshilan methods, grouped as Subjek Tahun 1 (Ta'wiilul
   Ma'ani, Syariat Khafiah) and Subjek Tahun 2 (Khitab Hilaalul Washil, Al Ashlih Asbaabun Nuzul).
 - **Daily goals**: Kaji 10 and Kuiz 3, with a streak when both are met. Counts carry on past the

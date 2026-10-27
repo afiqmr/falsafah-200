@@ -57,6 +57,9 @@ motif).
   - Kuiz count takes the higher value.
 - **Admin**: one verified email sees every student's progress, publishes the weekly class list to
   `stats/weekly`, and uploads Dr. HALO-N recordings to `stats/halon-*`.
+- **Pandangan**: students write an opinion on one or more falsafah from the menu or the Senarai
+  detail sheet (`window.FN_PANDANGAN.open(id)`). The admin publishes it from the admin panel; only
+  published ones appear to other students.
 - **Install and offline**: `manifest.webmanifest` and `sw.js` make it installable. The service
   worker is network-first, so students always get the newest build and the cached copy is used
   only offline.

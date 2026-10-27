@@ -2,6 +2,20 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-10-27
+
+### Added
+
+- Pandangan: students write an opinion on a falsafah (title, 1 to 5 linked falsafah, opinion),
+  from the account menu or "Kongsi pandangan" in Senarai. They see their own and the published
+  ones. The admin reads all of them first and chooses Terbit or Simpan in the admin panel.
+
+### Changed
+
+- Voice check is more forgiving of the phone's mishearing: letters it often swaps (ص/س, ط/ت,
+  ض/د, ذ/ظ/ز, ق/ك, ح/ه) count as the same, merged idgham words count, and on Android the best of
+  several guesses is used. A wrong ayat still scores low.
+
 ## 2026-10-25
 
 ### Fixed

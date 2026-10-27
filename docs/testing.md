@@ -23,6 +23,7 @@ with Firebase replaced by local mocks.
 | Nota     | Subject-year groups; each topic opens; last topic remembered                           |
 | Dengar   | Play, skip, pause length, lock-screen controls, word by word while playing            |
 | Accounts | Register, log in, Lupa PIN, two devices merging, log out clears the device             |
+| Pandangan| Write from menu and Senarai; required fields; 5 falsafah cap; delete; admin Terbit     |
 
 ## Playwright approach
 

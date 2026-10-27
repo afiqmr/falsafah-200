@@ -2626,7 +2626,13 @@
     return '<div class="voicebox"><button type="button" class="voicebtn" id="voiceBtn"><span class="vb-ic">&#127908;</span><span class="vb-tx">Cuba baca</span></button>' +
       '<span class="voice-note">Latihan, tiada tanda automatik. Semak kalimah sahaja, bukan tajwid.</span><div class="voice-out" id="voiceOut"></div></div>';
   }
-  function vNorm(w){ return arSkeleton(w).replace(/ا/g, '').replace(/ء/g, '').replace(/[ؤئ]/g, ''); }
+  // Letters the phone's ear often swaps are treated as one (ص/س/ث, ذ/ظ/ز, ض/د, ط/ت, ق/ك, ح/ه);
+  // alif, hamza and ain are dropped, as the ear often misses or misplaces them.
+  function vNorm(w){
+    return arSkeleton(w).replace(/[اءؤئع]/g, '')
+      .replace(/[ثص]/g, 'س').replace(/[ذظ]/g, 'ز').replace(/ض/g, 'د')
+      .replace(/ط/g, 'ت').replace(/ق/g, 'ك').replace(/ح/g, 'ه');
+  }
   function vEdit(a, b){
     if(Math.abs(a.length - b.length) > 1) return 2;
     var prev = [], cur, i, j;
@@ -2659,9 +2665,12 @@
       var t = vNorm(w), at = -1, len = 0, i, k;
       var cands = [t];
       if(t.length > 2 && /^[وفب]/.test(t)) cands.push(t.slice(1));   // wa-/fa-/bi- dropped
+      if(t.length > 2 && /ن$/.test(t)){ cands.push(t.slice(0, -1)); cands.push(t.slice(0, -1) + 'م'); }   // idgham / iqlab: final nun merged or heard as mim
       if(t.length <= 2){
         // short words (la, ma, min...) must be a whole heard word, or follow straight on
         if(H.substr(p, t.length) === t){ at = p; len = t.length; }
+        // idgham: "min rabbihim" is heard as one word "mirrabbihim", so the nun disappears
+        else if(t.length === 2 && /ن$/.test(t) && H.substr(p, 1) === t[0] && starts.indexOf(p) >= 0){ at = p; len = 1; }
         for(k = 0; at < 0 && k < words.length; k++){
           if(starts[k] < p) continue;
           if(starts[k] > p + 12) break;
@@ -2727,13 +2736,18 @@
       var rec = new SpeechRec();
       rec.lang = 'ar-SA';
       rec.continuous = !IS_IOS;   // iPhone: one stretch at a time is more reliable
-      rec.interimResults = true; rec.maxAlternatives = 1;
+      rec.interimResults = true; rec.maxAlternatives = 3;
       rec.onstart = rec.onaudiostart = function(){ if(!started){ started = true; show(); } };
       rec.onresult = function(e){
         started = true;
-        var t = '';
-        for(var i = 0; i < e.results.length; i++) t += ' ' + e.results[i][0].transcript;
-        text = base + ' ' + t;
+        // Android offers a few guesses for each stretch: keep the one that matches the ayat best
+        var acc = base;
+        for(var i = 0; i < e.results.length; i++){
+          var r = e.results[i], best = r[0].transcript, bs = -1;
+          if(r.length > 1) for(var j = 0; j < r.length; j++){ var sc = voiceMatch(entry.arabic, acc + ' ' + r[j].transcript).ok; if(sc > bs){ bs = sc; best = r[j].transcript; } }
+          acc += ' ' + best;
+        }
+        text = acc;
         show();
       };
       rec.onerror = function(e){
@@ -3061,7 +3075,8 @@
       gredBadge(id) + (cardLog(id).length ? ' <span class="markah-pill">Markah ' + fmtMarkah(markahOf(id)) + '</span>' : '') +
       '<h3 class="folio-title" style="margin-top:14px;">'+escapeHtml(displayTitle(entry.title))+'</h3>' +
       (true ? '<div class="share-row"><button type="button" class="share-btn" id="shareBtn" aria-label="Share">' + SHARE_ICON + 'Share</button>' +
-        '<button type="button" class="share-text" id="shareTextBtn">Copy to clipboard</button></div>' : '') +
+        '<button type="button" class="share-text" id="shareTextBtn">Copy to clipboard</button>' +
+        (window.FN_PANDANGAN ? '<button type="button" class="share-text" id="pdOpenBtn">Kongsi pandangan</button>' : '') + '</div>' : '') +
       '<hr class="divider">' +
       renderArabic(entry) +
       '<div class="folio-text-label">Maksud</div>' +
@@ -3078,6 +3093,8 @@
     document.getElementById('closeDetail').onclick = closeDetail;
     var bp = document.getElementById('backToProg');
     if(bp) bp.onclick = function(){ fromProgress.open(); };
+    var pb = document.getElementById('pdOpenBtn');
+    if(pb) pb.onclick = function(){ closeDetail(); window.FN_PANDANGAN.open(entry.id); };
     var sb = document.getElementById('shareBtn');
     if(sb){
       prepareShare(entry);   // draw the card now, so the tap can open the share menu straight away

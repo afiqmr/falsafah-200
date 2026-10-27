@@ -2686,7 +2686,13 @@
     return '<div class="voicebox"><button type="button" class="voicebtn" id="voiceBtn"><span class="vb-ic">&#127908;</span><span class="vb-tx">Cuba baca</span></button>' +
       '<span class="voice-note">Latihan, tiada tanda automatik. Semak kalimah sahaja, bukan tajwid.</span><div class="voice-out" id="voiceOut"></div></div>';
   }
-  function vNorm(w){ return arSkeleton(w).replace(/ا/g, '').replace(/ء/g, '').replace(/[ؤئ]/g, ''); }
+  // Letters the phone's ear often swaps are treated as one (ص/س/ث, ذ/ظ/ز, ض/د, ط/ت, ق/ك, ح/ه);
+  // alif, hamza and ain are dropped, as the ear often misses or misplaces them.
+  function vNorm(w){
+    return arSkeleton(w).replace(/[اءؤئع]/g, '')
+      .replace(/[ثص]/g, 'س').replace(/[ذظ]/g, 'ز').replace(/ض/g, 'د')
+      .replace(/ط/g, 'ت').replace(/ق/g, 'ك').replace(/ح/g, 'ه');
+  }
   function vEdit(a, b){
     if(Math.abs(a.length - b.length) > 1) return 2;
     var prev = [], cur, i, j;
@@ -2719,9 +2725,12 @@
       var t = vNorm(w), at = -1, len = 0, i, k;
       var cands = [t];
       if(t.length > 2 && /^[وفب]/.test(t)) cands.push(t.slice(1));   // wa-/fa-/bi- dropped
+      if(t.length > 2 && /ن$/.test(t)){ cands.push(t.slice(0, -1)); cands.push(t.slice(0, -1) + 'م'); }   // idgham / iqlab: final nun merged or heard as mim
       if(t.length <= 2){
         // short words (la, ma, min...) must be a whole heard word, or follow straight on
         if(H.substr(p, t.length) === t){ at = p; len = t.length; }
+        // idgham: "min rabbihim" is heard as one word "mirrabbihim", so the nun disappears
+        else if(t.length === 2 && /ن$/.test(t) && H.substr(p, 1) === t[0] && starts.indexOf(p) >= 0){ at = p; len = 1; }
         for(k = 0; at < 0 && k < words.length; k++){
           if(starts[k] < p) continue;
           if(starts[k] > p + 12) break;
@@ -2787,13 +2796,18 @@
       var rec = new SpeechRec();
       rec.lang = 'ar-SA';
       rec.continuous = !IS_IOS;   // iPhone: one stretch at a time is more reliable
-      rec.interimResults = true; rec.maxAlternatives = 1;
+      rec.interimResults = true; rec.maxAlternatives = 3;
       rec.onstart = rec.onaudiostart = function(){ if(!started){ started = true; show(); } };
       rec.onresult = function(e){
         started = true;
-        var t = '';
-        for(var i = 0; i < e.results.length; i++) t += ' ' + e.results[i][0].transcript;
-        text = base + ' ' + t;
+        // Android offers a few guesses for each stretch: keep the one that matches the ayat best
+        var acc = base;
+        for(var i = 0; i < e.results.length; i++){
+          var r = e.results[i], best = r[0].transcript, bs = -1;
+          if(r.length > 1) for(var j = 0; j < r.length; j++){ var sc = voiceMatch(entry.arabic, acc + ' ' + r[j].transcript).ok; if(sc > bs){ bs = sc; best = r[j].transcript; } }
+          acc += ' ' + best;
+        }
+        text = acc;
         show();
       };
       rec.onerror = function(e){
@@ -3121,7 +3135,8 @@
       gredBadge(id) + (cardLog(id).length ? ' <span class="markah-pill">Markah ' + fmtMarkah(markahOf(id)) + '</span>' : '') +
       '<h3 class="folio-title" style="margin-top:14px;">'+escapeHtml(displayTitle(entry.title))+'</h3>' +
       (true ? '<div class="share-row"><button type="button" class="share-btn" id="shareBtn" aria-label="Share">' + SHARE_ICON + 'Share</button>' +
-        '<button type="button" class="share-text" id="shareTextBtn">Copy to clipboard</button></div>' : '') +
+        '<button type="button" class="share-text" id="shareTextBtn">Copy to clipboard</button>' +
+        (window.FN_PANDANGAN ? '<button type="button" class="share-text" id="pdOpenBtn">Kongsi pandangan</button>' : '') + '</div>' : '') +
       '<hr class="divider">' +
       renderArabic(entry) +
       '<div class="folio-text-label">Maksud</div>' +
@@ -3138,6 +3153,8 @@
     document.getElementById('closeDetail').onclick = closeDetail;
     var bp = document.getElementById('backToProg');
     if(bp) bp.onclick = function(){ fromProgress.open(); };
+    var pb = document.getElementById('pdOpenBtn');
+    if(pb) pb.onclick = function(){ closeDetail(); window.FN_PANDANGAN.open(entry.id); };
     var sb = document.getElementById('shareBtn');
     if(sb){
       prepareShare(entry);   // draw the card now, so the tap can open the share menu straight away
@@ -4443,9 +4460,61 @@
   .stu.open .stu-d{ display:block; }
   .stu-d h4{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:10px 0 4px; }
   @media (max-width:600px){ .adm-tiles{ grid-template-columns:repeat(2,1fr); } }
+  /* ---------- Pandangan (student opinions) ---------- */
+  #pdPanel{ position:fixed; inset:0; z-index:85; background:var(--bg); overflow-y:auto; display:none; }
+  #pdPanel.active{ display:block; }
+  .pd{ max-width:640px; margin:0 auto; padding:20px 18px 70px; }
+  .pd-tabs{ display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:4px; border-radius:100px; background:var(--surface-2); border:1px solid var(--border); margin:6px 0 18px; }
+  .pd-tabs button{ border:0; background:transparent; color:var(--muted); font-family:inherit; font-size:13px; font-weight:800; line-height:1.2; padding:9px 4px; border-radius:100px; cursor:pointer; }
+  .pd-tabs button.active{ background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--gold); }
+  .pd-field{ margin-bottom:16px; }
+  .pd-field > label{ display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 6px 2px; }
+  .pd-input{ display:block; width:100%; box-sizing:border-box; padding:11px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-family:inherit; font-size:15px; }
+  .pd-input:focus{ outline:none; border-color:var(--gold); }
+  textarea.pd-input{ min-height:170px; resize:vertical; line-height:1.6; }
+  .pd-author{ padding:10px 14px; border-radius:12px; background:var(--surface-2); border:1px solid var(--border); font-size:15px; }
+  .pd-author span{ color:var(--muted); font-size:13px; }
+  .pd-count{ font-size:12px; color:var(--muted); margin:6px 2px 0; }
+  .pd-count.bad{ color:var(--rose); }
+  .pd-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pd-chips:not(:empty){ margin-bottom:8px; }
+  .pd-chip{ display:inline-flex; align-items:center; gap:4px; padding:5px 6px 5px 11px; border-radius:100px; background:var(--gold-soft); border:1px solid var(--gold); font-size:13px; font-weight:700; color:var(--ink); max-width:100%; }
+  .pd-chip i{ font-style:normal; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-cite); margin-right:2px; }
+  .pd-chip span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pd-chip button{ border:0; background:transparent; color:var(--muted); font-size:17px; line-height:1; cursor:pointer; padding:0 4px; }
+  .pd-sugg{ list-style:none; margin:6px 0 0; padding:0; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--surface); }
+  .pd-sugg li{ padding:9px 12px; border-bottom:1px solid var(--border); cursor:pointer; font-size:14px; }
+  .pd-sugg li:last-child{ border-bottom:0; }
+  .pd-sugg li:hover{ background:var(--surface-2); }
+  .pd-sugg li b{ color:var(--gold-cite); margin-right:6px; }
+  .pd-sugg li small{ display:block; color:var(--muted); font-size:12px; margin-top:2px; }
+  .pd-ayat{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:21px; line-height:1.9; direction:rtl; text-align:right; margin:10px 2px 0; color:var(--ink); }
+  .pd-card{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
+  .pd-card h4{ margin:0 0 4px; font-size:16px; line-height:1.35; }
+  .pd-meta{ font-size:12px; color:var(--muted); margin:0 0 10px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .pd-text{ font-size:14.5px; line-height:1.65; white-space:pre-wrap; margin:10px 0 0; overflow-wrap:anywhere; }
+  .pd-tags{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pd-tag{ font-size:12px; font-weight:700; padding:3px 10px; border-radius:100px; background:var(--surface-2); border:1px solid var(--border); color:var(--ink); }
+  button.pd-tag{ font-family:inherit; cursor:pointer; }
+  button.pd-tag.on{ border-color:var(--gold); background:var(--gold-soft); }
+  .pd-status{ font-size:11px; font-weight:800; padding:3px 9px; border-radius:100px; white-space:nowrap; }
+  .pd-status.baru{ background:var(--gold-soft); color:var(--gold-cite); }
+  .pd-status.terbit{ background:var(--emerald-soft); color:var(--emerald); }
+  .pd-status.simpan{ background:var(--surface-2); color:var(--muted); border:1px solid var(--border); }
+  .pd-status.padam{ background:var(--rose-soft); color:var(--rose); }
+  .pd-note{ font-size:12px; color:var(--muted); font-style:italic; margin:10px 0 0; }
+  .pd-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .pd-del{ border:0; background:transparent; color:var(--rose); font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; padding:0; margin-top:10px; }
+  .pd-filter{ display:flex; gap:6px; flex-wrap:wrap; margin:0 0 14px; }
+  .pd-empty{ text-align:center; color:var(--muted); font-size:14px; padding:30px 10px; }
+  .pd-send{ width:100%; background:var(--gold); color:var(--gold-ink); border:0; border-radius:10px; padding:13px; font-family:inherit; font-weight:800; font-size:15px; cursor:pointer; }
+  .pd-send:disabled{ opacity:.6; cursor:default; }
+  [data-theme="light"] .pd-send{ background:var(--coral-btn, var(--gold)); color:#FFFFFF; }
+  .pd-badge{ display:inline-block; min-width:18px; padding:1px 6px; border-radius:100px; background:var(--gold); color:var(--gold-ink); font-size:11px; font-weight:800; margin-left:6px; }
 </style>
 
 <div id="adminPanel" role="dialog" aria-modal="true"></div>
+<div id="pdPanel" role="dialog" aria-modal="true" aria-label="Pandangan"></div>
 
 <div class="nameoverlay" id="acctOverlay" aria-modal="true" role="dialog">
   <div class="namecard" id="acctCard"></div>
@@ -4567,6 +4636,7 @@ function render() {
       <p class="acct-msg ok" id="acctMsg">Progress synced ✓ · ${t}</p>
       <button class="namebtn" id="acctSyncNow">Sync progress</button>
       ${isStandalone() || installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">Pasang di skrin utama</button>' : ''}
+      <button class="namebtn acct-ghost" id="acctPd" style="margin-top:10px">Pandangan</button>
       <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">Panduan aplikasi</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">Papan pentadbir</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">Log keluar</button><button class="namebtn acct-ghost" id="acctClose">Tutup</button></div>
@@ -4576,6 +4646,7 @@ function render() {
     if ($('acctAdmin')) $('acctAdmin').onclick = () => { closeSheet(); openAdmin(); };
     if ($('acctInstall')) $('acctInstall').onclick = () => openInstall(false);
     $('acctTour').onclick = () => { closeSheet(); setTimeout(() => window.FN_APP && window.FN_APP.startTour(), 300); };
+    $('acctPd').onclick = () => { closeSheet(); openPandangan('tulis'); };
     $('acctShare').onclick = shareApp;
     return;
   }
@@ -4778,6 +4849,8 @@ function afterLogin() {
   try { sessionStorage.removeItem('fn_imported'); } catch (e) {}
   loadWeekly();
   loadHalon();
+  window.FN_PANDANGAN = { open: id => openPandangan('tulis', id) };   // the Senarai detail sheet shows "Kongsi pandangan"
+  document.dispatchEvent(new Event('fn-pandangan'));
   setBtn('on', firstName(profile?.name));
   closeSheet();
   if (lsGet(KEYS.range) && lsGet(TOUR_KEY) === '1') {
@@ -5069,11 +5142,13 @@ async function openAdmin() {
       <p class="hint" id="admHalonNow">Ada sekarang: ${(window.FN_HALON && window.FN_HALON.ids.length) ? 'Falsafah ' + window.FN_HALON.ids.join(', ') : 'tiada'}</p>
       <label class="adm-btn" style="display:inline-block">Pilih fail MP3<input type="file" id="admHalon" accept="audio/mpeg,.mp3" multiple hidden></label>
       <p class="acct-msg" id="admHalonMsg" style="text-align:left"></p></div>
+    <div class="adm-sec" id="admPd"><h3>Pandangan pelajar</h3><div class="acct-spin"></div></div>
     <input class="adm-search" id="admSearch" placeholder="Cari nama, nama pengguna atau emel…">
     <div id="admList">${students.map(card).join('') || '<p class="hint">Belum ada pelajar berdaftar.</p>'}</div>
   </div>`;
   $('admClose').onclick = closeAdmin;
   $('admRefresh').onclick = openAdmin;
+  adminPandangan($('admPd'));
   $('admHalon').onchange = async e => {
     const files = [...e.target.files]; e.target.value = '';
     const out = (t, k) => { $('admHalonMsg').textContent = t; $('admHalonMsg').className = 'acct-msg ' + (k || ''); };
@@ -5088,6 +5163,170 @@ async function openAdmin() {
   $('admSearch').oninput = e => { const q = e.target.value.trim().toLowerCase(); panel.querySelectorAll('.stu').forEach(c => { c.style.display = !q || c.dataset.q.includes(q) ? '' : 'none'; }); };
 }
 function closeAdmin() { panel.classList.remove('active'); document.body.style.overflow = ''; }
+
+// ---------- Pandangan: students write how an ayat relates to them; the admin publishes the good ones ----------
+// pandangan/{auto id}: uid, name, username, title, ids[1-5], text, status baru|terbit|simpan, deleted, createdAt
+// A student's "Padam" only hides it from the student (deleted: true); the admin still sees it.
+const PD_MAX = 5, PD_MIN_TEXT = 30, PD_MAX_TEXT = 1500, PD_MAX_TITLE = 80;
+const PD_STATUS = { baru: 'Menunggu semakan', terbit: 'Diterbitkan', simpan: 'Disemak, tidak diterbitkan' };
+const pdPanel = $('pdPanel');
+const pd = { tab: 'tulis', ids: [], title: '', text: '', filter: 0, mine: null, pub: null };
+const pdCol = () => fb.F.collection(fb.db, 'pandangan');
+const pdDoc = id => fb.F.doc(fb.db, 'pandangan', id);
+const pdTime = v => (v && v.toDate ? v.toDate().getTime() : 0);
+const pdWhen = v => { const t = pdTime(v); return t ? new Date(t).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short', year: 'numeric' }) : 'baru tadi'; };
+const pdTags = (ids, btn) => '<div class="pd-tags">' + (ids || []).map(id => { const e = byId(id); return e ? (btn ? `<button type="button" class="pd-tag" data-f="${e.id}">` : '<span class="pd-tag">') + `${e.id} · ${esc(title(e))}` + (btn ? '</button>' : '</span>') : ''; }).join('') + '</div>';
+async function pdLoad(q) { const snap = await fb.F.getDocs(q); const out = []; snap.forEach(d => out.push(Object.assign({ id: d.id }, d.data()))); return out; }
+
+function openPandangan(tab, id) {
+  if (!user || !fb) return;
+  pd.tab = tab || 'tulis';
+  if (id && byId(id) && !pd.ids.includes(+id)) pd.ids = [+id].concat(pd.ids).slice(0, PD_MAX);   // opened from a falsafah: it becomes the main one
+  pdPanel.classList.add('active'); document.body.style.overflow = 'hidden';
+  pdRender();
+}
+function closePandangan() { pdPanel.classList.remove('active'); document.body.style.overflow = ''; }
+function pdRender() {
+  const tabs = [['tulis', 'Tulis'], ['saya', 'Pandangan saya'], ['pelajar', 'Pandangan pelajar']];
+  pdPanel.innerHTML = `<div class="pd"><div class="adm-top"><h2>Pandangan</h2><button id="pdClose">Tutup</button></div>
+    <p class="adm-sub">Kongsi bagaimana ayat dan falsafah ini berkait dengan kehidupan anda, atau dengan ayat lain.</p>
+    <div class="pd-tabs" role="tablist">${tabs.map(t => `<button type="button" role="tab" data-t="${t[0]}" class="${pd.tab === t[0] ? 'active' : ''}">${t[1]}</button>`).join('')}</div>
+    <div id="pdBody"></div></div>`;
+  $('pdClose').onclick = closePandangan;
+  pdPanel.querySelectorAll('.pd-tabs button').forEach(b => b.onclick = () => { pdSaveDraft(); pd.tab = b.dataset.t; pdRender(); });
+  if (pd.tab === 'tulis') pdWrite(); else if (pd.tab === 'saya') pdMine(); else pdPublic();
+}
+function pdSaveDraft() { if ($('pdTitle')) pd.title = $('pdTitle').value; if ($('pdText')) pd.text = $('pdText').value; }
+
+function pdWrite(note) {
+  const body = $('pdBody');
+  body.innerHTML = `
+    <div class="pd-field"><label>Pengarang</label><div class="pd-author"><b>${esc(profile?.name || '')}</b> <span>@${esc(profile?.username || '')}</span></div></div>
+    <div class="pd-field"><label for="pdTitle">Tajuk</label><input id="pdTitle" class="pd-input" maxlength="${PD_MAX_TITLE}" placeholder="cth. Rezeki datang bersama usaha" value="${esc(pd.title)}"></div>
+    <div class="pd-field"><label for="pdFind">Falsafah / ayat yang dikaitkan</label>
+      <div class="pd-chips" id="pdChips"></div>
+      <input id="pdFind" class="pd-input" autocomplete="off" placeholder="Cari nombor, tajuk atau surah…">
+      <ul class="pd-sugg" id="pdSugg" hidden></ul>
+      <div class="pd-ayat" id="pdAyat" lang="ar" dir="rtl"></div>
+      <p class="pd-count" id="pdIdsNote"></p></div>
+    <div class="pd-field"><label for="pdText">Pandangan anda</label>
+      <textarea id="pdText" class="pd-input" maxlength="${PD_MAX_TEXT}" placeholder="Terangkan kaitan ayat ini dengan kehidupan anda, atau bagaimana ayat-ayat yang dipilih saling berhubung. Beri contoh.">${esc(pd.text)}</textarea>
+      <p class="pd-count" id="pdCount"></p></div>
+    <p class="acct-msg ${note ? 'ok' : ''}" id="pdMsg">${note ? esc(note) : ''}</p>
+    <button class="pd-send" id="pdSend">Hantar kepada pentadbir</button>
+    <p class="acct-note">Pandangan anda dibaca oleh pentadbir dahulu. Hanya yang diterbitkan boleh dibaca pelajar lain, bersama nama penuh anda.</p>`;
+  const chips = () => {
+    $('pdChips').innerHTML = pd.ids.map((id, k) => { const e = byId(id); return `<span class="pd-chip">${k === 0 ? '<i>Utama</i>' : ''}<span>${e.id} · ${esc(title(e))}</span><button type="button" data-x="${e.id}" aria-label="Buang falsafah ${e.id}">&times;</button></span>`; }).join('');
+    const main = byId(pd.ids[0]);
+    $('pdAyat').textContent = main ? main.arabic : '';
+    $('pdIdsNote').textContent = pd.ids.length ? (pd.ids.length < PD_MAX ? 'Boleh tambah ' + (PD_MAX - pd.ids.length) + ' lagi untuk menunjukkan kaitan antara ayat.' : 'Maksimum ' + PD_MAX + ' falsafah.') : 'Wajib pilih sekurang-kurangnya satu.';
+    $('pdFind').hidden = pd.ids.length >= PD_MAX;
+    $('pdChips').querySelectorAll('[data-x]').forEach(b => b.onclick = () => { pd.ids = pd.ids.filter(x => x !== +b.dataset.x); chips(); });
+  };
+  const count = () => { const n = $('pdText').value.trim().length; const c = $('pdCount'); c.textContent = n + ' / ' + PD_MAX_TEXT + ' aksara' + (n < PD_MIN_TEXT ? ' · sekurang-kurangnya ' + PD_MIN_TEXT : ''); c.className = 'pd-count' + (n && n < PD_MIN_TEXT ? ' bad' : ''); };
+  const find = () => {
+    const q = $('pdFind').value.trim().toLowerCase(), list = $('pdSugg');
+    if (!q) { list.hidden = true; return; }
+    const num = /^\d+$/.test(q);
+    const hits = DATA.filter(e => !pd.ids.includes(e.id) && (num ? String(e.id).startsWith(q) : (e.title.toLowerCase().includes(q) || e.surahDisplay.toLowerCase().includes(q) || e.text.toLowerCase().includes(q)))).slice(0, 8);
+    list.innerHTML = hits.length ? hits.map(e => `<li data-id="${e.id}"><b>${e.id}</b>${esc(title(e))}<small>${esc(e.surahDisplay)}</small></li>`).join('') : '<li style="cursor:default;color:var(--muted)">Tiada padanan.</li>';
+    list.hidden = false;
+    list.querySelectorAll('li[data-id]').forEach(li => li.onclick = () => { pd.ids.push(+li.dataset.id); const m = $('pdMsg'); if (m && m.classList.contains('err')) { m.textContent = ''; m.className = 'acct-msg'; } $('pdFind').value = ''; list.hidden = true; chips(); $('pdFind').focus(); });
+  };
+  chips(); count();
+  const clearMsg = () => { const m = $('pdMsg'); if (m && m.classList.contains('err')) { m.textContent = ''; m.className = 'acct-msg'; } };
+  $('pdTitle').oninput = clearMsg;
+  $('pdText').oninput = () => { count(); clearMsg(); };
+  $('pdFind').oninput = find;
+  $('pdFind').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); const f = $('pdSugg').querySelector('li[data-id]'); if (f) f.click(); } };
+  $('pdSend').onclick = pdSend;
+}
+async function pdSend() {
+  const t = $('pdTitle').value.trim(), x = $('pdText').value.trim(), m = (txt, k) => { $('pdMsg').textContent = txt; $('pdMsg').className = 'acct-msg ' + (k || ''); };
+  if (!t) return m('Isi tajuk dahulu.', 'err');
+  if (!pd.ids.length) return m('Pilih sekurang-kurangnya satu falsafah atau ayat.', 'err');
+  if (x.length < PD_MIN_TEXT) return m('Pandangan terlalu pendek. Tulis sekurang-kurangnya ' + PD_MIN_TEXT + ' aksara.', 'err');
+  const b = $('pdSend'); b.disabled = true; m('Menghantar…');
+  try {
+    // the name and username come from the account record, so no one can post under another name
+    const s = await fb.F.getDoc(userDoc()), pr = (s.exists() && s.data().profile) || profile || {};
+    await fb.F.addDoc(pdCol(), { uid: user.uid, name: pr.name || '', username: pr.username || '', title: t.slice(0, PD_MAX_TITLE), ids: pd.ids.slice(0, PD_MAX), text: x.slice(0, PD_MAX_TEXT),
+      status: 'baru', deleted: false, createdAt: fb.F.serverTimestamp() });
+    pd.ids = []; pd.title = ''; pd.text = ''; pd.mine = null;
+    pd.tab = 'saya'; pdRender();
+    setTimeout(() => { const n = $('pdMineMsg'); if (n) { n.textContent = 'Terima kasih. Pandangan anda sudah dihantar kepada pentadbir.'; n.className = 'acct-msg ok'; } }, 0);
+  } catch (e) { b.disabled = false; m(ERR(e.code || e.message), 'err'); }
+}
+
+function pdCard(o, opts) {
+  const st = o.deleted ? '<span class="pd-status padam">Dipadam pelajar</span>' : `<span class="pd-status ${o.status}">${PD_STATUS[o.status] || o.status}</span>`;
+  return `<div class="pd-card" data-id="${o.id}"><h4>${esc(o.title)}</h4>
+    <p class="pd-meta">${opts.who ? '<span>oleh <b>' + esc(o.name || '') + '</b>' + (opts.admin ? ' @' + esc(o.username || '') : '') + '</span>' : ''}<span>${pdWhen(o.publishedAt && opts.pub ? o.publishedAt : o.createdAt)}</span>${opts.status ? st : ''}</p>
+    ${pdTags(o.ids, opts.pub)}
+    <p class="pd-text">${esc(o.text)}</p>
+    ${opts.pub ? '<p class="pd-note">Pandangan pelajar, bukan tafsiran pengarang.</p>' : ''}
+    ${opts.extra ? opts.extra(o) : ''}</div>`;
+}
+async function pdMine() {
+  const body = $('pdBody');
+  body.innerHTML = '<p class="acct-msg" id="pdMineMsg"></p><div id="pdMineList"><div class="acct-spin"></div></div>';
+  try {
+    if (!pd.mine) pd.mine = (await pdLoad(fb.F.query(pdCol(), fb.F.where('uid', '==', user.uid)))).filter(o => !o.deleted).sort((a, b) => pdTime(b.createdAt) - pdTime(a.createdAt));
+    const list = $('pdMineList');
+    if (!list) return;
+    list.innerHTML = pd.mine.length ? pd.mine.map(o => pdCard(o, { status: true, extra: () => '<button type="button" class="pd-del" data-del="' + o.id + '">Padam</button>' })).join('')
+      : '<p class="pd-empty">Anda belum menghantar pandangan. Tekan <b>Tulis</b> untuk mula.</p>';
+    list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+      if (!confirm('Pandangan ini akan disembunyikan daripada anda, tetapi pentadbir masih boleh melihatnya. Padam?')) return;
+      try {
+        await fb.F.updateDoc(pdDoc(b.dataset.del), { deleted: true, deletedAt: fb.F.serverTimestamp() });
+        pd.mine = pd.mine.filter(o => o.id !== b.dataset.del); pd.pub = null; pdMine();
+      } catch (e) { const n = $('pdMineMsg'); n.textContent = ERR(e.code || e.message); n.className = 'acct-msg err'; }
+    });
+  } catch (e) { $('pdMineList').innerHTML = '<p class="pd-empty">' + esc(ERR(e.code || e.message)) + '</p>'; }
+}
+async function pdPublic() {
+  const body = $('pdBody');
+  body.innerHTML = '<div id="pdPubList"><div class="acct-spin"></div></div>';
+  try {
+    if (!pd.pub) pd.pub = (await pdLoad(fb.F.query(pdCol(), fb.F.where('status', '==', 'terbit')))).filter(o => !o.deleted).sort((a, b) => pdTime(b.publishedAt) - pdTime(a.publishedAt));
+    const list = $('pdPubList');
+    if (!list) return;
+    if (!pd.pub.length) { list.innerHTML = '<p class="pd-empty">Belum ada pandangan yang diterbitkan.</p>'; return; }
+    const counts = {}; pd.pub.forEach(o => (o.ids || []).forEach(id => { counts[id] = (counts[id] || 0) + 1; }));
+    const shown = pd.filter ? pd.pub.filter(o => (o.ids || []).includes(pd.filter)) : pd.pub;
+    list.innerHTML = `<div class="pd-filter"><button type="button" class="pd-tag ${pd.filter ? '' : 'on'}" data-f="0">Semua (${pd.pub.length})</button>` +
+      Object.keys(counts).map(Number).sort((a, b) => a - b).map(id => `<button type="button" class="pd-tag ${pd.filter === id ? 'on' : ''}" data-f="${id}">F${id} (${counts[id]})</button>`).join('') + '</div>' +
+      shown.map(o => pdCard(o, { who: true, pub: true })).join('');
+    list.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { pd.filter = +b.dataset.f; pdPublic(); window.scrollTo(0, 0); pdPanel.scrollTop = 0; });
+  } catch (e) { $('pdPubList').innerHTML = '<p class="pd-empty">' + esc(ERR(e.code || e.message)) + '</p>'; }
+}
+// admin: every opinion, newest first; Terbit shows it to all students, Simpan keeps it private
+async function adminPandangan(box) {
+  let all;
+  try { all = (await pdLoad(pdCol())).sort((a, b) => pdTime(b.createdAt) - pdTime(a.createdAt)); }
+  catch (e) { box.innerHTML = '<h3>Pandangan pelajar</h3><p class="hint">Tidak dapat dibaca: ' + esc(ERR(e.code || e.message)) + '. Pastikan peraturan Firestore untuk koleksi pandangan sudah ditampal.</p>'; return; }
+  let f = all.some(o => o.status === 'baru' && !o.deleted) ? 'baru' : 'semua';
+  const draw = () => {
+    const nBaru = all.filter(o => o.status === 'baru' && !o.deleted).length;
+    const list = all.filter(o => f === 'semua' ? true : f === 'baru' ? (o.status === 'baru' && !o.deleted) : f === 'terbit' ? (o.status === 'terbit' && !o.deleted) : o.deleted);
+    box.innerHTML = `<h3>Pandangan pelajar${nBaru ? '<span class="pd-badge">' + nBaru + ' baru</span>' : ''}</h3>
+      <p class="hint">Pelajar hanya melihat pandangan yang anda terbitkan, bersama nama penuh penulis. Pandangan yang dipadam pelajar kekal di sini.</p>
+      <div class="pd-filter">${[['baru', 'Baru'], ['terbit', 'Diterbitkan'], ['padam', 'Dipadam pelajar'], ['semua', 'Semua (' + all.length + ')']].map(x => `<button type="button" class="pd-tag ${f === x[0] ? 'on' : ''}" data-af="${x[0]}">${x[1]}</button>`).join('')}</div>
+      ${list.length ? list.map(o => pdCard(o, { who: true, admin: true, status: true, extra: o => '<div class="pd-actions">' +
+        (o.status !== 'terbit' && !o.deleted ? '<button type="button" class="adm-btn" data-pub="' + o.id + '">Terbit</button>' : '') +
+        (o.status !== 'simpan' ? '<button type="button" class="adm-btn" data-keep="' + o.id + '">' + (o.status === 'terbit' ? 'Tarik balik' : 'Simpan') + '</button>' : '') + '</div>' })).join('') : '<p class="hint">Tiada.</p>'}`;
+    box.querySelectorAll('[data-af]').forEach(b => b.onclick = () => { f = b.dataset.af; draw(); });
+    const act = (id, v) => async () => {
+      try { await fb.F.updateDoc(pdDoc(id), Object.assign(v, { reviewedAt: fb.F.serverTimestamp() })); const o = all.find(x => x.id === id); Object.assign(o, v, v.status === 'terbit' ? { publishedAt: { toDate: () => new Date() } } : {}); pd.pub = null; draw(); }
+      catch (e) { alert(ERR(e.code || e.message)); }
+    };
+    box.querySelectorAll('[data-pub]').forEach(b => b.onclick = act(b.dataset.pub, { status: 'terbit', publishedAt: fb.F.serverTimestamp() }));
+    box.querySelectorAll('[data-keep]').forEach(b => b.onclick = act(b.dataset.keep, { status: 'simpan' }));
+  };
+  draw();
+}
+
 
 document.addEventListener('fn-tour-start', () => {
   if (user && fb) fb.F.setDoc(userDoc(), { tourPending: false }, { merge: true }).catch(() => {});
