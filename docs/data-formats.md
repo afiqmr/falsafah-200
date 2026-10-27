@@ -77,7 +77,7 @@ Firestore.
 | `range_v1`           |   ✓    | Chosen julat `{ from, to }`                                      |
 | `username_v1`        |   ✓    | Display name                                                     |
 | `theme_v1`           |   ✓    | `light` or `dark`                                                |
-| `lang_v1`            |   ✓    | `ms` or `en`; the BM page opens `/en/` when `en`                 |
+| `lang_v1`            |   ✓    | `ms` or `en`, set at sign-up or by the menu switch; unset = BM   |
 | `wbw_v1`             |        | Word by word on or off                                           |
 | `wbwlang_v1`         |        | `en`, `id` (BM) or `both`                                        |
 | `wbwwords_v1`        |        | Cached word-by-word tables per falsafah                          |

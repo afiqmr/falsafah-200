@@ -186,7 +186,8 @@ async function switchLang() {
   try { await push(); } catch (e) {}
   location.href = EN ? '/' : '/en/';
 }
-const LANG_BTN = () => `<button type="button" class="nameskip acct-lang" id="acctLangGate">${T('English version', 'Versi Bahasa Melayu')}</button>`;
+// New students choose the language when signing up. Accounts made before the English version have no
+// choice stored, so they stay in BM; everyone can switch in the account menu, and the choice is remembered.
 const ADMIN_EMAILS = ['afiqmonsieur@gmail.com'];   // must match the Firestore rules
 const isAdminUser = () => !!(user && ADMIN_EMAILS.includes((user.email || '').toLowerCase()));
 const SYNCED = new Set(Object.values(KEYS));
@@ -323,13 +324,14 @@ function render() {
     ${reg ? T('<div class="acct-field"><label>Emel <span style="text-transform:none;letter-spacing:0;font-weight:600">(untuk Lupa PIN)</span></label><input id="fEmail" type="email" maxlength="80" autocapitalize="none" autocomplete="email" spellcheck="false" placeholder="nama@contoh.com"></div>', '<div class="acct-field"><label>Email <span style="text-transform:none;letter-spacing:0;font-weight:600">(for Forgot PIN)</span></label><input id="fEmail" type="email" maxlength="80" autocapitalize="none" autocomplete="email" spellcheck="false" placeholder="name@example.com"></div>') : ''}
     <div class="acct-field"><label>${T('PIN 6 digit', '6-digit PIN')}</label>${pinInput('fPin', reg ? 'new-password' : 'current-password')}</div>
     ${reg ? `<div class="acct-field"><label>${T('Sahkan PIN', 'Confirm PIN')}</label>${pinInput('fPin2', 'new-password')}</div>` : ''}
+    ${reg ? `<div class="acct-field"><label>${T('Bahasa aplikasi', 'App language')} / ${T('App language', 'Bahasa aplikasi')}</label><div class="acct-seg" id="fLang" style="margin:0"><button type="button" data-l="ms" class="${EN ? '' : 'active'}">Bahasa Melayu</button><button type="button" data-l="en" class="${EN ? 'active' : ''}">English</button></div></div>` : ''}
     <p class="acct-msg" id="acctMsg"></p>
     <button class="namebtn" id="acctGo">${reg ? T('Daftar', 'Sign up') : T('Log masuk', 'Log in')}</button>
     ${reg ? '' : '<button class="nameskip" id="acctForgot" type="button">' + T('Lupa PIN?', 'Forgot PIN?') + '</button>'}
     <p class="acct-note">${reg ? T('Nama pengguna: 3–20 huruf kecil, nombor, _ atau . Kami simpan nama, nama pengguna, emel dan kemajuan hafalan anda sahaja.', 'Username: 3–20 lowercase letters, numbers, _ or . We keep only your name, username, email and study progress.') : T('Belum ada akaun? Tekan Daftar.', 'No account yet? Tap Sign up.')}</p>
-    ${LANG_BTN()}`;
-  $('acctLangGate').onclick = switchLang;
-  card.querySelectorAll('.acct-seg button').forEach(b => b.onclick = () => { mode = b.dataset.m; render(); });
+`;
+  card.querySelectorAll('.acct-seg button[data-m]').forEach(b => b.onclick = () => { mode = b.dataset.m; render(); });
+  card.querySelectorAll('#fLang button').forEach(b => b.onclick = () => { card.querySelectorAll('#fLang button').forEach(x => x.classList.toggle('active', x === b)); });
   $('acctGo').onclick = reg ? register : login;
   if (!reg) $('acctForgot').onclick = forgot;
   card.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') $('acctGo').click(); }));
@@ -481,6 +483,7 @@ async function emailFor(u) { const s = await fb.F.getDoc(nameDoc(u)); return s.e
 
 async function register() {
   const name = ($('fName').value || '').trim().replace(/\s+/g, ' '), u = cleanUser($('fUser').value), email = cleanEmail($('fEmail').value), p = $('fPin').value, p2 = $('fPin2').value;
+  const lang = (card.querySelector('#fLang button.active') || {}).dataset?.l || (EN ? 'en' : 'ms');
   if (name.length < 3) return msg(T('Sila isi nama penuh anda.', 'Please enter your full name.'), 'err');
   if (!validUser(u)) return msg(T('Nama pengguna: 3–20 huruf kecil, nombor, _ atau .', 'Username: 3–20 lowercase letters, numbers, _ or .'), 'err');
   if (!validEmail(email)) return msg(T('Sila isi emel yang sah.', 'Please enter a valid email.'), 'err');
@@ -495,9 +498,11 @@ async function register() {
     user = cred.user; profile = { name, username: u, email };
     try { await fb.F.setDoc(nameDoc(u), { uid: user.uid, email }); }
     catch (e) { await cred.user.delete().catch(() => {}); user = null; throw { code: 'username-taken' }; }   // someone took it a moment ago
-    lsSet(LAST_USER, u); lsSet(KEYS.username, name); lsSet('falsafah200_tour_pending', '1');
+    lsSet(LAST_USER, u); lsSet(KEYS.username, name); lsSet('falsafah200_tour_pending', '1'); lsSet(KEYS.lang, lang);
     await fb.F.setDoc(userDoc(), { profile, data: localSnapshot(), tourPending: true, createdAt: fb.F.serverTimestamp(), updatedAt: fb.F.serverTimestamp() });
     lastSync = new Date();
+    // chose the other language: open that build (the account stays signed in on the same site)
+    if (lang !== (EN ? 'en' : 'ms')) { try { sessionStorage.setItem('fn_reg_install', '1'); } catch (e) {} location.href = lang === 'en' ? '/en/' : '/'; return; }
     if (['done', 'none'].includes(installKind())) afterLogin();
     else openInstall(true);   // registering stays true so the sign-in listener leaves this screen alone
   } catch (e) {
@@ -541,6 +546,9 @@ async function logout() {
 
 // After sign-in: close the gate, then ask for the julat if this account has none yet.
 function afterLogin() {
+  // just signed up in the other language: show the home-screen step here first, then carry on
+  let regInstall = false; try { regInstall = sessionStorage.getItem('fn_reg_install') === '1'; sessionStorage.removeItem('fn_reg_install'); } catch (e) {}
+  if (regInstall && !['done', 'none'].includes(installKind())) { registering = true; openInstall(true); return; }
   registering = false; gated = false;
   try { sessionStorage.removeItem('fn_imported'); } catch (e) {}
   loadWeekly();
