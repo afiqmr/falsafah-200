@@ -16,6 +16,12 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
   Sahih International for the ayat the English book does not quote, labelled as not from the book.
 - English Kuiz questions (same answers and distractors) and an English translation of Nota.
 
+### Changed
+
+- English titles follow the BM title wording, never the English ayat translation. Fixed nine
+  titles that had drifted: 15 (Prosperity at Three Times), 34, 50, 51, 63, 65, 127, 128 and 165.
+  "Sejahtera" is "Prosperity" / "Prosperous", as in the English book's Keywords.
+
 ## 2026-10-27
 
 ### Added

@@ -49,6 +49,9 @@ wait for READY.
   are the main reference), `notes_en.json` and `i18n/quiz_en.json` (question text only, keyed by id).
   App-written English never uses "verse"; use "Ayat". Text quoted from the English book keeps its
   own wording. English terms: Sadaqah, Rasul / Rasulullah, Solat.
+- **English titles** translate the words of the BM title, never the English ayat translation
+  (sejahtera = Prosperity, rahmat = Mercy, berbakti = Serve, kamu = your). Use the same English
+  word for the same BM word across titles.
 - **Pandangan**: the author name always comes from the account profile. Only admin-published
   opinions reach other students, and a student's delete only hides it (`deleted: true`).
 
