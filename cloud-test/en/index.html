@@ -1742,10 +1742,10 @@
 
   // ---------- Markah & gred ----------
   // Each falsafah keeps its last 10 answers: K/k = Kaji Ingat/Belum ingat (+1/-1),
-  // Q/q = Kuiz betul/salah (+0.5/-0.5). The sum is the markah; the markah gives the gred.
+  // Q/q = Kuiz betul/salah (+1/-1, same as Kaji). The sum is the markah; the markah gives the gred.
   // The box (spacing) still decides when a card comes back; students see the gred.
   var LOG_MAX = 10;
-  var LOG_PTS = { K: 1, k: -1, Q: 0.5, q: -0.5 };
+  var LOG_PTS = { K: 1, k: -1, Q: 1, q: -1 };
   var GREDS = [
     { g:'A+', min:7,  cls:'badge-emerald', col:'var(--lv5)' },
     { g:'A',  min:5,  cls:'badge-emerald', col:'var(--lv4)' },
@@ -2296,7 +2296,7 @@
   // ---------- shared helpers for Butiran (Kaji) and the Kemajuan tab ----------
   var LEVEL_COLORS = ['var(--border)','var(--lv1)','var(--lv2)','var(--lv3)','var(--lv4)','var(--lv5)'];
   function missesOf(id){ var c = srs[id]; return c ? Math.max(0, (c.seen||0) - (c.correct||0)) : 0; }
-  // Perlu fokus: every falsafah with gred C, D or G (markah 0.5 and below). It leaves when the markah reaches 1 (gred B).
+  // Perlu fokus: every falsafah with gred C, D or G (markah 0 and below). It leaves when the markah reaches 1 (gred B).
   function inFocus(id){ var g = gredOf(id); return !!g && FOCUS_GREDS.indexOf(g.g) >= 0; }
   function markahMeta(id){
     var g = gredOf(id);
@@ -2472,13 +2472,13 @@
     html += '<div class="prog-sec card-sec"><h4>' + T('Gred hafalan &middot; tekan untuk lihat senarai', 'Memory grades &middot; tap to see the list') + '</h4>' +
       '<div class="lvl-bar">' + gr.map(function(v, i){ return v.length ? '<span style="width:' + (v.length/total*100) + '%;background:' + grCol(i) + '"></span>' : ''; }).join('') + '</div>' +
       '<div class="lvl-grid">' + gr.map(function(v, i){ return '<div data-list="gr' + i + '"' + (i >= 5 && i < GREDS.length ? ' class="gr-low"' : '') + '><b>' + v.length + '</b><i style="background:' + grCol(i) + '"></i>' + grName(i) + '</div>'; }).join('') + '</div>' +
-      '<p class="pnote">' + T('Markah dikira dari 10 jawapan terakhir setiap falsafah: Kaji <b>Ingat +1</b>, <b>Belum ingat &minus;1</b>, Kuiz betul +&frac12;, salah &minus;&frac12;.', 'The score comes from the last 10 answers for each falsafah: Study <b>Remembered +1</b>, <b>Not yet &minus;1</b>, Quiz right +&frac12;, wrong &minus;&frac12;.') + '</p>' +
+      '<p class="pnote">' + T('Markah dikira dari 10 jawapan terakhir setiap falsafah: Kaji <b>Ingat +1</b>, <b>Belum ingat &minus;1</b>, Kuiz <b>betul +1</b>, <b>salah &minus;1</b>.', 'The score comes from the last 10 answers for each falsafah: Study <b>Remembered +1</b>, <b>Not yet &minus;1</b>, Quiz <b>right +1</b>, <b>wrong &minus;1</b>.') + '</p>' +
       '<div class="gred-key">' + (EN ? [
-        ['A+', '7 and above'], ['A', '5 to 6&frac12;'], ['A&minus;', '4 to 4&frac12;'], ['B+', '3 to 3&frac12;'],
-        ['B', '1 to 2&frac12;'], ['C', '&minus;1 to &frac12;'], ['D', '&minus;3 to &minus;1&frac12;'], ['G', 'below &minus;3']
+        ['A+', '7 and above'], ['A', '5 to 6'], ['A&minus;', '4'], ['B+', '3'],
+        ['B', '1 to 2'], ['C', '&minus;1 to 0'], ['D', '&minus;3 to &minus;2'], ['G', 'below &minus;3']
       ] : [
-        ['A+', '7 dan ke atas'], ['A', '5 hingga 6&frac12;'], ['A&minus;', '4 hingga 4&frac12;'], ['B+', '3 hingga 3&frac12;'],
-        ['B', '1 hingga 2&frac12;'], ['C', '&minus;1 hingga &frac12;'], ['D', '&minus;3 hingga &minus;1&frac12;'], ['G', 'bawah &minus;3']
+        ['A+', '7 dan ke atas'], ['A', '5 hingga 6'], ['A&minus;', '4'], ['B+', '3'],
+        ['B', '1 hingga 2'], ['C', '&minus;1 hingga 0'], ['D', '&minus;3 hingga &minus;2'], ['G', 'bawah &minus;3']
       ]).map(function(r){ return '<span><b>' + r[0] + ':</b> ' + r[1] + '</span>'; }).join('') + '</div>' +
       (nMarked ? '<button type="button" class="backbtn" data-list="markah" style="margin:12px 0 0;">' + T('Senarai markah setiap falsafah (', 'Score of each falsafah (') + nMarked + ') &rsaquo;</button>' : '') +
       '</div>';
@@ -4885,11 +4885,11 @@ async function publishWeekly(students) {
 }
 
 // ---------- admin: every student's progress ----------
-// gred: same rule as the app (last 10 answers; Kaji +1/-1, Kuiz +0.5/-0.5)
+// gred: same rule as the app (last 10 answers; Kaji +1/-1, Kuiz +1/-1)
 const LVL = ['A+', 'A', 'A−', 'B+', 'B', 'C', 'D', 'G', 'Belum dikaji'];
 const LVL_C = ['#0F9F74', '#34D399', '#7FB7A6', '#E9B949', '#D4AF37', '#EA6A2A', '#D9472B', '#B42318', 'var(--border)'];
 const G_MIN = [7, 5, 4, 3, 1, -1, -3, -Infinity];
-const LOG_PTS = { K: 1, k: -1, Q: 0.5, q: -0.5 };
+const LOG_PTS = { K: 1, k: -1, Q: 1, q: -1 };
 function seedLog(c) {
   const seen = c.seen || 0; if (!seen) return '';
   const n = Math.min(seen, 10), miss = Math.max(0, seen - (c.correct || 0)), tail = Math.min(c.box || 0, n);

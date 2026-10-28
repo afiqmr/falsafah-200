@@ -736,11 +736,11 @@ async function publishWeekly(students) {
 }
 
 // ---------- admin: every student's progress ----------
-// gred: same rule as the app (last 10 answers; Kaji +1/-1, Kuiz +0.5/-0.5)
+// gred: same rule as the app (last 10 answers; Kaji +1/-1, Kuiz +1/-1)
 const LVL = ['A+', 'A', 'A−', 'B+', 'B', 'C', 'D', 'G', 'Belum dikaji'];
 const LVL_C = ['#0F9F74', '#34D399', '#7FB7A6', '#E9B949', '#D4AF37', '#EA6A2A', '#D9472B', '#B42318', 'var(--border)'];
 const G_MIN = [7, 5, 4, 3, 1, -1, -3, -Infinity];
-const LOG_PTS = { K: 1, k: -1, Q: 0.5, q: -0.5 };
+const LOG_PTS = { K: 1, k: -1, Q: 1, q: -1 };
 function seedLog(c) {
   const seen = c.seen || 0; if (!seen) return '';
   const n = Math.min(seen, 10), miss = Math.max(0, seen - (c.correct || 0)), tail = Math.min(c.box || 0, n);

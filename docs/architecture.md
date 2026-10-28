@@ -32,7 +32,7 @@ All app code is one IIFE at the end of `template.html`. Main areas, in file orde
 | -------------------- | ------------------------------------------------------------------------- |
 | Daily state          | Today's Kaji ids, Kuiz count, results, cheer flags; rolls over at midnight |
 | Streak               | Days with both targets met; the 🔥 tile in the mission bar                 |
-| Markah and gred      | Last 10 answers per falsafah (Kaji ±1, Kuiz ±½) mapped to A+ … G           |
+| Markah and gred      | Last 10 answers per falsafah (Kaji ±1, Kuiz ±1) mapped to A+ … G           |
 | History              | Per-day Ingat / Belum ingat / missed-once lists, kept 120 days            |
 | Kaji                 | Card queue over the julat, Dedah, grading, day summary, focus sessions    |
 | Progres              | Gred tiles, Perlu fokus, markah list, chart, history, weekly popups       |

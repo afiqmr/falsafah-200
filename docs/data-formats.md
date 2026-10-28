@@ -90,7 +90,7 @@ Firestore.
 | `ids_v2`             |        | One-time migration marker                                        |
 
 `log` is a string of the last 10 answers: `K`/`k` for Kaji Ingat/Belum ingat and `Q`/`q` for a
-right/wrong Kuiz answer. Markah is the sum (K +1, k −1, Q +½, q −½) and decides the gred.
+right/wrong Kuiz answer. Markah is the sum (K +1, k −1, Q +1, q −1) and decides the gred.
 
 ## Firestore
 

@@ -23,6 +23,8 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
   "Sejahtera" is "Prosperity" / "Prosperous", as in the English book's Keywords.
 - Kaji order: falsafah with the same markah come in a new order every day (weakest still first),
   so students no longer see the same starting sequence daily. The order stays the same within a day.
+- Kuiz marks match Kaji: a right answer is +1 and a wrong answer −1 (was +½ / −½). Markah and
+  gred are worked out again from each falsafah's last 10 answers, so past Kuiz answers count at the new value.
 
 ## 2026-10-27
 
