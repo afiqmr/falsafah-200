@@ -86,7 +86,8 @@ Firestore.
 | `weekly_seen_v1`     |        | Saturday of the last weekly popup shown                          |
 | `tour_pending`       |        | First-time tour still to show                                    |
 | `last_user_v1`       |        | Last username on this device                                     |
-| `ids_v2`, `order_v3` |        | One-time migration markers                                       |
+| `order_v3`           |        | This device's random order of the 200; seeds the daily Kaji order |
+| `ids_v2`             |        | One-time migration marker                                        |
 
 `log` is a string of the last 10 answers: `K`/`k` for Kaji Ingat/Belum ingat and `Q`/`q` for a
 right/wrong Kuiz answer. Markah is the sum (K +1, k −1, Q +½, q −½) and decides the gred.

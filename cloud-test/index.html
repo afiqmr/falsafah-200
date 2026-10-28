@@ -2083,13 +2083,29 @@
     return ids;
   }
   var studyOrder = loadStudyOrder();
-  var studyOrderIndex = {};
-  studyOrder.forEach(function(id, i){ studyOrderIndex[id] = i; });
+
+  // Falsafah with the same markah get a new order every day, so the student does not learn the
+  // sequence. The order is fixed for the whole day (seeded by the date) and differs per device
+  // (the stored permutation is part of the seed).
+  var dayOrder = { date: null, idx: {} };
+  function dayOrderIndex(){
+    var t = todayStr();
+    if(dayOrder.date === t) return dayOrder.idx;
+    var str = t + '|' + studyOrder.slice(0, 12).join(','), h = 2166136261;
+    for(var i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    function rnd(){ h = (h + 0x6D2B79F5) >>> 0; var x = Math.imul(h ^ (h >>> 15), 1 | h); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }
+    var ids = studyOrder.slice();
+    for(var j = ids.length - 1; j > 0; j--){ var k = Math.floor(rnd() * (j + 1)), tmp = ids[j]; ids[j] = ids[k]; ids[k] = tmp; }
+    var idx = {}; ids.forEach(function(id, n){ idx[id] = n; });
+    dayOrder = { date: t, idx: idx };
+    return idx;
+  }
 
   // Every falsafah in the chosen julat, every day (no hidden return dates). Lowest markah first.
   function dueQueue(){
+    var ord = dayOrderIndex();
     return STUDY_POOL.slice().sort(function(a,b){
-      return (markahOf(a.id) - markahOf(b.id)) || (studyOrderIndex[a.id] - studyOrderIndex[b.id]);
+      return (markahOf(a.id) - markahOf(b.id)) || (ord[a.id] - ord[b.id]);
     });
   }
 
