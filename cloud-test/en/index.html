@@ -2824,14 +2824,10 @@
       ctx.font = '800 58px ' + SANS; var tLines = wrapLines(ctx, displayTitle(entry.title), IW);
       ctx.font = '400 50px ' + AR; ctx.direction = 'rtl'; var aLines = wrapLines(ctx, entry.arabic, IW - 80); ctx.direction = 'ltr';
       ctx.font = '400 30px ' + SANS; var mLines = wrapLines(ctx, entry.text, IW);
-      var refL = T('Rujukan: ', 'Reference: '), refB = T('Al-Fathun Nawa Jilid 7, ', 'Al-Fathun Nawa Volume 7, ') + msLabel(entry), url = APP_URL.replace('https://', '');
-      ctx.font = '400 24px ' + SANS; var wRefL = ctx.measureText(refL).width;
-      ctx.font = '600 24px ' + SANS; var wRefB = ctx.measureText(refB).width;
-      ctx.font = '800 24px ' + SANS; var wUrl = ctx.measureText(url).width;
-      var refOneRow = wRefL + wRefB + 24 + wUrl <= IW, BY = 'by Afiq';
+      var url = APP_URL.replace('https://', ''), BY = 'by Afiq';
       var yNo = BAND - 34, yT = yNo + 41 + 8, yA = yT + tLines.length * 65 + 36;
       var aH = 68 + aLines.length * 95, yL = yA + aH + 34, yM = yL + 27 + 10, yS = yM + mLines.length * 45 + 18;
-      var yR = yS + 36 + 34, H = yR + 24 + (refOneRow ? 33 : 66) + 34 + BAND - 30;
+      var yR = yS + 36 + 34, H = yR + 24 + 33 + BAND - 30;
       c.height = Math.ceil(H);
       ctx = c.getContext('2d');
       // ---- background + songket bands ----
@@ -2873,15 +2869,11 @@
       var cx = X; T('MAKSUD', 'MEANING').split('').forEach(function(ch){ ctx.fillText(ch, cx, yL + 13); cx += ctx.measureText(ch).width + 2.8; });
       ctx.font = '400 30px ' + SANS; ctx.fillStyle = '#10212B'; mLines.forEach(function(l, i){ ctx.fillText(l, X, yM + i * 45 + 22); });
       ctx.font = '700 26px ' + SANS; ctx.fillStyle = '#0F766E'; ctx.fillText(entry.surahDisplay, X, yS + 18);
-      // ---- reference + link ----
+      // ---- link + by Afiq ----
       ctx.fillStyle = 'rgba(16,33,43,.12)'; ctx.fillRect(X, yR, IW, 1);
       var ry = yR + 24 + 16;
-      ctx.font = '400 24px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.fillText(refL, X, ry);
-      ctx.font = '600 24px ' + SANS; ctx.fillStyle = '#10212B'; ctx.fillText(refB, X + wRefL, ry);
-      ctx.font = '800 24px ' + SANS; ctx.fillStyle = '#B8451F';
-      if(refOneRow){ ctx.textAlign = 'right'; ctx.fillText(url, X + IW, ry); ctx.textAlign = 'left'; } else ctx.fillText(url, X, ry + 33);
-      ctx.font = '600 22px ' + SANS; ctx.fillStyle = '#5F6B6D';
-      if(refOneRow){ ctx.textAlign = 'right'; ctx.fillText(BY, X + IW, ry + 34); ctx.textAlign = 'left'; } else ctx.fillText(BY, X, ry + 67);
+      ctx.font = '800 24px ' + SANS; ctx.fillStyle = '#B8451F'; ctx.fillText(url, X, ry);
+      ctx.font = '600 24px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.textAlign = 'right'; ctx.fillText(BY, X + IW, ry); ctx.textAlign = 'left';
       return new Promise(function(res){ c.toBlob(function(b){ res(b); }, 'image/png'); });
     });
   }
