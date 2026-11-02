@@ -38,7 +38,9 @@ A songket band is drawn in code in the theme colours:
 - as the top and bottom bands of the share card.
 
 The share card always uses the light theme, keeps fixed font sizes, and grows in height with the
-ayat.
+ayat. It has no brand header: it opens with the falsafah number and title, and ends with the
+reference, the app link and "by Afiq". The Arabic is set like a printed mushaf: full lines run
+edge to edge and the last line sits on the right.
 
 ## Patterns
 

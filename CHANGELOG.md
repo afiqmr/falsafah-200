@@ -2,6 +2,14 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-11-02
+
+### Changed
+
+- Share card: the header (AFN logo, "AL-FATHUN NAWA", "Falsafah 200 · Jilid 7") is removed, and
+  "by Afiq" sits under the app link. The Arabic is set like a printed mushaf: full lines run edge
+  to edge and the last line sits on the right (was centred).
+
 ## 2026-10-28
 
 ### Added

@@ -32,8 +32,6 @@ def build(lang, src_file, out_file):
     if en:
         sub('<p>Tell us your name or what you like to be called to start using this memory helper for your Al-Quran Philosophy studies.</p>',
             '<p>Choose the falsafah range you are studying. The name below shows on the main screen.</p>')
-        # the share card draws the logo from the shared icons folder
-        sub("loadImg('icons/logo-240.png')", "loadImg('../icons/logo-240.png')")
     else:
         sub('<p>Sila nyatakan nama atau panggilan anda untuk mula menggunakan pembantu hafalan ini dalam lembaran pengajian Falsafah Al-Quran.</p>',
             '<p>Pilih julat falsafah yang anda kaji. Nama panggilan di bawah dipaparkan pada skrin utama.</p>')

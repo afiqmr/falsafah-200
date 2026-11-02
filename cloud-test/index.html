@@ -2814,8 +2814,8 @@
     var fontsReady = (document.fonts && document.fonts.load) ? Promise.all([
       document.fonts.load('400 50px "Scheherazade New"', entry.arabic), document.fonts.load('400 30px "Noto Sans"'),
       document.fonts.load('600 26px "Noto Sans"'), document.fonts.load('800 58px "Noto Sans"')]).catch(function(){}) : Promise.resolve();
-    return Promise.all([fontsReady, loadImg('icons/logo-240.png'), loadImg(window.FN_SONGKET_BAND)]).then(function(r){
-      var logo = r[1], cloth = r[2];
+    return Promise.all([fontsReady, loadImg(window.FN_SONGKET_BAND)]).then(function(r){
+      var cloth = r[1];
       var W = 1080, X = 84, IW = W - 2 * X, BAND = 150;
       var c = document.createElement('canvas'), ctx = c.getContext('2d');
       c.width = W; c.height = 10;
@@ -2827,10 +2827,10 @@
       ctx.font = '400 24px ' + SANS; var wRefL = ctx.measureText(refL).width;
       ctx.font = '600 24px ' + SANS; var wRefB = ctx.measureText(refB).width;
       ctx.font = '800 24px ' + SANS; var wUrl = ctx.measureText(url).width;
-      var refOneRow = wRefL + wRefB + 24 + wUrl <= IW;
-      var y0 = BAND - 58, yNo = y0 + 68 + 44, yT = yNo + 41 + 8, yA = yT + tLines.length * 65 + 36;
+      var refOneRow = wRefL + wRefB + 24 + wUrl <= IW, BY = 'by Afiq';
+      var yNo = BAND - 34, yT = yNo + 41 + 8, yA = yT + tLines.length * 65 + 36;
       var aH = 68 + aLines.length * 95, yL = yA + aH + 34, yM = yL + 27 + 10, yS = yM + mLines.length * 45 + 18;
-      var yR = yS + 36 + 34, H = yR + 24 + (refOneRow ? 33 : 66) + BAND - 30;
+      var yR = yS + 36 + 34, H = yR + 24 + (refOneRow ? 33 : 66) + 34 + BAND - 30;
       c.height = Math.ceil(H);
       ctx = c.getContext('2d');
       // ---- background + songket bands ----
@@ -2848,13 +2848,6 @@
         });
       }
       ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-      // ---- brand row ----
-      if(logo){ ctx.save(); ctx.shadowColor = 'rgba(16,33,43,.18)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 4; roundRect(ctx, X, y0, 68, 68, 15); ctx.fillStyle = '#fff'; ctx.fill(); ctx.restore();
-        ctx.save(); roundRect(ctx, X, y0, 68, 68, 15); ctx.clip(); ctx.drawImage(logo, X, y0, 68, 68); ctx.restore(); }
-      var bx = X + (logo ? 86 : 0);
-      ctx.font = '800 22px ' + SANS; ctx.fillStyle = '#B8451F';
-      var cx = bx; 'AL-FATHUN NAWA'.split('').forEach(function(ch){ ctx.fillText(ch, cx, y0 + 21); cx += ctx.measureText(ch).width + 3.1; });
-      ctx.font = '600 19px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.fillText(T('Falsafah 200 · Jilid 7', 'Falsafah 200 · Volume 7'), bx, y0 + 50);
       // ---- number + title ----
       ctx.font = '800 30px ' + SANS; ctx.fillStyle = '#B8451F'; ctx.fillText(entry.rangeLabel, X, yNo + 20);
       ctx.font = '800 58px ' + SANS; ctx.fillStyle = '#10212B'; tLines.forEach(function(l, i){ ctx.fillText(l, X, yT + i * 65 + 33); });
@@ -2862,12 +2855,21 @@
       ctx.save(); ctx.shadowColor = 'rgba(16,33,43,.06)'; ctx.shadowBlur = 22; ctx.shadowOffsetY = 6;
       roundRect(ctx, X, yA, IW, aH, 22); ctx.fillStyle = '#FFFDF9'; ctx.fill(); ctx.restore();
       roundRect(ctx, X + .5, yA + .5, IW - 1, aH - 1, 22); ctx.strokeStyle = 'rgba(16,33,43,.10)'; ctx.lineWidth = 1; ctx.stroke();
-      ctx.font = '400 50px ' + AR; ctx.fillStyle = '#10212B'; ctx.textAlign = 'center'; ctx.direction = 'rtl';
-      aLines.forEach(function(l, i){ ctx.fillText(l, W / 2, yA + 34 + i * 95 + 50); });
+      // Arabic set like a printed mushaf: full lines run edge to edge, the last line sits on the right.
+      ctx.font = '400 50px ' + AR; ctx.fillStyle = '#10212B'; ctx.textAlign = 'right'; ctx.direction = 'rtl';
+      var aRight = X + IW - 40, aW = IW - 80;
+      aLines.forEach(function(l, i){
+        var ly = yA + 34 + i * 95 + 50, words = l.split(' ');
+        if(i === aLines.length - 1 || words.length < 2){ ctx.fillText(l, aRight, ly); return; }
+        var ws = words.map(function(w){ return ctx.measureText(w).width; }), sum = ws.reduce(function(a, b){ return a + b; }, 0);
+        var gap = (aW - sum) / (words.length - 1), xr = aRight;
+        if(gap > 60){ ctx.fillText(l, aRight, ly); return; }
+        words.forEach(function(w, k){ ctx.fillText(w, xr, ly); xr -= ws[k] + gap; });
+      });
       ctx.direction = 'ltr'; ctx.textAlign = 'left';
       // ---- maksud ----
       ctx.font = '800 20px ' + SANS; ctx.fillStyle = '#5F6B6D';
-      cx = X; T('MAKSUD', 'MEANING').split('').forEach(function(ch){ ctx.fillText(ch, cx, yL + 13); cx += ctx.measureText(ch).width + 2.8; });
+      var cx = X; T('MAKSUD', 'MEANING').split('').forEach(function(ch){ ctx.fillText(ch, cx, yL + 13); cx += ctx.measureText(ch).width + 2.8; });
       ctx.font = '400 30px ' + SANS; ctx.fillStyle = '#10212B'; mLines.forEach(function(l, i){ ctx.fillText(l, X, yM + i * 45 + 22); });
       ctx.font = '700 26px ' + SANS; ctx.fillStyle = '#0F766E'; ctx.fillText(entry.surahDisplay, X, yS + 18);
       // ---- reference + link ----
@@ -2877,6 +2879,8 @@
       ctx.font = '600 24px ' + SANS; ctx.fillStyle = '#10212B'; ctx.fillText(refB, X + wRefL, ry);
       ctx.font = '800 24px ' + SANS; ctx.fillStyle = '#B8451F';
       if(refOneRow){ ctx.textAlign = 'right'; ctx.fillText(url, X + IW, ry); ctx.textAlign = 'left'; } else ctx.fillText(url, X, ry + 33);
+      ctx.font = '600 22px ' + SANS; ctx.fillStyle = '#5F6B6D';
+      if(refOneRow){ ctx.textAlign = 'right'; ctx.fillText(BY, X + IW, ry + 34); ctx.textAlign = 'left'; } else ctx.fillText(BY, X, ry + 67);
       return new Promise(function(res){ c.toBlob(function(b){ res(b); }, 'image/png'); });
     });
   }
