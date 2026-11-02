@@ -7,7 +7,8 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
 ### Changed
 
 - Share card: the header (AFN logo, "AL-FATHUN NAWA", "Falsafah 200 · Jilid 7") and the Rujukan
-  line are removed. The bottom row reads "falsafah200.vercel.app · by Afiq". The Arabic is set like a printed mushaf: full lines run edge
+  line are removed. The bottom row reads "falsafah200.vercel.app · by Afiq". The songket bands are bigger, with more space
+  between them and the text. The Arabic is set like a printed mushaf: full lines run edge
   to edge and the last line sits on the right (was centred).
 
 ## 2026-10-28
