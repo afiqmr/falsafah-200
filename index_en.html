@@ -2754,8 +2754,10 @@
     var fontsReady = (document.fonts && document.fonts.load) ? Promise.all([
       document.fonts.load('400 50px "Scheherazade New"', entry.arabic), document.fonts.load('400 30px "Noto Sans"'),
       document.fonts.load('600 26px "Noto Sans"'), document.fonts.load('800 58px "Noto Sans"')]).catch(function(){}) : Promise.resolve();
-    return Promise.all([fontsReady, loadImg(window.FN_SONGKET_BAND)]).then(function(r){
-      var cloth = r[1];
+    // Word by word (Arabic + BM, or English on the English card; Quran.com) when it can be loaded; otherwise the plain ayat.
+    var wbwP = lpWbwFor(entry).then(function(ws){ return ws.length && ws.every(function(w){ return w.end || (EN ? w.en : w.id); }) ? ws : null; }).catch(function(){ return null; });
+    return Promise.all([fontsReady, loadImg(window.FN_SONGKET_BAND), wbwP]).then(function(r){
+      var cloth = r[1], wbw = r[2];
       var W = 1080, X = 84, IW = W - 2 * X, BAND = 150;
       var c = document.createElement('canvas'), ctx = c.getContext('2d');
       c.width = W; c.height = 10;
@@ -2764,8 +2766,25 @@
       ctx.font = '400 50px ' + AR; ctx.direction = 'rtl'; var aLines = wrapLines(ctx, entry.arabic, IW - 80); ctx.direction = 'ltr';
       ctx.font = '400 30px ' + SANS; var mLines = wrapLines(ctx, entry.text, IW);
       var url = APP_URL.replace('https://', ''), BY = 'by Afiq';
+      // word by word: cells flow right to left; each holds the Arabic word with its BM meaning below
+      var WB_AR = '400 48px ' + AR, WB_BM = 'italic 400 23px ' + SANS, WB_GAP = 28, wbRows = null, wbH = 0;
+      if(wbw){
+        var cells = wbw.map(function(w){
+          ctx.font = WB_AR; var aw = ctx.measureText(w.ar).width;
+          ctx.font = WB_BM; var bl = w.end ? [] : wrapLines(ctx, EN ? w.en : w.id, Math.max(aw, 230));
+          var bw = bl.reduce(function(m, l){ return Math.max(m, ctx.measureText(l).width); }, 0);
+          return { w: w, lines: bl, cw: Math.min(IW - 80, Math.max(aw, bw)) };
+        });
+        wbRows = []; var cur = [], curW = 0;
+        cells.forEach(function(cl){
+          if(cur.length && curW + WB_GAP + cl.cw > IW - 80){ wbRows.push(cur); cur = []; curW = 0; }
+          curW += (cur.length ? WB_GAP : 0) + cl.cw; cur.push(cl);
+        });
+        if(cur.length) wbRows.push(cur);
+        wbRows.forEach(function(row){ row.h = 74 + row.reduce(function(m, cl){ return Math.max(m, cl.lines.length); }, 0) * 30 + 22; wbH += row.h; });
+      }
       var yNo = BAND - 34, yT = yNo + 41 + 8, yA = yT + tLines.length * 65 + 36;
-      var aH = 68 + aLines.length * 95, yL = yA + aH + 34, yM = yL + 27 + 10, yS = yM + mLines.length * 45 + 18;
+      var aH = wbRows ? 40 + wbH + 34 : 68 + aLines.length * 95, yL = yA + aH + 34, yM = yL + 27 + 10, yS = yM + mLines.length * 45 + 18;
       var yR = yS + 36 + 34, H = yR + 24 + 33 + BAND - 30;
       c.height = Math.ceil(H);
       ctx = c.getContext('2d');
@@ -2794,6 +2813,26 @@
       // Arabic set like a printed mushaf: full lines run edge to edge, the last line sits on the right.
       ctx.font = '400 50px ' + AR; ctx.fillStyle = '#10212B'; ctx.textAlign = 'right'; ctx.direction = 'rtl';
       var aRight = X + IW - 40, aW = IW - 80;
+      if(wbRows){
+        var wy = yA + 40;
+        wbRows.forEach(function(row, ri){
+          var sum = row.reduce(function(a, cl){ return a + cl.cw; }, 0), gap = WB_GAP;
+          if(ri < wbRows.length - 1 && row.length > 1) gap = Math.min(80, (aW - sum) / (row.length - 1));
+          var xr = aRight;
+          row.forEach(function(cl){
+            var mid = xr - cl.cw / 2;
+            ctx.textAlign = 'center'; ctx.direction = 'rtl'; ctx.font = WB_AR; ctx.fillStyle = cl.w.end ? '#0F766E' : '#10212B';
+            ctx.fillText(cl.w.ar, mid, wy + 34);
+            ctx.direction = 'ltr'; ctx.font = WB_BM; ctx.fillStyle = '#0F766E';
+            cl.lines.forEach(function(l, k){ ctx.fillText(l, mid, wy + 88 + k * 30); });
+            xr -= cl.cw + gap;
+          });
+          wy += row.h;
+        });
+        ctx.direction = 'ltr'; ctx.textAlign = 'right'; ctx.font = '400 19px ' + SANS; ctx.fillStyle = '#8A9496';
+        ctx.fillText('Word by word: Quran.com', aRight, yA + aH - 26);
+        aLines = [];
+      }
       aLines.forEach(function(l, i){
         var ly = yA + 34 + i * 95 + 50, words = l.split(' ');
         if(i === aLines.length - 1 || words.length < 2){ ctx.fillText(l, aRight, ly); return; }
@@ -2812,7 +2851,8 @@
       ctx.fillStyle = 'rgba(16,33,43,.12)'; ctx.fillRect(X, yR, IW, 1);
       var ry = yR + 24 + 16;
       ctx.font = '800 24px ' + SANS; ctx.fillStyle = '#B8451F'; ctx.fillText(url, X, ry);
-      ctx.font = '600 24px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.textAlign = 'right'; ctx.fillText(BY, X + IW, ry); ctx.textAlign = 'left';
+      var ux = X + ctx.measureText(url).width;
+      ctx.font = '600 24px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.fillText('  \u00b7  ' + BY, ux, ry);
       return new Promise(function(res){ c.toBlob(function(b){ res(b); }, 'image/png'); });
     });
   }
