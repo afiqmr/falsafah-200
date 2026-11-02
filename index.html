@@ -2748,14 +2748,21 @@
   }
   function roundRect(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
   // Light theme card, 1080 wide; font sizes never change, the height follows the ayat and maksud.
-  function makeShareCard(entry){
+  // Share card colours: a dark songket cloth with gold thread, and the same two colours for the text accents.
+  var SHARE_THEMES = {
+    maroon: { band: '#5B1A20', ink: '#5B1A20', gold: '#D9AE4E', goldText: '#8F6A17' },
+    navy:   { band: '#15284A', ink: '#15284A', gold: '#D9AE4E', goldText: '#8F6A17' }
+  };
+  var SHARE_THEME = 'maroon';
+  function makeShareCard(entry, themeName){
+    var TH = SHARE_THEMES[themeName || SHARE_THEME];
     var SANS = '"Noto Sans", system-ui, sans-serif', AR = '"Scheherazade New", "Traditional Arabic", serif';
     var fontsReady = (document.fonts && document.fonts.load) ? Promise.all([
       document.fonts.load('400 50px "Scheherazade New"', entry.arabic), document.fonts.load('400 30px "Noto Sans"'),
       document.fonts.load('600 26px "Noto Sans"'), document.fonts.load('800 58px "Noto Sans"')]).catch(function(){}) : Promise.resolve();
     return Promise.all([fontsReady, loadImg(window.FN_SONGKET_BAND)]).then(function(r){
       var cloth = r[1];
-      var W = 1080, X = 84, IW = W - 2 * X, BAND = 150;
+      var W = 1080, X = 84, IW = W - 2 * X, BAND = 150, SK_TW = 240, SK_TH = 336;
       var c = document.createElement('canvas'), ctx = c.getContext('2d');
       c.width = W; c.height = 10;
       // ---- measure ----
@@ -2763,33 +2770,37 @@
       ctx.font = '400 50px ' + AR; ctx.direction = 'rtl'; var aLines = wrapLines(ctx, entry.arabic, IW - 80); ctx.direction = 'ltr';
       ctx.font = '400 30px ' + SANS; var mLines = wrapLines(ctx, entry.text, IW);
       var url = APP_URL.replace('https://', ''), BY = 'by Afiq';
-      var yNo = BAND - 34, yT = yNo + 41 + 8, yA = yT + tLines.length * 65 + 36;
+      var yNo = BAND + 40, yT = yNo + 41 + 8, yA = yT + tLines.length * 65 + 36;
       var aH = 68 + aLines.length * 95, yL = yA + aH + 34, yM = yL + 27 + 10, yS = yM + mLines.length * 45 + 18;
-      var yR = yS + 36 + 34, H = yR + 24 + 33 + BAND - 30;
+      var yR = yS + 36 + 34, H = yR + 24 + 33 + 44 + BAND;
       c.height = Math.ceil(H);
       ctx = c.getContext('2d');
       // ---- background + songket bands ----
       ctx.fillStyle = '#FAF5EC'; ctx.fillRect(0, 0, W, H);
-      if(cloth){
-        [0, H - BAND].forEach(function(top, i){
-          var b = document.createElement('canvas'); b.width = W; b.height = BAND; var g = b.getContext('2d');
-          var tw = 120, th = 168, off = (W / 2 - tw / 2) % tw;
-          for(var x = off - tw; x < W; x += tw) for(var yy = (i ? BAND - th : 0); i ? yy > -th : yy < BAND; yy += (i ? -th : th)) g.drawImage(cloth, x, yy, tw, th);
-          var gr = g.createLinearGradient(0, 0, 0, BAND);
-          if(i){ gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(.65, '#000'); gr.addColorStop(1, '#000'); }
-          else { gr.addColorStop(0, '#000'); gr.addColorStop(.35, '#000'); gr.addColorStop(1, 'rgba(0,0,0,0)'); }
-          g.globalCompositeOperation = 'destination-in'; g.fillStyle = gr; g.fillRect(0, 0, W, BAND);
-          ctx.drawImage(b, 0, top);
-        });
-      }
+      // songket: gold thread on dark cloth, a solid band at the top and bottom with a gold edge
+      [0, H - BAND].forEach(function(top, i){
+        ctx.fillStyle = TH.band; ctx.fillRect(0, top, W, BAND);
+        if(cloth){
+          var tw = SK_TW, th = SK_TH, t = document.createElement('canvas'); t.width = tw; t.height = th; var tg = t.getContext('2d');
+          [[0, 0], [1.5, 0], [0, 1.5], [1.5, 1.5]].forEach(function(d){ tg.drawImage(cloth, d[0], d[1], tw, th); });   // thicken the thread
+          tg.globalCompositeOperation = 'source-in'; tg.fillStyle = TH.gold; tg.fillRect(0, 0, tw, th);
+          ctx.save(); ctx.beginPath(); ctx.rect(0, top, W, BAND); ctx.clip();
+          var off = (W / 2 - tw / 2) % tw, y0 = top + BAND / 2 - th / 2;
+          for(var x = off - tw; x < W; x += tw) ctx.drawImage(t, x, y0);
+          ctx.restore();
+        }
+        ctx.fillStyle = TH.gold; ctx.fillRect(0, i ? top : top + BAND - 4, W, 4);
+        ctx.fillRect(0, i ? top + 9 : top + BAND - 11, W, 1.5);
+      });
       ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
       // ---- number + title ----
-      ctx.font = '800 30px ' + SANS; ctx.fillStyle = '#B8451F'; ctx.fillText(entry.rangeLabel, X, yNo + 20);
-      ctx.font = '800 58px ' + SANS; ctx.fillStyle = '#10212B'; tLines.forEach(function(l, i){ ctx.fillText(l, X, yT + i * 65 + 33); });
+      ctx.font = '800 30px ' + SANS; ctx.fillStyle = TH.goldText; ctx.fillText(entry.rangeLabel, X, yNo + 20);
+      ctx.font = '800 58px ' + SANS; ctx.fillStyle = TH.ink; tLines.forEach(function(l, i){ ctx.fillText(l, X, yT + i * 65 + 33); });
       // ---- ayat box ----
       ctx.save(); ctx.shadowColor = 'rgba(16,33,43,.06)'; ctx.shadowBlur = 22; ctx.shadowOffsetY = 6;
       roundRect(ctx, X, yA, IW, aH, 22); ctx.fillStyle = '#FFFDF9'; ctx.fill(); ctx.restore();
-      roundRect(ctx, X + .5, yA + .5, IW - 1, aH - 1, 22); ctx.strokeStyle = 'rgba(16,33,43,.10)'; ctx.lineWidth = 1; ctx.stroke();
+      roundRect(ctx, X + 1, yA + 1, IW - 2, aH - 2, 22); ctx.strokeStyle = TH.gold; ctx.lineWidth = 2; ctx.stroke();
+      roundRect(ctx, X + 9, yA + 9, IW - 18, aH - 18, 16); ctx.strokeStyle = TH.gold; ctx.globalAlpha = .45; ctx.lineWidth = 1; ctx.stroke(); ctx.globalAlpha = 1;
       // Arabic set like a printed mushaf: full lines run edge to edge, the last line sits on the right.
       ctx.font = '400 50px ' + AR; ctx.fillStyle = '#10212B'; ctx.textAlign = 'right'; ctx.direction = 'rtl';
       var aRight = X + IW - 40, aW = IW - 80;
@@ -2806,11 +2817,11 @@
       ctx.font = '800 20px ' + SANS; ctx.fillStyle = '#5F6B6D';
       var cx = X; T('MAKSUD', 'MEANING').split('').forEach(function(ch){ ctx.fillText(ch, cx, yL + 13); cx += ctx.measureText(ch).width + 2.8; });
       ctx.font = '400 30px ' + SANS; ctx.fillStyle = '#10212B'; mLines.forEach(function(l, i){ ctx.fillText(l, X, yM + i * 45 + 22); });
-      ctx.font = '700 26px ' + SANS; ctx.fillStyle = '#0F766E'; ctx.fillText(entry.surahDisplay, X, yS + 18);
+      ctx.font = '700 26px ' + SANS; ctx.fillStyle = TH.ink; ctx.fillText(entry.surahDisplay, X, yS + 18);
       // ---- link + by Afiq ----
-      ctx.fillStyle = 'rgba(16,33,43,.12)'; ctx.fillRect(X, yR, IW, 1);
+      ctx.fillStyle = TH.gold; ctx.globalAlpha = .6; ctx.fillRect(X, yR, IW, 1.5); ctx.globalAlpha = 1;
       var ry = yR + 24 + 16;
-      ctx.font = '800 24px ' + SANS; ctx.fillStyle = '#B8451F'; ctx.fillText(url, X, ry);
+      ctx.font = '800 24px ' + SANS; ctx.fillStyle = TH.goldText; ctx.fillText(url, X, ry);
       var ux = X + ctx.measureText(url).width;
       ctx.font = '600 24px ' + SANS; ctx.fillStyle = '#5F6B6D'; ctx.fillText('  \u00b7  ' + BY, ux, ry);
       return new Promise(function(res){ c.toBlob(function(b){ res(b); }, 'image/png'); });
