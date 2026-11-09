@@ -2,6 +2,13 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-11-09
+
+### Changed
+
+- Daily target and streak: Kaji 7 (was 10) and Kuiz 3. Studying more than 7 still counts toward
+  markah; the streak only needs 7 Kaji and 3 Kuiz.
+
 ## 2026-11-02
 
 ### Changed

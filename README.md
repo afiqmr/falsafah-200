@@ -96,7 +96,7 @@ Screens are the running app with a demo account and demo progress.
   every one first and publishes the good ones, which other students then read with the writer's name.
 - **Nota**: exam notes for the four pentafshilan methods, grouped as Subjek Tahun 1 (Ta'wiilul
   Ma'ani, Syariat Khafiah) and Subjek Tahun 2 (Khitab Hilaalul Washil, Al Ashlih Asbaabun Nuzul).
-- **Daily goals**: Kaji 10 and Kuiz 3, with a streak when both are met. Counts carry on past the
+- **Daily goals**: Kaji 7 and Kuiz 3, with a streak when both are met. Counts carry on past the
   target (for example 14/10).
 - **Accounts**: username and 6-digit PIN, progress merged across devices, an admin panel for the
   class, and install to the home screen as an app.
