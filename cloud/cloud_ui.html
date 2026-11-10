@@ -616,7 +616,13 @@ function merge(local, remote) {
   out.lang = local.lang || remote.lang; if (!out.lang) delete out.lang;
   const h = mergeHistory(parse(local.history), parse(remote.history)); if (h) out.history = JSON.stringify(h);
   const sl = parse(local.streak), sr = parse(remote.streak);   // days with both daily targets met, from either device
-  if (sl || sr) out.streak = JSON.stringify({ days: [...new Set([...((sl && sl.days) || []), ...((sr && sr.days) || [])])].sort().slice(-400) });
+  if (sl || sr) {
+    const uni = (k, n) => [...new Set([...(((sl && sl.qada) || {})[k] || []), ...(((sr && sr.qada) || {})[k] || [])])].sort().slice(-n);
+    out.streak = JSON.stringify({
+      days: [...new Set([...((sl && sl.days) || []), ...((sr && sr.days) || [])])].sort().slice(-400),
+      qada: { used: uni('used', 60), filled: uni('filled', 400), tried: uni('tried', 30) }   // qada' record: union from both devices
+    });
+  }
   return out;
 }
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);

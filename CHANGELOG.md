@@ -4,6 +4,15 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
 
 ## 2026-11-10
 
+### Added
+
+- Qada' streak: a student who missed 1 to 4 days can join the streak up again with a Kaji test of
+  10, 15, 20 or 25 falsafah they have studied before (gred below A first, in random order, then the
+  rest, from anywhere in 1-200). At least 80% Ingat puts the missed days back. A failed test can be
+  taken again with a new set; only the first attempt of the day changes markah, and the test does not
+  count toward today's 10 Kaji. One qada' per 7 days, and only after 25 falsafah have been studied.
+  While a qada' is open the streak tile and a banner on the Kaji tab glow as a reminder.
+
 ### Changed
 
 - Daily target and streak back to Kaji 10 and Kuiz 3 (7 was too short for remembering).

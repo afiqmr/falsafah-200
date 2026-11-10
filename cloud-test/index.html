@@ -1069,6 +1069,19 @@
   .missionbar .mi-streak .flame{ font-size:.85em; margin-right:3px; filter:grayscale(1); opacity:.55; }
   .missionbar .mi-streak.on .mi-num{ color:#E8772E; }
   .missionbar .mi-streak.on .flame{ filter:none; opacity:1; }
+  /* qada': the broken streak glows dim and bright as a reminder until it is made up */
+  .missionbar .mi-streak.qada{ cursor:pointer; border-radius:10px; animation:qadaGlow 1.8s ease-in-out infinite; }
+  .missionbar .mi-streak.qada .mi-num{ color:#E8772E; }
+  .missionbar .mi-streak.qada .mi-lbl{ color:#E8772E; }
+  @keyframes qadaGlow{ 0%,100%{ background:transparent; } 50%{ background:rgba(232,119,46,.16); } }
+  .qada-banner{ margin:0 0 14px; padding:12px 14px; border-radius:12px; font-size:13px; line-height:1.55;
+    background:rgba(232,119,46,.09); border:1px solid rgba(232,119,46,.38); animation:qadaGlow 1.8s ease-in-out infinite; }
+  .qada-banner p{ margin:0; }
+  .qada-banner b{ color:#E8772E; }
+  .qada-banner .namebtn{ margin-top:10px; width:100%; background:#E8772E; color:#fff; border:0; font-weight:800; font-size:14px; padding:11px; border-radius:10px; cursor:pointer; }
+  .qada-banner.off{ animation:none; background:var(--surface-2); border-color:var(--border); color:var(--muted); }
+  .qadabar{ background:rgba(232,119,46,.10); border-color:rgba(232,119,46,.35); }
+  @media (prefers-reduced-motion: reduce){ .missionbar .mi-streak.qada, .qada-banner{ animation:none; } }
   .missionbar .mi-lbl{ font-size:10px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; font-weight:700; margin-top:3px; }
   .missionbar .mi-track{
     height:4px; border-radius:100px; background:var(--surface-2); margin-top:7px; overflow:hidden;
@@ -1534,7 +1547,15 @@
 
   // Streak: a day counts when both daily targets are met (Kaji and Kuiz). Days kept as 'YYYY-MM-DD'.
   var STREAK_KEY = 'falsafah200_streak_v1';
-  var streakDays = (function(){ try{ var o = JSON.parse(localStorage.getItem(STREAK_KEY) || '{}'); return (o && Array.isArray(o.days)) ? o.days : []; }catch(e){ return []; } })();
+  var streakStore = (function(){ try{ var o = JSON.parse(localStorage.getItem(STREAK_KEY) || '{}'); return (o && typeof o === 'object') ? o : {}; }catch(e){ return {}; } })();
+  var streakDays = Array.isArray(streakStore.days) ? streakStore.days : [];
+  // Qada': used = days a qada' was passed (one per 7 days), filled = missed days put back,
+  // tried = days a qada' was started (only the first attempt of the day counts toward markah).
+  var qadaStore = streakStore.qada || {};
+  ['used', 'filled', 'tried'].forEach(function(k){ if(!Array.isArray(qadaStore[k])) qadaStore[k] = []; });
+  function saveStreak(){
+    try{ localStorage.setItem(STREAK_KEY, JSON.stringify({ days: streakDays, qada: qadaStore })); }catch(e){}
+  }
   function dayComplete(){ return daily.kajiIds.length >= kajiGoal() && (daily.kuizCount||0) >= DAILY_KUIZ_GOAL; }
   function streakCount(){
     var t = todayStr(), d = streakDays.indexOf(t) >= 0 ? t : addDays(t, -1), n = 0;
@@ -1547,7 +1568,7 @@
     var t = todayStr();
     if(!dayComplete() || streakDays.indexOf(t) >= 0) return false;
     streakDays.push(t); streakDays.sort(); if(streakDays.length > 400) streakDays = streakDays.slice(-400);
-    try{ localStorage.setItem(STREAK_KEY, JSON.stringify({ days: streakDays })); }catch(e){}
+    saveStreak();
     if(daily.cheerStreak) return false;
     daily.cheerStreak = true; saveDaily(daily);
     var n = streakCount();
@@ -1654,6 +1675,7 @@
   function renderMissionBar(){
     rolloverDailyIfNeeded();
     var streak = streakCount(), doneToday = streakDays.indexOf(todayStr()) >= 0;
+    var qd = qadaRun ? null : qadaInfo(), qadaOpen = !!(qd && !qd.blocked);
 
     var goal = kajiGoal();
     // the real count for the day, even past the target (e.g. 14/10); the bar stops at full
@@ -1663,10 +1685,15 @@
     var kuizPct = Math.min(100, Math.round(kuizDone/DAILY_KUIZ_GOAL*100));
 
     document.getElementById('missionBar').innerHTML =
-      '<div class="mi mi-streak'+(doneToday?' on':'')+'" id="streakTile" title="' + T('Hari berturut-turut sasaran Kaji dan Kuiz selesai', 'Days in a row with Study and Quiz targets done') + '">' +
-        '<div class="mi-num"><span class="flame">&#128293;</span>'+streak+'</div>' +
-        '<div class="mi-lbl">'+(doneToday ? T('Streak hari', 'Day streak') : (streak ? T('Siapkan hari ini', 'Finish today') : T('Streak hari', 'Day streak')))+'</div>' +
-      '</div>' +
+      (qadaOpen
+        ? '<div class="mi mi-streak qada" id="streakTile" role="button" tabindex="0" title="' + T('Streak terputus. Tekan untuk qada\'.', 'Streak broken. Tap to make it up (qada\').') + '">' +
+            '<div class="mi-num"><span class="flame">&#128293;</span>'+qd.before+'</div>' +
+            '<div class="mi-lbl">' + T('Qada\' streak', 'Qada\' streak') + '</div>' +
+          '</div>'
+        : '<div class="mi mi-streak'+(doneToday?' on':'')+'" id="streakTile" title="' + T('Hari berturut-turut sasaran Kaji dan Kuiz selesai', 'Days in a row with Study and Quiz targets done') + '">' +
+            '<div class="mi-num"><span class="flame">&#128293;</span>'+streak+'</div>' +
+            '<div class="mi-lbl">'+(doneToday ? T('Streak hari', 'Day streak') : (streak ? T('Siapkan hari ini', 'Finish today') : T('Streak hari', 'Day streak')))+'</div>' +
+          '</div>') +
       '<div class="mi">' +
         '<div class="mi-num'+(kajiDone>=goal?' mi-done':'')+'">'+kajiDone+'/'+goal+'</div>' +
         '<div class="mi-lbl">' + T('Kaji hari ini', 'Study today') + '</div>' +
@@ -1678,6 +1705,12 @@
         '<div class="mi-track"><span class="'+(kuizDone>=DAILY_KUIZ_GOAL?'mi-fill-done':'')+'" style="width:'+kuizPct+'%;"></span></div>' +
       '</div>';
 
+    var stTile = document.getElementById('streakTile');
+    if(qadaOpen && stTile){
+      stTile.onclick = startQada;
+      stTile.onkeydown = function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); startQada(); } };
+    }
+    renderQadaBanner(qd);
     renderKajiStats();
     var dn = document.getElementById('dueNum');
     if(dn) dn.textContent = kajiDone;
@@ -1942,7 +1975,7 @@
   var TOUR = [
     { sel:'nav.tabs button[data-view="study"]', title:'Kaji', text:'Kad hafalan harian. Cuba ingat ayat dahulu, tekan <b>Dedah</b>, kemudian pilih <b>Ingat</b> atau <b>Belum ingat</b>. Sasaran: 10 falsafah sehari.' },
     { sel:'nav.tabs button[data-view="quiz"]', title:'Kuiz', text:'Soalan berfikir daripada huraian Jilid 7: pilih ayat yang paling tepat antara 2 atau 3 ayat yang hampir sama tema. Sasaran: 3 soalan sehari.' },
-    { sel:'#streakTile', title:'Streak', text:'Siapkan sasaran Kaji dan Kuiz setiap hari untuk menyambung api &#128293;. Terlepas sehari, kiraan bermula semula.' },
+    { sel:'#streakTile', title:'Streak', text:'Siapkan sasaran Kaji dan Kuiz setiap hari untuk menyambung api &#128293;. Terlepas 1 hingga 4 hari? Buat qada\' untuk menyambungnya.' },
     { sel:'nav.tabs button[data-view="browse"]', title:'Senarai', text:'Semua 200 falsafah. Cari ikut nombor, tajuk, surah atau sebutan ayat. Tekan mana-mana kad untuk butiran penuh dan <b>Word by word</b>.' },
     { sel:'nav.tabs button[data-view="notes"]', title:'Nota', text:'Nota ringkas peperiksaan bagi empat kaedah, dengan huraian penuh.' },
     { sel:'#view-study .rangechip', title:'Julat', text:'Falsafah yang anda kaji. Tekan <b>Tukar</b> untuk pilih Tahun 1, Tahun 2, Semua atau julat sendiri.' },
@@ -1953,7 +1986,7 @@
   if(EN) TOUR = [
     { sel:'nav.tabs button[data-view="study"]', title:'Study', text:'Daily memory cards. Try to recall the ayat first, tap <b>Reveal</b>, then choose <b>Remembered</b> or <b>Not yet</b>. Target: 10 falsafah a day.' },
     { sel:'nav.tabs button[data-view="quiz"]', title:'Quiz', text:'Thinking questions from the Volume 7 explanations: pick the right ayat out of 2 or 3 with a similar theme. Target: 3 questions a day.' },
-    { sel:'#streakTile', title:'Streak', text:'Meet the Study and Quiz targets every day to keep the flame &#128293; going. Miss a day and the count starts again.' },
+    { sel:'#streakTile', title:'Streak', text:'Meet the Study and Quiz targets every day to keep the flame &#128293; going. Missed 1 to 4 days? Do a qada\' to join it up again.' },
     { sel:'nav.tabs button[data-view="browse"]', title:'List', text:'All 200 falsafah. Search by number, title, surah or how the ayat sounds. Tap any card for the full details and <b>Word by word</b>.' },
     { sel:'nav.tabs button[data-view="notes"]', title:'Notes', text:'Short exam notes on four methods, with full explanations.' },
     { sel:'#view-study .rangechip', title:'Range', text:'The falsafah you are studying. Tap <b>Change</b> to pick Year 1, Year 2, All or your own range.' },
@@ -2127,6 +2160,7 @@
   function renderStudy(){
     renderMissionBar();
     rolloverDailyIfNeeded();
+    if(qadaRun){ renderQadaStudy(); return; }
     if(focus && focus.mode === 'kaji'){ renderFocusStudy(); return; }
     var stage = document.getElementById('studyStage');
     var fresh = dueQueue().filter(function(e){ return daily.kajiIds.indexOf(e.id) === -1; });
@@ -2234,6 +2268,137 @@
       daily.cheerKaji = true; saveDaily(daily);
       if(!checkStreak()) celebrate(T('Sasaran ' + kajiGoal() + ' kaji hari ini tercapai.', 'Target of ' + kajiGoal() + ' studied today reached.'));
     }
+  }
+
+  // ---------- Qada' streak: make up 1 to 4 missed days with a Kaji test ----------
+  // Missed days -> cards: 1 -> 10, 2 -> 15, 3 -> 20, 4 -> 25. Cards come from falsafah the student has
+  // studied before (anywhere in 1-200): those below gred A first, in random order, then the rest.
+  // Pass = at least 80% Ingat; the missed days are then added back to the streak. A failed test can be
+  // taken again with a new set; only the first attempt of the day changes markah. One qada' per 7 days,
+  // and only once at least 25 falsafah have been studied.
+  var QADA_NEED = [10, 15, 20, 25], QADA_MIN_TOUCHED = 25, QADA_PASS = 0.8;
+  var qadaRun = null;   // { need, gap, ids, pos, ok, first, done: null|'pass'|'fail' }
+  function dayDiff(a, b){ return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000); }
+  function touchedIds(){ return DATA.filter(function(e){ return cardLog(e.id).length > 0; }).map(function(e){ return e.id; }); }
+  function qadaInfo(){
+    var t = todayStr(), prev = null;
+    streakDays.forEach(function(d){ if(d < t && (!prev || d > prev)) prev = d; });
+    if(!prev) return null;
+    var missed = dayDiff(prev, t) - 1;
+    if(missed < 1 || missed > QADA_NEED.length) return null;
+    var gap = []; for(var i = 1; i <= missed; i++) gap.push(addDays(prev, i));
+    var before = 0, d = prev; while(streakDays.indexOf(d) >= 0){ before++; d = addDays(d, -1); }
+    var info = { missed: missed, need: QADA_NEED[missed - 1], gap: gap, before: before };
+    var used = qadaStore.used.slice().sort(), last = used[used.length - 1];
+    if(last && dayDiff(last, t) < 7){ info.blocked = 'week'; info.next = addDays(last, 7); }
+    else { var n = touchedIds().length; if(n < QADA_MIN_TOUCHED){ info.blocked = 'touched'; info.touched = n; } }
+    return info;
+  }
+  function qadaPick(need){
+    var ids = touchedIds();
+    var below = shuffle(ids.filter(function(id){ return markahOf(id) < 5; }));    // gred A- and lower
+    var rest = shuffle(ids.filter(function(id){ return markahOf(id) >= 5; }));
+    return below.concat(rest).slice(0, need);
+  }
+  function qadaPassMark(need){ return Math.ceil(need * QADA_PASS); }
+  function startQada(){
+    var q = qadaInfo(); if(!q || q.blocked) return;
+    var t = todayStr(), first = qadaStore.tried.indexOf(t) < 0;
+    if(first){ qadaStore.tried.push(t); qadaStore.tried = qadaStore.tried.slice(-30); saveStreak(); }
+    focus = null;
+    qadaRun = { need: q.need, gap: q.gap, ids: qadaPick(q.need), pos: 0, ok: 0, first: first, done: null };
+    closeDetail();
+    var tab = document.querySelector('nav.tabs button[data-view="study"]');
+    if(tab && !tab.classList.contains('active')) tab.click();
+    renderStudy();
+    window.scrollTo(0, 0);
+  }
+  function retryQada(){
+    if(!qadaRun) return;
+    qadaRun = { need: qadaRun.need, gap: qadaRun.gap, ids: qadaPick(qadaRun.need), pos: 0, ok: 0, first: false, done: null };
+    renderStudy(); window.scrollTo(0, 0);
+  }
+  function endQada(){ qadaRun = null; renderStudy(); }
+  function recordQada(id, result){
+    var r = qadaRun; if(!r || r.done) return;
+    if(r.first){ grade(id, result); logHistory(id, result); }
+    if(result) r.ok++;
+    r.pos++;
+    if(r.pos < r.ids.length) return;
+    if(r.ok >= qadaPassMark(r.ids.length)){
+      r.done = 'pass';
+      r.gap.forEach(function(d){
+        if(streakDays.indexOf(d) < 0) streakDays.push(d);
+        if(qadaStore.filled.indexOf(d) < 0) qadaStore.filled.push(d);
+      });
+      streakDays.sort(); if(streakDays.length > 400) streakDays = streakDays.slice(-400);
+      qadaStore.filled = qadaStore.filled.sort().slice(-400);
+      qadaStore.used.push(todayStr()); qadaStore.used = qadaStore.used.sort().slice(-60);
+      saveStreak();
+      celebrate(T('&#128293; Qada\' diterima. Streak disambung semula: ' + streakCount() + ' hari.', '&#128293; Qada\' accepted. Your streak is back: ' + streakCount() + ' days.'));
+    } else r.done = 'fail';
+  }
+  function renderQadaBanner(q){
+    var el = document.getElementById('qadaBanner');
+    if(!el){
+      var ks = document.getElementById('kajiStats'); if(!ks) return;
+      el = document.createElement('div'); el.id = 'qadaBanner'; ks.parentNode.insertBefore(el, ks);
+    }
+    if(!q || qadaRun){ el.className = ''; el.innerHTML = ''; return; }
+    var lost = T('Streak ' + q.before + ' hari terputus (' + q.missed + ' hari terlepas). ', 'Your ' + q.before + '-day streak broke (' + q.missed + (q.missed > 1 ? ' days' : ' day') + ' missed). ');
+    if(q.blocked === 'week'){
+      el.className = 'qada-banner off';
+      var nx = new Date(q.next + 'T00:00:00').toLocaleDateString(EN ? 'en-GB' : 'ms-MY', { day: 'numeric', month: 'short' });
+      el.innerHTML = '<p>' + lost + T('Qada\' hanya sekali seminggu. Boleh lagi mulai ' + nx + '.', 'Qada\' is once a week. Next one from ' + nx + '.') + '</p>';
+    } else if(q.blocked === 'touched'){
+      el.className = 'qada-banner off';
+      el.innerHTML = '<p>' + lost + T('Qada\' perlukan sekurang-kurangnya ' + QADA_MIN_TOUCHED + ' falsafah yang pernah dikaji. Anda baru ' + q.touched + '.', 'Qada\' needs at least ' + QADA_MIN_TOUCHED + ' falsafah studied before. You have ' + q.touched + '.') + '</p>';
+    } else {
+      el.className = 'qada-banner';
+      el.innerHTML = '<p><b>&#128293; ' + lost + '</b>' +
+        T('Qada\' sekarang: kaji ' + q.need + ' falsafah yang pernah anda kaji, dan ingat sekurang-kurangnya ' + qadaPassMark(q.need) + ' (80%) untuk menyambung streak.',
+          'Make it up now: study ' + q.need + ' falsafah you have studied before, and remember at least ' + qadaPassMark(q.need) + ' (80%) to join your streak up again.') + '</p>' +
+        '<button type="button" class="namebtn" id="qadaGo">' + T('Mula qada\' (', 'Start qada\' (') + q.need + ')</button>';
+      document.getElementById('qadaGo').onclick = startQada;
+    }
+  }
+  function renderQadaStudy(){
+    var stage = document.getElementById('studyStage'), r = qadaRun, pass = qadaPassMark(r.ids.length);
+    if(r.done){
+      currentCardId = null;
+      var pct = Math.round(r.ok / r.ids.length * 100);
+      stage.innerHTML = '<div class="folio"><div class="kaji-goal-done">' + (r.done === 'pass'
+        ? '<div class="big">&#128293;</div><h3>' + T('Streak disambung semula!', 'Your streak is back!') + '</h3>' +
+          '<p>' + T('Anda ingat ' + r.ok + ' daripada ' + r.ids.length + ' (' + pct + '%). ' + r.gap.length + ' hari yang terlepas sudah diqada\'. Streak kini ' + streakCount() + ' hari. Jangan lupa sasaran hari ini.',
+                    'You remembered ' + r.ok + ' of ' + r.ids.length + ' (' + pct + '%). ' + r.gap.length + (r.gap.length > 1 ? ' missed days are' : ' missed day is') + ' made up. Your streak is now ' + streakCount() + ' days. Remember today\'s targets too.') + '</p>' +
+          '<button class="namebtn kaji-ulang-btn" id="qadaBack">' + T('Kembali ke kaji biasa', 'Back to normal study') + '</button>'
+        : '<div class="big">&#8635;</div><h3>' + T('Belum cukup 80%', 'Not 80% yet') + '</h3>' +
+          '<p>' + T('Anda ingat ' + r.ok + ' daripada ' + r.ids.length + ' (' + pct + '%). Perlu sekurang-kurangnya ' + pass + '. Cuba lagi dengan set baharu. Cubaan ulang tidak mengubah markah.',
+                    'You remembered ' + r.ok + ' of ' + r.ids.length + ' (' + pct + '%). You need at least ' + pass + '. Try again with a new set. Retries do not change your scores.') + '</p>' +
+          '<button class="namebtn kaji-ulang-btn" id="qadaRetry">' + T('Cuba lagi', 'Try again') + '</button>' +
+          '<button class="kaji-extra-btn" id="qadaBack">' + T('Nanti dahulu', 'Later') + '</button>') +
+        '</div></div>';
+      var rb = document.getElementById('qadaRetry'); if(rb) rb.onclick = retryQada;
+      document.getElementById('qadaBack').onclick = endQada;
+      return;
+    }
+    var entry = entryById(r.ids[r.pos]);
+    currentCardId = entry.id;
+    revealed = false;
+    prefetchWbw(entry); prefetchWbw(entryById(r.ids[r.pos + 1]));
+    stage.innerHTML =
+      '<div class="focusbar qadabar"><span>' + T('Qada\' streak', 'Qada\' streak') + ' &middot; <b>' + r.ok + '</b> ' + T('ingat', 'remembered') +
+        ' &middot; ' + T('perlu ', 'need ') + pass + T(' daripada ', ' of ') + r.ids.length + (r.first ? '' : T(' &middot; cubaan ulang', ' &middot; retry')) + '</span>' +
+        '<button type="button" id="qadaQuit">' + T('Tamat', 'End') + '</button></div>' +
+      '<div class="folio">' +
+        '<div class="folio-top">' +
+          '<span class="rangepill">' + entry.rangeLabel + '</span>' +
+          '<span class="badge badge-gold">' + T('Qada\' &middot; ', 'Qada\' &middot; ') + (r.pos + 1) + '/' + r.ids.length + '</span>' +
+        '</div>' +
+        '<div id="folioBody"></div>' +
+      '</div>';
+    document.getElementById('qadaQuit').onclick = endQada;
+    renderFolioBody(entry);
   }
 
   // ---------- Focus sessions: test only a chosen set of falsafah ----------
@@ -2641,7 +2806,8 @@
       applyWbw(el);
       el.querySelectorAll('.gradebtn').forEach(function(b){
         b.onclick = function(){
-          recordKaji(entry.id, parseInt(b.getAttribute('data-g'),10));
+          var g = parseInt(b.getAttribute('data-g'),10);
+          if(qadaRun) recordQada(entry.id, g); else recordKaji(entry.id, g);
           renderStudy();
           window.scrollTo(0, 0);
         };
@@ -4761,7 +4927,13 @@ function merge(local, remote) {
   out.lang = local.lang || remote.lang; if (!out.lang) delete out.lang;
   const h = mergeHistory(parse(local.history), parse(remote.history)); if (h) out.history = JSON.stringify(h);
   const sl = parse(local.streak), sr = parse(remote.streak);   // days with both daily targets met, from either device
-  if (sl || sr) out.streak = JSON.stringify({ days: [...new Set([...((sl && sl.days) || []), ...((sr && sr.days) || [])])].sort().slice(-400) });
+  if (sl || sr) {
+    const uni = (k, n) => [...new Set([...(((sl && sl.qada) || {})[k] || []), ...(((sr && sr.qada) || {})[k] || [])])].sort().slice(-n);
+    out.streak = JSON.stringify({
+      days: [...new Set([...((sl && sl.days) || []), ...((sr && sr.days) || [])])].sort().slice(-400),
+      qada: { used: uni('used', 60), filled: uni('filled', 400), tried: uni('tried', 30) }   // qada' record: union from both devices
+    });
+  }
   return out;
 }
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
