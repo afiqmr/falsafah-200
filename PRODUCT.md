@@ -28,7 +28,7 @@ and explain each one without looking.
 - **Recall before reveal.** Kaji asks the student to remember first, then shows the answer.
 - **Honest scoring.** Gred comes from recent answers only, and the student marks Ingat or Belum
   ingat honestly after Dedah.
-- **Small daily habit.** Targets are small (Kaji 7, Kuiz 3) and a streak rewards coming back.
+- **Small daily habit.** Targets are small (Kaji 10, Kuiz 3) and a streak rewards coming back.
 - **Bahasa Melayu first.** Labels and messages are in BM. A few familiar English terms stay, such
   as Word by word and Share.
 - **Private by default.** Progress belongs to the student. Recordings stay with registered students.

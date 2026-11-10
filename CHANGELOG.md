@@ -2,6 +2,12 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-11-10
+
+### Changed
+
+- Daily target and streak back to Kaji 10 and Kuiz 3 (7 was too short for remembering).
+
 ## 2026-11-09
 
 ### Changed
