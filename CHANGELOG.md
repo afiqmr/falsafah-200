@@ -2,6 +2,14 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-11-11
+
+### Fixed
+
+- Kaji order: falsafah never answered in Kaji now come right after the weak ones (gred C, D, G),
+  before falsafah already studied. A right Kuiz answer used to give the same +1 as Ingat, so a
+  falsafah met only in Kuiz waited at random among the studied ones and could take weeks to reach Kaji.
+
 ## 2026-11-10
 
 ### Added

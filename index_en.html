@@ -2074,11 +2074,18 @@
     return idx;
   }
 
-  // Every falsafah in the chosen julat, every day (no hidden return dates). Lowest markah first.
+  // Every falsafah in the chosen julat, every day (no hidden return dates). Order:
+  // 1. weak ones (gred C, D, G: markah 0 and below, from any answer),
+  // 2. ones never answered in Kaji (new, or met only in Kuiz: a right Kuiz answer must not skip Kaji),
+  // 3. the rest. Lowest markah first within each group, then the day's order.
+  function kajiTier(id){
+    if(inFocus(id)) return 0;
+    return /[Kk]/.test(cardLog(id)) ? 2 : 1;
+  }
   function dueQueue(){
     var ord = dayOrderIndex();
     return STUDY_POOL.slice().sort(function(a,b){
-      return (markahOf(a.id) - markahOf(b.id)) || (ord[a.id] - ord[b.id]);
+      return (kajiTier(a.id) - kajiTier(b.id)) || (markahOf(a.id) - markahOf(b.id)) || (ord[a.id] - ord[b.id]);
     });
   }
 
