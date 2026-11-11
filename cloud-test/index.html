@@ -1130,7 +1130,11 @@
     transform:rotate(45deg);
   }
   .theme-tip b{ color:var(--gold-cite); }
-  .themebtn.tip-pulse{ animation:tipPulse 1.6s ease-out 2; }
+  .themebtn.tip-pulse, .rangechip.tip-pulse{ animation:tipPulse 1.6s ease-out 2; }
+  /* the same hint under the julat button on the Kaji tab */
+  .chiprow{ position:relative; }
+  .theme-tip.range-tip{ right:auto; left:0; max-width:240px; transform-origin:top left; }
+  .theme-tip.range-tip::before{ right:auto; left:22px; }
   @keyframes tipPulse{
     0%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--gold) 55%, transparent); }
     100%{ box-shadow:0 0 0 10px transparent; }
@@ -1871,7 +1875,7 @@
   }
   document.getElementById('themeToggle').onclick = function(){ toggleTheme(); setTimeout(nudgeBars, 450); };
 
-  // Small hint beside the theme button on each page open; any click, tap or key press hides it.
+  // Small hints beside the theme button and the julat button on each page open; any click, tap or key press hides them.
   var themeTipShown = false;
   function showThemeTip(){
     if(themeTipShown) return;
@@ -1881,12 +1885,24 @@
     tip.hidden = false;
     requestAnimationFrame(function(){ requestAnimationFrame(function(){ tip.classList.add('show'); }); });
     btn.classList.add('tip-pulse');
+    // the julat hint shows at the same time, under the julat button on the Kaji tab
+    var chip = document.querySelector('#view-study.active .chiprow .rangechip'), rtip = null;
+    if(chip){
+      rtip = document.createElement('div');
+      rtip.className = 'theme-tip range-tip'; rtip.setAttribute('role', 'status');
+      rtip.innerHTML = T('Mahu kaji falsafah lain? Tekan <b>julat</b> ini untuk menukar julat bila-bila masa.', 'Want to study other falsafah? Tap this <b>range</b> to change it any time.');
+      chip.parentNode.appendChild(rtip);
+      rtip.style.top = (chip.offsetTop + chip.offsetHeight + 12) + 'px'; rtip.style.left = chip.offsetLeft + 'px';   // right under the julat button, even when the row wraps
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ rtip.classList.add('show'); }); });
+      chip.classList.add('tip-pulse');
+    }
     function hide(){
       document.removeEventListener('pointerdown', hide, true);
       document.removeEventListener('keydown', hide, true);
       btn.classList.remove('tip-pulse');
       tip.classList.remove('show');
       setTimeout(function(){ tip.hidden = true; }, 300);
+      if(rtip){ chip.classList.remove('tip-pulse'); rtip.classList.remove('show'); setTimeout(function(){ if(rtip.parentNode) rtip.remove(); }, 300); }
     }
     // Attach after this tick so the click that triggered the tip does not close it.
     setTimeout(function(){
