@@ -10,6 +10,13 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
   before falsafah already studied. A right Kuiz answer used to give the same +1 as Ingat, so a
   falsafah met only in Kuiz waited at random among the studied ones and could take weeks to reach Kaji.
 
+### Changed
+
+- Markah and gred come from Kaji only. Kuiz is a simple test: it still counts toward the daily
+  target and the streak, but no longer changes markah or gred. Old Kuiz answers in a falsafah's last
+  10 are ignored, so grades move today for students who did a lot of Kuiz, and a falsafah met only in
+  Kuiz shows as Baru.
+
 ## 2026-11-10
 
 ### Added

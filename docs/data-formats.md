@@ -89,8 +89,10 @@ Firestore.
 | `order_v3`           |        | This device's random order of the 200; seeds the daily Kaji order |
 | `ids_v2`             |        | One-time migration marker                                        |
 
-`log` is a string of the last 10 answers: `K`/`k` for Kaji Ingat/Belum ingat and `Q`/`q` for a
-right/wrong Kuiz answer. Markah is the sum (K +1, k −1, Q +1, q −1) and decides the gred.
+`log` is a string of the last 10 Kaji answers: `K`/`k` for Ingat/Belum ingat. Markah is the sum
+(K +1, k −1) and decides the gred. Kuiz does not change it. Logs saved before 11 Nov 2026 may also
+hold `Q`/`q` (old Kuiz answers); the app and the admin panel ignore them, and the next Kaji answer
+drops them from the stored log.
 
 ## Firestore
 

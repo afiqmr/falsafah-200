@@ -1714,10 +1714,11 @@
 
   // ---------- Markah & gred ----------
   // Each falsafah keeps its last 10 answers: K/k = Kaji Ingat/Belum ingat (+1/-1),
-  // Q/q = Kuiz betul/salah (+1/-1, same as Kaji). The sum is the markah; the markah gives the gred.
+  // Only Kaji counts: Kuiz is a simple test and does not change markah or gred. Logs saved before this
+  // may still hold Q/q (old Kuiz answers); cardLog drops them. The sum is the markah; the markah gives the gred.
   // The box (spacing) still decides when a card comes back; students see the gred.
   var LOG_MAX = 10;
-  var LOG_PTS = { K: 1, k: -1, Q: 1, q: -1 };
+  var LOG_PTS = { K: 1, k: -1 };
   var GREDS = [
     { g:'A+', min:7,  cls:'badge-emerald', col:'var(--lv5)' },
     { g:'A',  min:5,  cls:'badge-emerald', col:'var(--lv4)' },
@@ -1741,7 +1742,7 @@
     if(miss > 0 && !(c.box) && w < 1) w = 1;
     return rep('K', n - tail - w) + rep('k', w) + rep('K', tail);
   }
-  function cardLog(id){ var c = srs[id]; if(!c) return ''; return typeof c.log === 'string' ? c.log : seedLog(c); }
+  function cardLog(id){ var c = srs[id]; if(!c) return ''; return typeof c.log === 'string' ? c.log.replace(/[Qq]/g, '') : seedLog(c); }
   function pushLog(id, ch){ var c = getCard(id); c.log = (cardLog(id) + ch).slice(-LOG_MAX); c.lt = Date.now(); }
   function markahOf(id){ var s = 0, l = cardLog(id); for(var i = 0; i < l.length; i++) s += LOG_PTS[l[i]] || 0; return s; }
   function gredOf(id){   // null = belum dikaji
@@ -1756,7 +1757,7 @@
     return g ? '<span class="badge ' + g.cls + '">' + T('Gred ', 'Grade ') + gredLabel(g.g) + '</span>' : '<span class="badge badge-neutral">' + T('Baru', 'New') + '</span>';
   }
   function gredKey(id){ var g = gredOf(id); return g ? g.g : '-'; }
-  function recordQuizAnswer(id, ok){ if(!entryById(id)) return; pushLog(id, ok ? 'Q' : 'q'); saveState(srs); }
+  function recordQuizAnswer(id, ok){ /* Kuiz does not change markah or gred; it only counts toward the daily target */ }
 
   function grade(id, result){
     // result: 0 = belum ingat, 1 = ingat
@@ -2583,7 +2584,7 @@
     html += '<div class="prog-sec card-sec"><h4>' + T('Gred hafalan &middot; tekan untuk lihat senarai', 'Memory grades &middot; tap to see the list') + '</h4>' +
       '<div class="lvl-bar">' + gr.map(function(v, i){ return v.length ? '<span style="width:' + (v.length/total*100) + '%;background:' + grCol(i) + '"></span>' : ''; }).join('') + '</div>' +
       '<div class="lvl-grid">' + gr.map(function(v, i){ return '<div data-list="gr' + i + '"' + (i >= 5 && i < GREDS.length ? ' class="gr-low"' : '') + '><b>' + v.length + '</b><i style="background:' + grCol(i) + '"></i>' + grName(i) + '</div>'; }).join('') + '</div>' +
-      '<p class="pnote">' + T('Markah dikira dari 10 jawapan terakhir setiap falsafah: Kaji <b>Ingat +1</b>, <b>Belum ingat &minus;1</b>, Kuiz <b>betul +1</b>, <b>salah &minus;1</b>.', 'The score comes from the last 10 answers for each falsafah: Study <b>Remembered +1</b>, <b>Not yet &minus;1</b>, Quiz <b>right +1</b>, <b>wrong &minus;1</b>.') + '</p>' +
+      '<p class="pnote">' + T('Markah dikira dari 10 jawapan Kaji terakhir setiap falsafah: <b>Ingat +1</b>, <b>Belum ingat &minus;1</b>. Kuiz tidak mengubah markah.', 'The score comes from the last 10 Study answers for each falsafah: <b>Remembered +1</b>, <b>Not yet &minus;1</b>. Quiz does not change the score.') + '</p>' +
       '<div class="gred-key">' + (EN ? [
         ['A+', '7 and above'], ['A', '5 to 6'], ['A&minus;', '4'], ['B+', '3'],
         ['B', '1 to 2'], ['C', '&minus;1 to 0'], ['D', '&minus;3 to &minus;2'], ['G', 'below &minus;3']
