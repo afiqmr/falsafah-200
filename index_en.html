@@ -1269,7 +1269,7 @@
     <section class="view active" id="view-study">
       <div class="study-head">
         <h2>Review</h2>
-        <div class="duecount"><b id="dueNum">0</b>/<span id="dueGoal">20</span> falsafah studied today</div>
+        <div class="duecount"><b id="dueNum">0</b>/<span id="dueGoal">20</span> falsafah remembered today</div>
       </div>
       <div class="kaji-stats" id="kajiStats"></div>
       <div class="chiprow"><button class="rangechip" type="button"></button><button class="listenbtn" type="button" id="listenBtn">&#127911; Listen</button></div>
@@ -1439,12 +1439,13 @@
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   }
 
-  // kajiIds: distinct falsafah studied today (counts toward the daily goal).
-  // results: latest rating per id today. again: "Belum ingat" ids still to review, in order.
+  // kajiIds: distinct falsafah studied today. results: latest rating per id today; only falsafah whose
+  // latest answer today is Ingat count toward the daily goal. again: "Belum ingat" ids still to review;
+  // againWait: how many other cards each one waits before it comes back in the same session.
   // repeating: the student pressed "Ulang" in the summary, so the again cards are being tested now.
   // cheerKaji / cheerKuiz: the "target reached" ribbon has been shown today.
   function freshDaily(){
-    return { date: todayStr(), kajiIds: [], kuizCount: 0, results: {}, again: [], summaryShown: false,
+    return { date: todayStr(), kajiIds: [], kuizCount: 0, results: {}, again: [], againWait: {}, summaryShown: false,
              repeating: false, cheerKaji: false, cheerKuiz: false, cheerStreak: false };
   }
   function loadDaily(){
@@ -1500,7 +1501,9 @@
   function saveStreak(){
     try{ localStorage.setItem(STREAK_KEY, JSON.stringify({ days: streakDays, qada: qadaStore })); }catch(e){}
   }
-  function dayComplete(){ return daily.kajiIds.length >= kajiGoal() && (daily.kuizCount||0) >= DAILY_KUIZ_GOAL; }
+  // Today's Kaji count: falsafah remembered (latest answer Ingat). A Belum ingat card counts once it is remembered.
+  function kajiIngatCount(){ return daily.kajiIds.filter(function(id){ return daily.results[id] === 'good'; }).length; }
+  function dayComplete(){ return kajiIngatCount() >= kajiGoal() && (daily.kuizCount||0) >= DAILY_KUIZ_GOAL; }
   function streakCount(){
     var t = todayStr(), d = streakDays.indexOf(t) >= 0 ? t : addDays(t, -1), n = 0;
     while(streakDays.indexOf(d) >= 0){ n++; d = addDays(d, -1); }
@@ -1623,7 +1626,7 @@
 
     var goal = kajiGoal();
     // the real count for the day, even past the target (e.g. 14/10); the bar stops at full
-    var kajiDone = daily.kajiIds.length;
+    var kajiDone = kajiIngatCount();
     var kuizDone = daily.kuizCount || 0;
     var kajiPct = Math.min(100, Math.round(kajiDone/goal*100));
     var kuizPct = Math.min(100, Math.round(kuizDone/DAILY_KUIZ_GOAL*100));
@@ -1930,7 +1933,7 @@
   /* ---------------- FIRST-TIME TOUR ---------------- */
   var TOUR_KEY = 'falsafah200_tour_pending';
   var TOUR = [
-    { sel:'nav.tabs button[data-view="study"]', title:'Kaji', text:'Kad hafalan harian. Cuba ingat ayat dahulu, tekan <b>Dedah</b>, kemudian pilih <b>Ingat</b> atau <b>Belum ingat</b>. Sasaran: 10 falsafah sehari.' },
+    { sel:'nav.tabs button[data-view="study"]', title:'Kaji', text:'Kad hafalan harian. Cuba ingat ayat dahulu, tekan <b>Dedah</b>, kemudian pilih <b>Ingat</b> atau <b>Belum ingat</b>. Sasaran: 10 falsafah <b>Ingat</b> sehari; yang belum ingat diulang sehingga ingat.' },
     { sel:'nav.tabs button[data-view="quiz"]', title:'Kuiz', text:'Soalan berfikir daripada huraian Jilid 7: pilih ayat yang paling tepat antara 2 atau 3 ayat yang hampir sama tema. Sasaran: 3 soalan sehari.' },
     { sel:'#streakTile', title:'Streak', text:'Siapkan sasaran Kaji dan Kuiz setiap hari untuk menyambung api &#128293;. Terlepas 1 hingga 4 hari? Buat qada\' untuk menyambungnya.' },
     { sel:'nav.tabs button[data-view="browse"]', title:'Senarai', text:'Semua 200 falsafah. Cari ikut nombor, tajuk, surah atau sebutan ayat. Tekan mana-mana kad untuk butiran penuh dan <b>Word by word</b>.' },
@@ -1941,7 +1944,7 @@
     { sel:'nav.tabs button[data-view="kemajuan"]', title:'Progres', text:'Kemajuan keseluruhan 200 falsafah: gred hafalan, <b>Perlu fokus</b>, carta 14 hari dan sejarah harian.' }
   ];
   if(EN) TOUR = [
-    { sel:'nav.tabs button[data-view="study"]', title:'Study', text:'Daily memory cards. Try to recall the ayat first, tap <b>Reveal</b>, then choose <b>Remembered</b> or <b>Not yet</b>. Target: 10 falsafah a day.' },
+    { sel:'nav.tabs button[data-view="study"]', title:'Study', text:'Daily memory cards. Try to recall the ayat first, tap <b>Reveal</b>, then choose <b>Remembered</b> or <b>Not yet</b>. Target: 10 falsafah <b>remembered</b> a day; any not yet remembered come back until they are.' },
     { sel:'nav.tabs button[data-view="quiz"]', title:'Quiz', text:'Thinking questions from the Volume 7 explanations: pick the right ayat out of 2 or 3 with a similar theme. Target: 3 questions a day.' },
     { sel:'#streakTile', title:'Streak', text:'Meet the Study and Quiz targets every day to keep the flame &#128293; going. Missed 1 to 4 days? Do a qada\' to join it up again.' },
     { sel:'nav.tabs button[data-view="browse"]', title:'List', text:'All 200 falsafah. Search by number, title, surah or how the ayat sounds. Tap any card for the full details and <b>Word by word</b>.' },
@@ -2114,9 +2117,9 @@
       (x ? '<p class="text-extra"><small>' + T('Ayat ', 'Ayat ') + escapeHtml(x.ayat) + ' &middot; ' + escapeHtml(x.source) + T(', bukan daripada buku', ', not from the book') + '</small>' + escapeHtml(x.text) + '</p>' : '');
   }
 
-  // Order of play: every due falsafah in the chosen range once (wrong ones are only recorded),
-  // then a summary of the whole day. The Belum ingat cards are tested again only if the student
-  // presses "Ulang" there; otherwise they wait, and stay under Belum ingat for the day.
+  // Order of play: the falsafah in the chosen range, one by one. A card marked Belum ingat comes back in
+  // the same session after 2 to 4 other cards, again and again until it is Ingat; when the range is done
+  // the ones still waiting come straight away. Then a summary of the whole day.
   function startRepeat(){
     daily.repeating = true; saveDaily(daily);
     renderStudy();
@@ -2132,11 +2135,16 @@
     if(daily.repeating && !againEntries.length){ daily.repeating = false; saveDaily(daily); }
     var entry = null, reviewing = false;
 
-    if(daily.repeating){
-      entry = againEntries[0];
+    var wait = daily.againWait || {};
+    var readyAgain = againEntries.filter(function(e){ return !(wait[e.id] > 0); });
+    if(readyAgain.length){
+      entry = readyAgain[0];
       reviewing = true;
     } else if(fresh.length){
       entry = fresh[0];
+    } else if(againEntries.length){
+      entry = againEntries[0];
+      reviewing = true;
     } else if(!daily.summaryShown && daily.kajiIds.length){
       openKajiSummary();
     }
@@ -2180,7 +2188,7 @@
     }
 
     prefetchWbw(entry);
-    prefetchWbw(reviewing ? againEntries[1] : fresh[1]);
+    prefetchWbw(fresh[0] && fresh[0] !== entry ? fresh[0] : fresh[1]);
     stage.innerHTML =
       '<div class="folio">' +
         '<div class="folio-top">' +
@@ -2220,15 +2228,18 @@
     var i = daily.again.indexOf(id);
     if(i >= 0) daily.again.splice(i, 1);
     var inFocusSession = focus && focus.mode === 'kaji';
-    if(result === 0){
-      // in the main pass a wrong card is only recorded; it is tested again only when the student presses Ulang
-      if(daily.repeating && !inFocusSession) requeue(daily.again, id); else daily.again.push(id);
-    }
+    if(!inFocusSession){
+      // every other waiting Belum ingat card is one card closer to coming back
+      var w = daily.againWait = daily.againWait || {};
+      daily.again.forEach(function(a){ if(w[a] > 0) w[a]--; });
+      delete w[id];
+      if(result === 0){ daily.again.push(id); w[id] = 2 + Math.floor(Math.random() * 3); }   // back after 2 to 4 cards
+    } else if(result === 0) daily.again.push(id);
     // a new round (or the end of an Ulang) brings the day summary up again when it ends
     if(!inFocusSession && (firstToday || (daily.repeating && !daily.again.length))) daily.summaryShown = false;
     if(daily.repeating && !daily.again.length) daily.repeating = false;
     saveDaily(daily);
-    if(!daily.cheerKaji && daily.kajiIds.length >= kajiGoal()){
+    if(!daily.cheerKaji && kajiIngatCount() >= kajiGoal()){
       daily.cheerKaji = true; saveDaily(daily);
       if(!checkStreak()) celebrate(T('Sasaran ' + kajiGoal() + ' kaji hari ini tercapai.', 'Target of ' + kajiGoal() + ' studied today reached.'));
     }

@@ -71,7 +71,7 @@ Firestore.
 | Key                  | Synced | Holds                                                            |
 | -------------------- | :----: | ---------------------------------------------------------------- |
 | `srs_v1`             |   ✓    | Per falsafah: `seen`, `correct`, `box`, `due`, `log`, `lt`       |
-| `daily_v1`           |   ✓    | Today: `kajiIds`, `kuizCount`, `results`, `again`, flags         |
+| `daily_v1`           |   ✓    | Today: `kajiIds`, `kuizCount`, `results`, `again`, `againWait`, flags. The Kaji target counts ids whose `results` is `good` |
 | `history_v1`         |   ✓    | Per day: `g` (Ingat), `a` (Belum ingat), `m` (missed once)       |
 | `streak_v1`          |   ✓    | `{ days: ["YYYY-MM-DD", …], qada: { used, filled, tried } }`: days with both targets met (or made up by qada'); qada' dates passed, days filled, days a qada' was started |
 | `range_v1`           |   ✓    | Chosen julat `{ from, to }`                                      |

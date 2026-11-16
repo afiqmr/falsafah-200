@@ -2,6 +2,14 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-11-16
+
+### Changed
+
+- The daily Kaji target counts only falsafah remembered (Ingat). A card marked Belum ingat comes back
+  in the same session after 2 to 4 other cards, again until it is Ingat, and then counts. The Ulang
+  button at the end is no longer needed. The counter reads "falsafah diingat hari ini".
+
 ## 2026-11-11
 
 ### Fixed

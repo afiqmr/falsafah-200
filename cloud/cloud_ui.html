@@ -587,7 +587,8 @@ function mergeDaily(a, b) {
   const kaji = [...new Set([...(a.kajiIds || []), ...(b.kajiIds || [])])];
   const results = Object.assign({}, b.results || {}, a.results || {});
   const again = [...new Set([...(a.again || []), ...(b.again || [])])].filter(id => results[id] === 'again');
-  return { date: a.date, kajiIds: kaji, kuizCount: Math.max(a.kuizCount || 0, b.kuizCount || 0), results, again,
+  const againWait = {}; again.forEach(id => { const w = (a.againWait || {})[id] ?? (b.againWait || {})[id]; if (w > 0) againWait[id] = w; });
+  return { date: a.date, kajiIds: kaji, kuizCount: Math.max(a.kuizCount || 0, b.kuizCount || 0), results, again, againWait,
     summaryShown: !!(a.summaryShown || b.summaryShown), repeating: !!a.repeating && again.length > 0,
     cheerKaji: !!(a.cheerKaji || b.cheerKaji), cheerKuiz: !!(a.cheerKuiz || b.cheerKuiz), cheerStreak: !!(a.cheerStreak || b.cheerStreak) };
 }
