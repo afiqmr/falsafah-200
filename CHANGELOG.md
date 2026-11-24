@@ -2,6 +2,15 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-11-25
+
+### Changed
+
+- A julat must hold at least 10 Kaji cards (a Kaji group counts once), so a small range can no longer
+  shrink the daily target. The picker widens a smaller range (for example 50–52 to 50–59) and asks
+  the student to tap again; a saved smaller range (for example 1–11) is widened once on open, and the
+  julat hint says so.
+
 ## 2026-11-24
 
 ### Changed

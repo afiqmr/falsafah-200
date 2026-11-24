@@ -1497,13 +1497,24 @@
   function isValidRange(from, to){
     return Number.isInteger(from) && Number.isInteger(to) && from >= 1 && to <= 200 && from <= to;
   }
+  // A julat must hold at least 10 Kaji cards (groups count once), so a tiny range cannot shrink the
+  // daily target. A smaller one is widened upwards (downwards at the end of the book).
+  var MIN_KAJI_CARDS = 10;
+  function widenRange(from, to){
+    while(kajiUnits(poolFor(from, to)).length < MIN_KAJI_CARDS && (to < 200 || from > 1)){ if(to < 200) to++; else from--; }
+    return { from: from, to: to };
+  }
   var studyRange = { from:1, to:200 };
-  var rangeSaved = false;
+  var rangeSaved = false, rangeWidened = null;
   try{
     var savedRange = JSON.parse(localStorage.getItem(RANGE_KEY) || 'null');
     if(savedRange && isValidRange(savedRange.from, savedRange.to) && poolFor(savedRange.from, savedRange.to).length){
-      studyRange = { from:savedRange.from, to:savedRange.to };
+      studyRange = widenRange(savedRange.from, savedRange.to);
       rangeSaved = true;
+      if(studyRange.from !== savedRange.from || studyRange.to !== savedRange.to){
+        rangeWidened = { from: savedRange.from, to: savedRange.to };
+        localStorage.setItem(RANGE_KEY, JSON.stringify(studyRange));
+      }
     }
   }catch(e){}
   var STUDY_POOL = poolFor(studyRange.from, studyRange.to);
@@ -1997,7 +2008,11 @@
     if(chip){
       rtip = document.createElement('div');
       rtip.className = 'theme-tip range-tip'; rtip.setAttribute('role', 'status');
-      rtip.innerHTML = T('Mahu kaji falsafah lain? Tekan <b>julat</b> ini untuk menukar julat bila-bila masa.', 'Want to study other falsafah? Tap this <b>range</b> to change it any time.');
+      rtip.innerHTML = rangeWidened
+        ? T('Julat anda diluaskan dari ' + rangeWidened.from + '&ndash;' + rangeWidened.to + ' ke <b>' + studyRange.from + '&ndash;' + studyRange.to + '</b>: setiap julat perlu sekurang-kurangnya 10 kad Kaji.',
+            'Your range was widened from ' + rangeWidened.from + '&ndash;' + rangeWidened.to + ' to <b>' + studyRange.from + '&ndash;' + studyRange.to + '</b>: every range needs at least 10 Study cards.')
+        : T('Mahu kaji falsafah lain? Tekan <b>julat</b> ini untuk menukar julat bila-bila masa.', 'Want to study other falsafah? Tap this <b>range</b> to change it any time.');
+      rangeWidened = null;
       chip.parentNode.appendChild(rtip);
       rtip.style.top = (chip.offsetTop + chip.offsetHeight + 12) + 'px'; rtip.style.left = chip.offsetLeft + 'px';   // right under the julat button, even when the row wraps
       requestAnimationFrame(function(){ requestAnimationFrame(function(){ rtip.classList.add('show'); }); });
@@ -2205,6 +2220,16 @@
     }
     if(!poolFor(r.from, r.to).length){
       setRangeHint(T('Tiada falsafah dalam julat ini. Sila pilih julat lain.', 'There are no falsafah in this range. Choose another range.'), true);
+      return;
+    }
+    var w = widenRange(r.from, r.to);
+    if(w.from !== r.from || w.to !== r.to){
+      // too few Kaji cards: widen the inputs and ask the student to confirm
+      document.getElementById('rangeFrom').value = w.from;
+      document.getElementById('rangeTo').value = w.to;
+      syncPresetButtons();
+      setRangeHint(T('Julat perlu sekurang-kurangnya 10 kad Kaji (falsafah yang sama ayat dikira satu kad). Julat diluaskan ke <b>' + w.from + '&ndash;' + w.to + '</b>. Tekan sekali lagi untuk teruskan.',
+                     'A range needs at least 10 Study cards (falsafah sharing an ayat count as one card). It was widened to <b>' + w.from + '&ndash;' + w.to + '</b>. Tap again to carry on.'), true);
       return;
     }
     var v = document.getElementById('nameInput').value.trim();
