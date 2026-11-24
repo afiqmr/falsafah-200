@@ -760,7 +760,7 @@
     border-radius:100px; padding:6px 12px; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;
   }
   .listenbtn:hover, .listenbtn.on{ border-color:var(--gold); }
-  /* Mini player. Two looks while choosing: .mp-bar (solid bar with a number tile) and .mp-pill (frosted capsule). */
+  /* Mini player: a frosted capsule; the play button carries a progress ring. */
   .miniplayer{
     position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:45;
     width:calc(100% - 20px); max-width:560px; display:flex; align-items:center; gap:10px; overflow:hidden;
@@ -771,34 +771,16 @@
   .miniplayer .mp-ib:active{ transform:scale(.9); }
   .miniplayer .mp-ib.close .mp-ic{ width:18px; height:18px; }
   .miniplayer .mp-play{ width:44px; height:44px; }
-  .miniplayer .mp-line{ position:absolute; left:0; right:0; bottom:0; height:3px; pointer-events:none; }
-  .miniplayer .mp-line i{ display:block; height:100%; transform-origin:left center; transform:scaleX(0); }
-  /* bar: deep teal, white text, number tile like an album cover, progress along the bottom edge */
-  .miniplayer.mp-bar{ background:linear-gradient(135deg, #0F5F59, #0B4743); color:#fff; border-radius:16px; padding:9px 8px 11px 9px;
-    box-shadow:0 14px 32px -12px rgba(5,40,38,.6); }
-  .mp-bar .mp-tile{ flex:none; min-width:46px; height:46px; padding:0 6px; border-radius:11px; background:rgba(255,255,255,.14);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
-  .mp-bar .mp-tile small{ font-size:8px; font-weight:800; letter-spacing:.12em; opacity:.7; margin-bottom:3px; }
-  .mp-bar .mp-tile b{ font-size:17px; font-weight:800; letter-spacing:-.02em; white-space:nowrap; }
-  .mp-bar .mp-t{ color:#fff; }
-  .mp-bar .mp-s{ color:rgba(255,255,255,.72); }
-  .mp-bar .mp-ib{ color:#fff; }
-  .mp-bar .mp-play{ background:#fff; color:#0B4743; }
-  .mp-bar .mp-line{ background:rgba(255,255,255,.18); }
-  .mp-bar .mp-line i{ background:#F4C76B; }
   /* pill: frosted capsule, play button with a progress ring */
   .miniplayer.mp-pill{ border-radius:999px; padding:6px 8px 6px 18px; color:var(--ink);
     background:rgba(255,253,248,.72); border:1px solid rgba(16,33,43,.10);
     -webkit-backdrop-filter:blur(18px) saturate(1.6); backdrop-filter:blur(18px) saturate(1.6);
     box-shadow:0 12px 30px -10px rgba(0,0,0,.35); }
   body:not([data-theme="light"]) .miniplayer.mp-pill{ background:rgba(30,32,36,.72); border-color:rgba(255,255,255,.12); }
-  .mp-pill .mp-tile, .mp-pill .mp-line{ display:none; }
   .mp-pill .mp-main{ position:relative; flex:none; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center; }
   .mp-pill .mp-play{ background:var(--gold); color:var(--gold-ink); }
   .mp-pill .mp-ib:not(.mp-play){ color:var(--ink); }
   .mp-pill .mp-s{ color:var(--muted); }
-  .mp-bar .mp-ring{ display:none; }
-  .mp-bar .mp-main{ display:contents; }
   .mp-ring{ position:absolute; inset:0; transform:rotate(-90deg); pointer-events:none; }
   .mp-ring circle{ fill:none; stroke-width:3; }
   .mp-ring .bg{ stroke:rgba(16,33,43,.12); }
@@ -3892,7 +3874,6 @@
     lpProgVal = lpProgFrac();
     document.querySelectorAll('.lp-prog i, .mp-prog i').forEach(function(i){ i.style.transform = 'scaleX(' + lpProgVal.toFixed(4) + ')'; });
     document.querySelectorAll('.mp-ring .fg').forEach(function(c){ c.style.strokeDashoffset = (150.8 * (1 - lpProgVal)).toFixed(2); });
-    document.querySelectorAll('.mp-line i').forEach(function(i){ i.style.transform = 'scaleX(' + lpProgVal.toFixed(4) + ')'; });
   }
   (function loop(){ if(LP.active && !document.hidden) lpProgPaint(); requestAnimationFrame(loop); })();
   function lpTitleHtml(e){ return '<h4>' + e.rangeLabel + ' &middot; ' + escapeHtml(displayTitle(e.title)) + '</h4><div class="lp-meta lp-voice">' + lpVoiceHtml(e) + '</div>'; }
@@ -3909,21 +3890,18 @@
     else {
       mp.hidden = lpSheetOpen; document.body.classList.toggle('has-miniplayer', !lpSheetOpen);
       if(!mp.firstElementChild){
-        mp.className = 'miniplayer ' + (window.FN_MP_STYLE || 'mp-bar');
+        mp.className = 'miniplayer mp-pill';
         mp.innerHTML =
-          '<div class="mp-tile" data-lp="open"></div>' +
           '<div class="mp-info lp-car" data-lp="open"></div>' +
           '<span class="mp-main"><svg class="mp-ring" viewBox="0 0 52 52" aria-hidden="true"><circle class="bg" cx="26" cy="26" r="24"></circle><circle class="fg" cx="26" cy="26" r="24"></circle></svg>' +
           '<button type="button" class="mp-ib mp-play" data-lp="toggle" aria-label="' + T('Main/jeda', 'Play/pause') + '"></button></span>' +
           '<button type="button" class="mp-ib" data-lp="next" aria-label="' + T('Seterusnya', 'Next') + '">' + MP_ICONS.next + '</button>' +
-          '<button type="button" class="mp-ib close" data-lp="stop" aria-label="' + T('Henti', 'Stop') + '">' + MP_ICONS.close + '</button>' +
-          '<div class="mp-line"><i></i></div>';
+          '<button type="button" class="mp-ib close" data-lp="stop" aria-label="' + T('Henti', 'Stop') + '">' + MP_ICONS.close + '</button>';
         lpSwipe(mp.querySelector('.mp-info'));
       }
       mp.querySelector('[data-lp="toggle"]').innerHTML = lpPlaying() ? MP_ICONS.pause : MP_ICONS.play;
-      mp.querySelector('.mp-tile').innerHTML = '<small>' + T('FALSAFAH', 'FALSAFAH') + '</small><b>' + entry.rangeLabel.replace(/^\D+/, '') + '</b>';
       lpCarousel(mp.querySelector('.mp-info'), entry.id,
-        '<div class="mp-t">' + escapeHtml(displayTitle(entry.title)) + '</div>' +
+        '<div class="mp-t">F' + entry.rangeLabel.replace(/^\D+/, '') + ': ' + escapeHtml(displayTitle(entry.title)) + '</div>' +
         '<div class="mp-s">' + mpVoiceName(entry) + ' &middot; <span class="lp-status"></span></div>', dir);
     }
     var now = document.getElementById('lpNow');

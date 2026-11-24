@@ -13,6 +13,10 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
   Nota and Kuiz are unchanged.
 - Admin panel: last active shows the date and time with AM/PM, and "x hari lalu" for older days.
 
+- Dengar mini player: a frosted rounded capsule that sits higher above the iPhone home bar, titled
+  "F184: Amthal sumber furqan", with drawn play, next and close icons (no emoji) and a progress ring
+  around the play button.
+
 ### Added
 
 - Sound: a short chime when the Kaji or Kuiz target is reached, and a rising chime (with a buzz on
