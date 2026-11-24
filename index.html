@@ -437,6 +437,16 @@
   .sum-list li:last-child{ border-bottom:0; }
   .sum-list .sl-no{ font-weight:800; color:var(--gold-cite); white-space:nowrap; }
   .kk-no{ color:var(--gold-cite); font-weight:800; margin-right:6px; }
+  /* look back through today's Kaji */
+  .kaji-backrow{ display:flex; margin:0 0 10px; }
+  .kaji-back-btn{ border:1px solid var(--border); background:var(--surface-2); color:var(--ink); border-radius:100px; padding:7px 13px;
+    font-family:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+  .kaji-back-btn:disabled{ opacity:.35; cursor:default; }
+  .kaji-backbar{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 10px; font-size:12px; font-weight:800; color:var(--muted); }
+  .kaji-backbar .kb-gap{ width:90px; }
+  .badge.kb-ok{ background:rgba(15,118,110,.12); color:var(--emerald); }
+  .badge.kb-re{ background:rgba(232,119,46,.14); color:#D9622B; }
+  .kaji-back-exit{ width:100%; margin-top:14px; }
   .sum-empty{ font-size:12px; color:var(--muted); margin:0; }
   .wk-uji{
     margin-top:8px; width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border);
@@ -2222,6 +2232,7 @@
     rolloverDailyIfNeeded();
     if(qadaRun){ renderQadaStudy(); return; }
     if(focus && focus.mode === 'kaji'){ renderFocusStudy(); return; }
+    if(kajiBack !== null){ renderKajiBack(); return; }
     var stage = document.getElementById('studyStage');
     var fresh = dueQueue().filter(function(e){ return daily.kajiIds.indexOf(e.id) === -1; });
     var againEntries = daily.again.map(kajiEntry).filter(Boolean);
@@ -2245,7 +2256,7 @@
     if(!entry){
       currentCardId = null;
       var n = againEntries.length;
-      stage.innerHTML =
+      stage.innerHTML = kajiBackRow() +
         '<div class="folio"><div class="kaji-goal-done">' +
         '<div class="big">' + (n ? '&#8635;' : '&#10003;') + '</div>' +
         '<h3>' + (daily.kajiIds.length ? T('Julat ini sudah dikaji hari ini', 'This range is done for today') : T('Tiada falsafah tertunggak', 'Nothing left to study')) + '</h3>' +
@@ -2260,6 +2271,7 @@
       var sb = document.getElementById('sumAgainBtn');
       if(sb) sb.style.display = daily.kajiIds.length ? '' : 'none';
       if(sb) sb.onclick = openKajiSummary;
+      bindKajiBackRow();
       return;
     }
 
@@ -2282,15 +2294,54 @@
 
     prefetchWbw(entry);
     prefetchWbw(fresh[0] && fresh[0] !== entry ? fresh[0] : fresh[1]);
-    stage.innerHTML =
+    stage.innerHTML = kajiBackRow() +
       '<div class="folio">' +
         '<div class="folio-top">' +
           '<span class="rangepill">' + entry.rangeLabel + '</span>' + badge +
         '</div>' + prog +
         '<div id="folioBody"></div>' +
       '</div>';
-
+    bindKajiBackRow();
     renderFolioBody(entry);
+  }
+
+  // ---------- Look back: every falsafah studied in today's Kaji, revealed, in the order studied ----------
+  var kajiBack = null;   // index into daily.kajiIds while looking back, otherwise null
+  function kajiBackRow(){
+    return daily.kajiIds.length ? '<div class="kaji-backrow"><button type="button" class="kaji-back-btn" id="kajiPrev">&larr; ' + T('Sebelum', 'Previous') + '</button></div>' : '';
+  }
+  function bindKajiBackRow(){
+    var b = document.getElementById('kajiPrev'); if(!b) return;
+    b.onclick = function(){
+      var ids = daily.kajiIds, i = ids.length - 1;
+      if(ids[i] === currentCardId && i > 0) i--;   // start from the last one before the card on screen
+      kajiBack = i; renderStudy(); window.scrollTo(0, 0);
+    };
+  }
+  function renderKajiBack(){
+    var ids = daily.kajiIds, stage = document.getElementById('studyStage');
+    if(!ids.length){ kajiBack = null; renderStudy(); return; }
+    var i = Math.max(0, Math.min(kajiBack, ids.length - 1)); kajiBack = i;
+    var entry = kajiEntry(ids[i]), good = daily.results[ids[i]] === 'good';
+    stage.innerHTML =
+      '<div class="kaji-backbar">' +
+        '<button type="button" class="kaji-back-btn" id="kbPrev"' + (i === 0 ? ' disabled' : '') + '>&larr; ' + T('Sebelum', 'Previous') + '</button>' +
+        '<span>' + (i + 1) + '/' + ids.length + T(' hari ini', ' today') + '</span>' +
+        (i < ids.length - 1 ? '<button type="button" class="kaji-back-btn" id="kbNext">' + T('Seterusnya', 'Next') + ' &rarr;</button>' : '<span class="kb-gap"></span>') +
+      '</div>' +
+      '<div class="folio">' +
+        '<div class="folio-top"><span class="rangepill">' + entry.rangeLabel + '</span>' +
+          '<span class="badge ' + (good ? 'kb-ok' : 'kb-re') + '">' + (good ? '&#10003; ' + T('Ingat', 'Remembered') : '&#8635; ' + T('Belum ingat', 'Not yet')) + '</span></div>' +
+        '<div id="folioBody"></div>' +
+      '</div>' +
+      '<button type="button" class="namebtn kaji-back-exit" id="kbExit">' + T('Kembali ke kaji', 'Back to study') + '</button>';
+    var el = document.getElementById('folioBody');
+    el.innerHTML = folioRevealedHtml(entry, false);
+    applyWbw(el); prefetchWbw(entry);
+    var go = function(j){ kajiBack = j; renderStudy(); window.scrollTo(0, 0); };
+    document.getElementById('kbPrev').onclick = function(){ if(i > 0) go(i - 1); };
+    var nx = document.getElementById('kbNext'); if(nx) nx.onclick = function(){ go(i + 1); };
+    document.getElementById('kbExit').onclick = function(){ kajiBack = null; renderStudy(); window.scrollTo(0, 0); };
   }
 
   // A card marked Belum ingat goes back at a random spot, with at least 2 other cards before it
@@ -2847,6 +2898,20 @@
     if(later) later.onclick = close;
   }
 
+  // The revealed card: title, ayat, maksud, (grade buttons), Kata Kunci and Catitan.
+  function folioRevealedHtml(entry, withGrades){
+    return '<h3 class="folio-title">' + escapeHtml(displayTitle(entry.title)) + '</h3>' +
+      '<hr class="divider">' +
+      renderArabic(entry) +
+      '<div class="folio-text-label">' + T('Maksud', 'Meaning') + '</div>' +
+      textHtml(entry) +
+      '<p class="surah-ref">' + escapeHtml(entry.surahDisplay) + '</p>' +
+      (withGrades ? '<div class="gradebar">' +
+        '<button class="gradebtn again" data-g="0"><span class="g-label">' + T('Belum ingat', 'Not yet') + '</span></button>' +
+        '<button class="gradebtn good" data-g="1"><span class="g-label">' + T('Ingat', 'Remembered') + '</span></button>' +
+      '</div>' : '') +
+      renderExtras(entry);
+  }
   function renderFolioBody(entry){
     var el = document.getElementById('folioBody');
     if(!revealed){
@@ -2860,18 +2925,7 @@
         el.classList.remove('reveal-in'); void el.offsetWidth; el.classList.add('reveal-in');
       };
     } else {
-      el.innerHTML =
-        '<h3 class="folio-title">' + escapeHtml(displayTitle(entry.title)) + '</h3>' +
-        '<hr class="divider">' +
-        renderArabic(entry) +
-        '<div class="folio-text-label">' + T('Maksud', 'Meaning') + '</div>' +
-        textHtml(entry) +
-        '<p class="surah-ref">' + escapeHtml(entry.surahDisplay) + '</p>' +
-        '<div class="gradebar">' +
-          '<button class="gradebtn again" data-g="0"><span class="g-label">' + T('Belum ingat', 'Not yet') + '</span></button>' +
-          '<button class="gradebtn good" data-g="1"><span class="g-label">' + T('Ingat', 'Remembered') + '</span></button>' +
-        '</div>' +
-        renderExtras(entry);
+      el.innerHTML = folioRevealedHtml(entry, true);
       applyWbw(el);
       el.querySelectorAll('.gradebtn').forEach(function(b){
         b.onclick = function(){

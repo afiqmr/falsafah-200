@@ -13,6 +13,9 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
   Nota and Kuiz are unchanged.
 - Admin panel: last active shows the date and time with AM/PM, and "x hari lalu" for older days.
 
+- Kaji look-back: "← Sebelum" above the card steps back through every falsafah studied today, in
+  order, each shown revealed (title, ayat, maksud, Kata Kunci) with its Ingat or Belum ingat. It is
+  read only; "Kembali ke kaji" returns to the card you were on.
 - Dengar mini player: a frosted rounded capsule that sits higher above the iPhone home bar, titled
   "F184: Amthal sumber furqan", with drawn play, next and close icons (no emoji) and a progress ring
   around the play button.
