@@ -176,7 +176,7 @@
 </script>
 <script type="module">
 const CFG = window.FIREBASE_CONFIG;
-const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1', history: 'falsafah200_history_v1', streak: 'falsafah200_streak_v1', lang: 'falsafah200_lang_v1' };
+const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1', history: 'falsafah200_history_v1', streak: 'falsafah200_streak_v1', lang: 'falsafah200_lang_v1', sound: 'falsafah200_sound_v1' };
 // Language of this build ('ms' or 'en'), written by build.py. The other build lives at / (BM) or /en/ (English).
 const EN = window.FN_LANG === 'en';
 const T = (ms, en) => EN ? en : ms;
@@ -300,6 +300,7 @@ function render() {
       ${isStandalone() || installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">' + T('Pasang di skrin utama', 'Add to home screen') + '</button>' : ''}
       <button class="namebtn acct-ghost" id="acctPd" style="margin-top:10px">${T('Pandangan', 'Reflections')}</button>
       <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">${T('Panduan aplikasi', 'App guide')}</button>
+      <button class="namebtn acct-ghost" id="acctSound" style="margin-top:10px"></button>
       <button class="namebtn acct-ghost" id="acctLang" style="margin-top:10px">${T('English version', 'Versi Bahasa Melayu')}</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">' + T('Papan pentadbir', 'Admin panel') + '</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">${T('Log keluar', 'Log out')}</button><button class="namebtn acct-ghost" id="acctClose">${T('Tutup', 'Close')}</button></div>
@@ -312,6 +313,14 @@ function render() {
     $('acctPd').onclick = () => { closeSheet(); openPandangan('tulis'); };
     $('acctShare').onclick = shareApp;
     $('acctLang').onclick = switchLang;
+    const sndLabel = () => { $('acctSound').innerHTML = (lsGet(KEYS.sound) === 'off' ? '&#128263; ' : '&#128276; ') + T('Bunyi: ', 'Sound: ') + (lsGet(KEYS.sound) === 'off' ? T('Mati', 'Off') : T('Hidup', 'On')); };
+    sndLabel();
+    $('acctSound').onclick = () => {
+      const off = lsGet(KEYS.sound) !== 'off';
+      try { localStorage.setItem(KEYS.sound, off ? 'off' : 'on'); } catch (e) {}   // goes through the sync hook
+      sndLabel();
+      if (!off && window.FN_SOUND) window.FN_SOUND.play('target');   // a sample when it is turned on
+    };
     return;
   }
   const reg = mode === 'register', last = lsGet(LAST_USER) || '';
@@ -615,6 +624,7 @@ function merge(local, remote) {
   out.range = remote.range || local.range; if (!out.range) delete out.range;
   out.theme = local.theme || remote.theme; if (!out.theme) delete out.theme;
   out.lang = local.lang || remote.lang; if (!out.lang) delete out.lang;
+  out.sound = local.sound || remote.sound; if (!out.sound) delete out.sound;   // chime on/off: this device's choice wins
   const h = mergeHistory(parse(local.history), parse(remote.history)); if (h) out.history = JSON.stringify(h);
   const sl = parse(local.streak), sr = parse(remote.streak);   // days with both daily targets met, from either device
   if (sl || sr) {
@@ -765,8 +775,9 @@ async function loadStudents() {
     const v = d.data() || {}, data = v.data || {};
     const srs = parse(data.srs) || {}, daily = parse(data.daily), range = parse(data.range) || { from: 1, to: 200 }, history = parse(data.history) || {};
     const pool = DATA.filter(e => e.noEnd >= range.from && e.noStart <= range.to);
-    const levels = LVL.map(() => 0); pool.forEach(e => { levels[gredIdx(srs[e.id])]++; });
-    const focus = pool.filter(e => { const g = gredIdx(srs[e.id]); return g >= 5 && g <= 7; })   // same rule as the app: gred C, D, G
+    const L = id => (window.FN_KAJI_LEAD || {})[id] || id;   // falsafah in a Kaji group share the group's grade
+    const levels = LVL.map(() => 0); pool.forEach(e => { levels[gredIdx(srs[L(e.id)])]++; });
+    const focus = pool.filter(e => L(e.id) === e.id && (g => g >= 5 && g <= 7)(gredIdx(srs[e.id])))   // same rule as the app: gred C, D, G; one per Kaji group
      .map(e => ({ id: e.id, m: markahOf(srs[e.id]), g: LVL[gredIdx(srs[e.id])] })).sort((a, b) => a.m - b.m);
     let today = null;
     if (daily && daily.date === dayStr(new Date())) {
@@ -777,7 +788,7 @@ async function loadStudents() {
     }
     const updated = v.updatedAt && v.updatedAt.toDate ? v.updatedAt.toDate() : null;
     out.push({ uid: d.id, profile: v.profile || {}, range, pool: pool.length, levels, focus, today, history, updated,
-      seen: Object.values(srs).reduce((a, c) => a + (c.seen || 0), 0) });
+      seen: Object.entries(srs).reduce((a, [k, c]) => a + (L(+k) === +k ? (c.seen || 0) : 0), 0) });
   });
   out.sort((a, b) => (b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0));
   return out;
@@ -786,8 +797,11 @@ const panel = $('adminPanel');
 function relTime(d) {
   if (!d) return 'belum aktif';
   const days = Math.floor((new Date(dayStr(new Date()) + 'T00:00:00') - new Date(dayStr(d) + 'T00:00:00')) / 86400000);
-  const hm = d.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' });
-  return days <= 0 ? 'hari ini, ' + hm : days === 1 ? 'semalam' : days + ' hari lalu';
+  // e.g. "Hari ini · 24 Nov, 6:26 PM", "Semalam · 23 Nov, 7:54 AM", "20 Nov, 6:26 PM · 4 hari lalu"
+  const h = d.getHours(), hm = (h % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM');
+  const MON = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'];
+  const when = d.getDate() + ' ' + MON[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '') + ', ' + hm;
+  return days <= 0 ? 'Hari ini · ' + when : days === 1 ? 'Semalam · ' + when : when + ' · ' + days + ' hari lalu';
 }
 function rows(list, meta) {
   if (!list.length) return '<p class="hint">Tiada.</p>';

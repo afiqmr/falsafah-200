@@ -497,6 +497,7 @@
   .sum-list li{ display:flex; gap:8px; padding:8px 12px; font-size:13px; border-bottom:1px solid var(--border); }
   .sum-list li:last-child{ border-bottom:0; }
   .sum-list .sl-no{ font-weight:800; color:var(--gold-cite); white-space:nowrap; }
+  .kk-no{ color:var(--gold-cite); font-weight:800; margin-right:6px; }
   .sum-empty{ font-size:12px; color:var(--muted); margin:0; }
   .wk-uji{
     margin-top:8px; width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--border);
@@ -1431,6 +1432,29 @@
   var EN = window.FN_LANG === 'en';
   function T(ms, en){ return EN ? en : ms; }
   var DATA = JSON.parse(document.getElementById('falsafah-data').textContent);
+  // Kaji groups: falsafah with the same title and the same ayat are one Kaji card and one grade.
+  // The first number leads; the others share its markah. Senarai, Nota and Kuiz still show all 200.
+  var KAJI_GROUPS = [[1,2,3],[4,5,6,7,8],[9,10,11],[16,17,18],[19,29,30],[20,21],[22,23],[36,67],[40,41],[59,104],[60,61],[66,105],[73,74],[99,100],[101,151],[108,109],[115,149],[118,122]];
+  var KAJI_LEAD = {}, KAJI_MEMBERS = {}, KAJI_ENTRY = {};
+  KAJI_GROUPS.forEach(function(g){ KAJI_MEMBERS[g[0]] = g; g.slice(1).forEach(function(id){ KAJI_LEAD[id] = g[0]; }); });
+  window.FN_KAJI_LEAD = KAJI_LEAD;   // the admin panel reads grades the same way
+  function lead(id){ return KAJI_LEAD[id] || id; }
+  KAJI_GROUPS.forEach(function(g){
+    var ms = g.map(function(id){ return DATA.find(function(e){ return e.id === id; }); });
+    var e = Object.assign({}, ms[0]);
+    var consec = g[g.length - 1] - g[0] === g.length - 1;
+    e.rangeLabel = ms[0].rangeLabel.replace(/\d.*$/, '') + (consec ? g[0] + '\u2013' + g[g.length - 1] : g.join(', '));
+    e.members = ms;
+    KAJI_ENTRY[g[0]] = e;
+  });
+  // the entry Kaji shows for a falsafah: its group card when it has one
+  function kajiEntry(id){ var l = lead(id); return KAJI_ENTRY[l] || DATA.find(function(e){ return e.id === l; }); }
+  // the Kaji cards in a list of falsafah: one per group, in order
+  function kajiUnits(entries){
+    var seen = {}, out = [];
+    entries.forEach(function(e){ var l = lead(e.id); if(seen[l]) return; seen[l] = 1; out.push(kajiEntry(l)); });
+    return out;
+  }
   // Kaji and Kuiz use the student's chosen range; Senarai always lists everything.
   var RANGE_KEY = 'falsafah200_range_v1';
   var RANGE_PRESETS = [
@@ -1579,12 +1603,40 @@
     if(daily.cheerStreak) return false;
     daily.cheerStreak = true; saveDaily(daily);
     var n = streakCount();
-    celebrate(T('&#128293; Streak ' + n + ' hari! Sasaran Kaji dan Kuiz hari ini selesai.', '&#128293; ' + n + '-day streak! Study and Quiz targets done today.'));
+    celebrate(T('&#128293; Streak ' + n + ' hari! Sasaran Kaji dan Kuiz hari ini selesai.', '&#128293; ' + n + '-day streak! Study and Quiz targets done today.'), 'streak');
     renderMissionBar();
     return true;
   }
+  // A short chime made in code (no audio file): a rising four-note chime for the streak, two notes for a target.
+  // Follows the phone's silent switch on iPhone; the student can turn it off in the account menu ("Bunyi").
+  var SOUND_KEY = 'falsafah200_sound_v1', audioCtx = null;
+  function soundOn(){ try{ return localStorage.getItem(SOUND_KEY) !== 'off'; }catch(e){ return true; } }
+  function playChime(kind){
+    if(!soundOn()) return;
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext; if(!AC) return;
+      audioCtx = audioCtx || new AC();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      var big = kind === 'streak', notes = big ? [523.25, 659.25, 783.99, 1046.5] : [659.25, 987.77];
+      var t0 = audioCtx.currentTime + 0.03;
+      notes.forEach(function(f, i){
+        [[f, 'sine', 0.2], [f * 2, 'triangle', 0.05]].forEach(function(v){   // a soft bell: the note and a quiet octave
+          var o = audioCtx.createOscillator(), g = audioCtx.createGain(), st = t0 + i * (big ? 0.12 : 0.1);
+          var len = big && i === notes.length - 1 ? 1.1 : 0.5;
+          o.type = v[1]; o.frequency.value = v[0];
+          g.gain.setValueAtTime(0.0001, st);
+          g.gain.exponentialRampToValueAtTime(v[2], st + 0.015);
+          g.gain.exponentialRampToValueAtTime(0.0001, st + len);
+          o.connect(g); g.connect(audioCtx.destination); o.start(st); o.stop(st + len + 0.05);
+        });
+      });
+      if(big && navigator.vibrate) navigator.vibrate([40, 60, 40, 60, 140]);
+    }catch(e){}
+  }
+  window.FN_SOUND = { key: SOUND_KEY, play: playChime };
   // Target reached: ribbons from both sides and a short note. Closes by itself; the session carries on.
-  function celebrate(msg){
+  function celebrate(msg, kind){
+    playChime(kind || 'target');
     var old = document.getElementById('cheer'); if(old) old.remove();
     var el = document.createElement('div');
     el.id = 'cheer';
@@ -1604,7 +1656,7 @@
     setTimeout(function(){ if(el.parentNode) el.remove(); }, 3800);
   }
 
-  function kajiGoal(){ return Math.min(DAILY_KAJI_GOAL, STUDY_POOL.length); }
+  function kajiGoal(){ return Math.min(DAILY_KAJI_GOAL, kajiUnits(STUDY_POOL).length); }
 
   // Daily history: for each day, the latest result per falsafah (g = ingat,
   // a = perlu ulang) and every falsafah missed at least once (m). Kept 120 days.
@@ -1770,9 +1822,32 @@
   var srs = loadState();
 
   function getCard(id){
+    id = lead(id);
     if(!srs[id]) srs[id] = { box:0, due: todayStr(), seen:0, correct:0 };
     return srs[id];
   }
+  // Fold progress saved per falsafah into its group: the member with the most Kaji answers wins.
+  (function foldKajiGroups(){
+    var changed = false;
+    KAJI_GROUPS.forEach(function(g){
+      var best = null;
+      g.forEach(function(id){
+        var c = srs[id]; if(!c) return;
+        if(!best || (c.seen || 0) > (best.seen || 0) || ((c.seen || 0) === (best.seen || 0) && (c.lt || 0) > (best.lt || 0))) best = c;
+      });
+      g.slice(1).forEach(function(id){ if(srs[id]){ delete srs[id]; changed = true; } });
+      if(best && srs[g[0]] !== best){ srs[g[0]] = best; changed = true; }
+    });
+    // today's lists move to the group's first number too
+    var dl = false, res = {};
+    Object.keys(daily.results || {}).forEach(function(k){ var l = lead(+k); if(l !== +k) dl = true; if(res[l] !== 'good') res[l] = daily.results[k]; });
+    var uniq = function(a){ return a.map(lead).filter(function(v, i, x){ return x.indexOf(v) === i; }); };
+    var kIds = uniq(daily.kajiIds || []), ag = uniq(daily.again || []).filter(function(id){ return res[id] !== 'good'; });
+    if(dl || kIds.length !== (daily.kajiIds || []).length || ag.length !== (daily.again || []).length){
+      daily.results = res; daily.kajiIds = kIds; daily.again = ag; daily.againWait = {}; saveDaily(daily);
+    }
+    if(changed) saveState(srs);
+  })();
 
   function isDue(id){
     var c = getCard(id);
@@ -1809,7 +1884,7 @@
     if(miss > 0 && !(c.box) && w < 1) w = 1;
     return rep('K', n - tail - w) + rep('k', w) + rep('K', tail);
   }
-  function cardLog(id){ var c = srs[id]; if(!c) return ''; return typeof c.log === 'string' ? c.log.replace(/[Qq]/g, '') : seedLog(c); }
+  function cardLog(id){ var c = srs[lead(id)]; if(!c) return ''; return typeof c.log === 'string' ? c.log.replace(/[Qq]/g, '') : seedLog(c); }
   function pushLog(id, ch){ var c = getCard(id); c.log = (cardLog(id) + ch).slice(-LOG_MAX); c.lt = Date.now(); }
   function markahOf(id){ var s = 0, l = cardLog(id); for(var i = 0; i < l.length; i++) s += LOG_PTS[l[i]] || 0; return s; }
   function gredOf(id){   // null = belum dikaji
@@ -2164,7 +2239,7 @@
   }
   function dueQueue(){
     var ord = dayOrderIndex();
-    return STUDY_POOL.slice().sort(function(a,b){
+    return kajiUnits(STUDY_POOL).sort(function(a,b){
       return (kajiTier(a.id) - kajiTier(b.id)) || (markahOf(a.id) - markahOf(b.id)) || (ord[a.id] - ord[b.id]);
     });
   }
@@ -2191,7 +2266,7 @@
     if(focus && focus.mode === 'kaji'){ renderFocusStudy(); return; }
     var stage = document.getElementById('studyStage');
     var fresh = dueQueue().filter(function(e){ return daily.kajiIds.indexOf(e.id) === -1; });
-    var againEntries = daily.again.map(entryById).filter(Boolean);
+    var againEntries = daily.again.map(kajiEntry).filter(Boolean);
     if(daily.repeating && !againEntries.length){ daily.repeating = false; saveDaily(daily); }
     var entry = null, reviewing = false;
 
@@ -2240,7 +2315,7 @@
     // Progress through the chosen range today: cards due today in the range, done vs left (this card included)
     var prog = '';
     if(!reviewing){
-      var doneHere = STUDY_POOL.filter(function(e){ return daily.kajiIds.indexOf(e.id) >= 0; }).length;
+      var doneHere = kajiUnits(STUDY_POOL).filter(function(e){ return daily.kajiIds.indexOf(e.id) >= 0; }).length;
       var totalHere = doneHere + fresh.length;
       prog = '<div class="julatprog"><div class="jp-txt"><span>' + doneHere + '/' + totalHere + T(' dalam julat', ' in range') + '</span>' +
         '<span>' + T('Tinggal ', 'Left: ') + fresh.length + '</span></div>' +
@@ -2314,7 +2389,7 @@
   var QADA_NEED = [10, 15, 20, 25], QADA_MIN_TOUCHED = 25, QADA_PASS = 0.8;
   var qadaRun = null;   // { need, gap, ids, pos, ok, first, done: null|'pass'|'fail' }
   function dayDiff(a, b){ return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000); }
-  function touchedIds(){ return DATA.filter(function(e){ return cardLog(e.id).length > 0; }).map(function(e){ return e.id; }); }
+  function touchedIds(){ return DATA.filter(function(e){ return lead(e.id) === e.id && cardLog(e.id).length > 0; }).map(function(e){ return e.id; }); }
   function qadaInfo(){
     var t = todayStr(), prev = null;
     streakDays.forEach(function(d){ if(d < t && (!prev || d > prev)) prev = d; });
@@ -2370,7 +2445,7 @@
       qadaStore.filled = qadaStore.filled.sort().slice(-400);
       qadaStore.used.push(todayStr()); qadaStore.used = qadaStore.used.sort().slice(-60);
       saveStreak();
-      celebrate(T('&#128293; Qada\' diterima. Streak disambung semula: ' + streakCount() + ' hari.', '&#128293; Qada\' accepted. Your streak is back: ' + streakCount() + ' days.'));
+      celebrate(T('&#128293; Qada\' diterima. Streak disambung semula: ' + streakCount() + ' hari.', '&#128293; Qada\' accepted. Your streak is back: ' + streakCount() + ' days.'), 'streak');
     } else r.done = 'fail';
   }
   function renderQadaBanner(q){
@@ -2417,7 +2492,7 @@
       document.getElementById('qadaBack').onclick = endQada;
       return;
     }
-    var entry = entryById(r.ids[r.pos]);
+    var entry = kajiEntry(r.ids[r.pos]);
     currentCardId = entry.id;
     revealed = false;
     prefetchWbw(entry); prefetchWbw(entryById(r.ids[r.pos + 1]));
@@ -2440,6 +2515,7 @@
   var focus = null;   // { mode:'kaji'|'kuiz', ids:[...], queue:[...], label, done }
   function startFocus(ids, mode, label){
     ids = ids.filter(function(id){ return entryById(id); });
+    if(mode === 'kaji') ids = ids.map(lead).filter(function(v, i, a){ return a.indexOf(v) === i; });   // one card per group
     if(!ids.length) return;
     focus = { mode: mode, ids: ids.slice(), queue: shuffle(ids.slice()), label: label, done: 0 };
     closeDetail();
@@ -2476,10 +2552,10 @@
       document.getElementById('focusDone').onclick = endFocus;
       return;
     }
-    var entry = entryById(focus.queue[0]);
+    var entry = focus.mode === 'kaji' ? kajiEntry(focus.queue[0]) : entryById(focus.queue[0]);
     currentCardId = entry.id;
     revealed = false;
-    prefetchWbw(entry); prefetchWbw(entryById(focus.queue[1]));
+    prefetchWbw(entry); prefetchWbw(entryById(focus.queue[1]) || null);
     stage.innerHTML = focusBar() +
       '<div class="folio">' +
         '<div class="folio-top">' +
@@ -2509,7 +2585,7 @@
   function progItems(ids, meta){
     if(!ids.length) return '';
     return '<ul class="sum-list">' + ids.map(function(id){
-      var e = entryById(id); if(!e) return '';
+      var e = KAJI_ENTRY[id] || entryById(id); if(!e) return '';
       return '<li data-open="' + id + '"><span class="sl-no">' + e.rangeLabel.replace('Falsafah ', '') + '</span>' +
         '<span class="sl-title">' + escapeHtml(displayTitle(e.title)) + '</span>' +
         (meta ? '<span class="sl-meta">' + meta(id) + '</span>' : '') + '</li>';
@@ -4302,6 +4378,7 @@
 
   function renderExtras(entry){
     var html = '<hr class="divider">';
+    if(entry.members) return html + renderGroupExtras(entry);
     if(entry.kataKunci && entry.kataKunci.length){
       html += '<div class="extra-block"><div class="extra-label">' + T('Kata kunci falsafah', 'Keywords') + '</div>' +
         entry.kataKunci.map(function(k){ return '<p class="kata-kunci">' + escapeHtml(k) + '</p>'; }).join('') +
@@ -4318,6 +4395,23 @@
         '</div>';
     }
     if(entry.bookPages) html += '<p class="book-ref">' + T('Rujukan: <b>Al-Fathun Nawa Jilid 7, ', 'Reference: <b>Al-Fathun Nawa Volume 7, ') + msLabel(entry) + '</b></p>';
+    return html;
+  }
+  // A Kaji group card: every member's Kata Kunci labelled F1, F2 ...; the Catitan once when they match.
+  function renderGroupExtras(entry){
+    var ms = entry.members, html = '<div class="extra-block"><div class="extra-label">' + T('Kata kunci falsafah', 'Keywords') + '</div>';
+    ms.forEach(function(m){
+      (m.kataKunci || []).forEach(function(k){ html += '<p class="kata-kunci"><b class="kk-no">F' + m.id + '</b> ' + escapeHtml(k) + '</p>'; });
+    });
+    html += '</div>';
+    var same = ms.every(function(m){ return JSON.stringify(m.catitan) === JSON.stringify(ms[0].catitan); });
+    var cat = function(list){ return (list || []).map(function(c){ return splitCatitanLines(c).map(function(line){ return '<p class="catitan-text">' + escapeHtml(line) + '</p>'; }).join(''); }).join(''); };
+    if(ms.some(function(m){ return m.catitan && m.catitan.length; })){
+      html += '<div class="extra-block"><div class="extra-label">' + T('Catitan kaedah pembuka mulut', 'Notes: Method of Ayat Introduction') + '</div>' +
+        (same ? cat(ms[0].catitan) : ms.map(function(m){ return m.catitan && m.catitan.length ? '<p class="catitan-text"><b class="kk-no">F' + m.id + '</b></p>' + cat(m.catitan) : ''; }).join('')) + '</div>';
+    }
+    html += '<p class="book-ref">' + T('Rujukan: <b>Al-Fathun Nawa Jilid 7</b>, ', 'Reference: <b>Al-Fathun Nawa Volume 7</b>, ') +
+      ms.map(function(m){ return 'F' + m.id + ' ' + msLabel(m); }).join(' &middot; ') + '</p>';
     return html;
   }
   function msLabel(entry){
@@ -4522,7 +4616,7 @@
 </script>
 <script type="module">
 const CFG = window.FIREBASE_CONFIG;
-const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1', history: 'falsafah200_history_v1', streak: 'falsafah200_streak_v1', lang: 'falsafah200_lang_v1' };
+const KEYS = { srs: 'falsafah200_srs_v1', daily: 'falsafah200_daily_v1', username: 'falsafah200_username_v1', range: 'falsafah200_range_v1', theme: 'falsafah200_theme_v1', history: 'falsafah200_history_v1', streak: 'falsafah200_streak_v1', lang: 'falsafah200_lang_v1', sound: 'falsafah200_sound_v1' };
 // Language of this build ('ms' or 'en'), written by build.py. The other build lives at / (BM) or /en/ (English).
 const EN = window.FN_LANG === 'en';
 const T = (ms, en) => EN ? en : ms;
@@ -4646,6 +4740,7 @@ function render() {
       ${isStandalone() || installKind() !== 'none' ? '<button class="namebtn acct-ghost" id="acctInstall" style="margin-top:10px">' + T('Pasang di skrin utama', 'Add to home screen') + '</button>' : ''}
       <button class="namebtn acct-ghost" id="acctPd" style="margin-top:10px">${T('Pandangan', 'Reflections')}</button>
       <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">${T('Panduan aplikasi', 'App guide')}</button>
+      <button class="namebtn acct-ghost" id="acctSound" style="margin-top:10px"></button>
       <button class="namebtn acct-ghost" id="acctLang" style="margin-top:10px">${T('English version', 'Versi Bahasa Melayu')}</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">' + T('Papan pentadbir', 'Admin panel') + '</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">${T('Log keluar', 'Log out')}</button><button class="namebtn acct-ghost" id="acctClose">${T('Tutup', 'Close')}</button></div>
@@ -4658,6 +4753,14 @@ function render() {
     $('acctPd').onclick = () => { closeSheet(); openPandangan('tulis'); };
     $('acctShare').onclick = shareApp;
     $('acctLang').onclick = switchLang;
+    const sndLabel = () => { $('acctSound').innerHTML = (lsGet(KEYS.sound) === 'off' ? '&#128263; ' : '&#128276; ') + T('Bunyi: ', 'Sound: ') + (lsGet(KEYS.sound) === 'off' ? T('Mati', 'Off') : T('Hidup', 'On')); };
+    sndLabel();
+    $('acctSound').onclick = () => {
+      const off = lsGet(KEYS.sound) !== 'off';
+      try { localStorage.setItem(KEYS.sound, off ? 'off' : 'on'); } catch (e) {}   // goes through the sync hook
+      sndLabel();
+      if (!off && window.FN_SOUND) window.FN_SOUND.play('target');   // a sample when it is turned on
+    };
     return;
   }
   const reg = mode === 'register', last = lsGet(LAST_USER) || '';
@@ -4961,6 +5064,7 @@ function merge(local, remote) {
   out.range = remote.range || local.range; if (!out.range) delete out.range;
   out.theme = local.theme || remote.theme; if (!out.theme) delete out.theme;
   out.lang = local.lang || remote.lang; if (!out.lang) delete out.lang;
+  out.sound = local.sound || remote.sound; if (!out.sound) delete out.sound;   // chime on/off: this device's choice wins
   const h = mergeHistory(parse(local.history), parse(remote.history)); if (h) out.history = JSON.stringify(h);
   const sl = parse(local.streak), sr = parse(remote.streak);   // days with both daily targets met, from either device
   if (sl || sr) {
@@ -5111,8 +5215,9 @@ async function loadStudents() {
     const v = d.data() || {}, data = v.data || {};
     const srs = parse(data.srs) || {}, daily = parse(data.daily), range = parse(data.range) || { from: 1, to: 200 }, history = parse(data.history) || {};
     const pool = DATA.filter(e => e.noEnd >= range.from && e.noStart <= range.to);
-    const levels = LVL.map(() => 0); pool.forEach(e => { levels[gredIdx(srs[e.id])]++; });
-    const focus = pool.filter(e => { const g = gredIdx(srs[e.id]); return g >= 5 && g <= 7; })   // same rule as the app: gred C, D, G
+    const L = id => (window.FN_KAJI_LEAD || {})[id] || id;   // falsafah in a Kaji group share the group's grade
+    const levels = LVL.map(() => 0); pool.forEach(e => { levels[gredIdx(srs[L(e.id)])]++; });
+    const focus = pool.filter(e => L(e.id) === e.id && (g => g >= 5 && g <= 7)(gredIdx(srs[e.id])))   // same rule as the app: gred C, D, G; one per Kaji group
      .map(e => ({ id: e.id, m: markahOf(srs[e.id]), g: LVL[gredIdx(srs[e.id])] })).sort((a, b) => a.m - b.m);
     let today = null;
     if (daily && daily.date === dayStr(new Date())) {
@@ -5123,7 +5228,7 @@ async function loadStudents() {
     }
     const updated = v.updatedAt && v.updatedAt.toDate ? v.updatedAt.toDate() : null;
     out.push({ uid: d.id, profile: v.profile || {}, range, pool: pool.length, levels, focus, today, history, updated,
-      seen: Object.values(srs).reduce((a, c) => a + (c.seen || 0), 0) });
+      seen: Object.entries(srs).reduce((a, [k, c]) => a + (L(+k) === +k ? (c.seen || 0) : 0), 0) });
   });
   out.sort((a, b) => (b.updated ? b.updated.getTime() : 0) - (a.updated ? a.updated.getTime() : 0));
   return out;
@@ -5132,8 +5237,11 @@ const panel = $('adminPanel');
 function relTime(d) {
   if (!d) return 'belum aktif';
   const days = Math.floor((new Date(dayStr(new Date()) + 'T00:00:00') - new Date(dayStr(d) + 'T00:00:00')) / 86400000);
-  const hm = d.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' });
-  return days <= 0 ? 'hari ini, ' + hm : days === 1 ? 'semalam' : days + ' hari lalu';
+  // e.g. "Hari ini · 24 Nov, 6:26 PM", "Semalam · 23 Nov, 7:54 AM", "20 Nov, 6:26 PM · 4 hari lalu"
+  const h = d.getHours(), hm = (h % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM');
+  const MON = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'];
+  const when = d.getDate() + ' ' + MON[d.getMonth()] + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '') + ', ' + hm;
+  return days <= 0 ? 'Hari ini · ' + when : days === 1 ? 'Semalam · ' + when : when + ' · ' + days + ' hari lalu';
 }
 function rows(list, meta) {
   if (!list.length) return '<p class="hint">Tiada.</p>';

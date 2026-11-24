@@ -52,6 +52,8 @@ wait for READY.
 - **English titles** translate the words of the BM title, never the English ayat translation
   (sejahtera = Prosperity, rahmat = Mercy, berbakti = Serve, kamu = your). Use the same English
   word for the same BM word across titles.
+- **Kaji groups**: falsafah with the same title and ayat (`KAJI_GROUPS` in `template.html`) are one
+  Kaji card and one grade, stored under the first number. Senarai, Nota and Kuiz still use all 200.
 - **Pandangan**: the author name always comes from the account profile. Only admin-published
   opinions reach other students, and a student's delete only hides it (`deleted: true`).
 

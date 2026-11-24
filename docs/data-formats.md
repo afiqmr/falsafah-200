@@ -70,13 +70,14 @@ Firestore.
 
 | Key                  | Synced | Holds                                                            |
 | -------------------- | :----: | ---------------------------------------------------------------- |
-| `srs_v1`             |   ✓    | Per falsafah: `seen`, `correct`, `box`, `due`, `log`, `lt`       |
+| `srs_v1`             |   ✓    | Per Kaji card: `seen`, `correct`, `box`, `due`, `log`, `lt`. A Kaji group (`KAJI_GROUPS` in `template.html`) is stored under its first number only |
 | `daily_v1`           |   ✓    | Today: `kajiIds`, `kuizCount`, `results`, `again`, `againWait`, flags. The Kaji target counts ids whose `results` is `good` |
 | `history_v1`         |   ✓    | Per day: `g` (Ingat), `a` (Belum ingat), `m` (missed once)       |
 | `streak_v1`          |   ✓    | `{ days: ["YYYY-MM-DD", …], qada: { used, filled, tried } }`: days with both targets met (or made up by qada'); qada' dates passed, days filled, days a qada' was started |
 | `range_v1`           |   ✓    | Chosen julat `{ from, to }`                                      |
 | `username_v1`        |   ✓    | Display name                                                     |
 | `theme_v1`           |   ✓    | `light` or `dark`                                                |
+| `sound_v1`           |   ✓    | `on` or `off` (chime on targets and streak; missing = on)        |
 | `lang_v1`            |   ✓    | `ms` or `en`, set at sign-up or by the menu switch; unset = BM   |
 | `wbw_v1`             |        | Word by word on or off                                           |
 | `wbwlang_v1`         |        | `en`, `id` (BM) or `both`                                        |

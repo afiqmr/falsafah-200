@@ -2,6 +2,23 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-11-24
+
+### Changed
+
+- Kaji groups: the 18 groups of falsafah with the same title and the same ayat (for example 1–3, 4–8,
+  9–11) are now one Kaji card and one grade ("Falsafah 1–3"). After Dedah the card lists each
+  member's Kata Kunci as F1, F2, F3 and each one's pages. Progress saved per falsafah folds into the
+  group, keeping the member with the most Kaji answers. Kaji has 175 cards instead of 200; Senarai,
+  Nota and Kuiz are unchanged.
+- Admin panel: last active shows the date and time with AM/PM, and "x hari lalu" for older days.
+
+### Added
+
+- Sound: a short chime when the Kaji or Kuiz target is reached, and a rising chime (with a buzz on
+  Android) when the day's streak is made or a qada' passes. On by default; "Bunyi" in the account
+  menu turns it off. Made in code, no audio file.
+
 ## 2026-11-16
 
 ### Changed
