@@ -117,7 +117,7 @@ function call(msg, tr){ return new Promise(function(res, rej){ var id = ++seq; w
 function st(s){ document.getElementById('st').textContent = s; }
 function row(c, kase, secs, ms, r, text){ var tr = document.createElement('tr'); tr.innerHTML = '<td>' + c.no + ' (' + c.key + ')</td><td>' + kase + '</td><td>' + secs.toFixed(1) + '</td><td>' + ms + '</td><td>' + r.pct + '% (' + r.ok + '/' + r.total + ')</td><td class="ar">' + text + '</td>'; document.getElementById('tb').appendChild(tr); }
 function audioFor(key){ return fetch('https://api.quran.com/api/v4/verses/by_key/' + key + '?audio=5').then(function(r){ return r.json(); }).then(function(j){ var u = j.verse.audio.url; return fetch(/^https?:/.test(u) ? u : (/^\/\//.test(u) ? 'https:' + u : 'https://verses.quran.com/' + u)); }).then(function(r){ return r.blob(); }).then(bcDecode); }
-async function run(pcm, c, kase){ var t0 = Date.now(); var m = await call({type:'run', audio: pcm}, [pcm.buffer]); var r = voiceMatch(c.arabic, m.text); row(c, kase, pcm.length/16000, Date.now() - t0, r, m.text); return r; }
+async function run(pcm, c, kase){ var secs = pcm.length/16000, t0 = Date.now(); var m = await call({type:'run', audio: pcm}, [pcm.buffer]); var r = voiceMatch(c.arabic, m.text); row(c, kase, secs, Date.now() - t0, r, m.text); return r; }
 document.getElementById('go').onclick = async function(){
   try{
     st('Memuatkan model…'); var t0 = Date.now(); await call({type:'load'}); st('Model sedia dalam ' + (Date.now()-t0) + ' ms. Menguji…');
