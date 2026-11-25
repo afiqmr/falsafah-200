@@ -1,0 +1,136 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Ujian model bacaan</title>
+<style>body{font:14px system-ui;margin:16px}td,th{border:1px solid #ccc;padding:4px 6px;font-size:13px}table{border-collapse:collapse}.ar{font-size:15px;direction:rtl}</style>
+<h3>Ujian model bacaan (demo)</h3><p id="st">Menunggu…</p><button id="go">Mula ujian</button>
+<table id="tb"><tr><th>Falsafah</th><th>Kes</th><th>Saat audio</th><th>Masa semak (ms)</th><th>Skor</th><th>Didengar</th></tr></table>
+<script>
+var EN = false; function T(m, e){ return m; }
+  var BC_MODEL = 'iqbalaesthetic/Basira';        // ONNX export of tarteel-ai/whisper-base-ar-quran (Apache-2.0)
+
+  var BC_LIB = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2';
+
+  var BC_WORKER_SRC = [
+    'import { pipeline, env } from "' + BC_LIB + '";',
+    'env.allowLocalModels = false;',
+    'var loading = null;',
+    'function load(){',
+    '  if(!loading) loading = pipeline("automatic-speech-recognition", "' + BC_MODEL + '", { dtype: "q8", device: "wasm",',
+    '    progress_callback: function(p){ self.postMessage({ type: "progress", p: { status: p.status, file: p.file, loaded: p.loaded, total: p.total } }); } })',
+    '    .catch(function(e){ loading = null; throw e; });',
+    '  return loading;',
+    '}',
+    'function fail(id, e){ self.postMessage({ id: id, type: "error", error: String(e && e.message || e) }); }',
+    'self.onmessage = function(e){',
+    '  var m = e.data;',
+    '  if(m.type === "load") load().then(function(){ self.postMessage({ id: m.id, type: "ready" }); }, function(err){ fail(m.id, err); });',
+    '  else if(m.type === "run") load().then(function(asr){',
+    '    var long = { chunk_length_s: 30, stride_length_s: 5 };',
+    '    return asr(m.audio, Object.assign({ language: "arabic", task: "transcribe" }, long))',
+    '      .catch(function(){ return asr(m.audio, long); });',   // in case the fine-tuned config has no language table
+    '  }).then(function(out){ self.postMessage({ id: m.id, type: "text", text: (out && out.text) || "" }); }, function(err){ fail(m.id, err); });',
+    '};'
+  ].join('\n');
+  function arSkeleton(s){
+    return s.normalize('NFKD').replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u08D3-\u08FF\u0640]/g, '')
+      .replace(/[\u0671\u0623\u0625\u0622]/g, '\u0627').replace(/[\u06CC\u0649]/g, '\u064A')
+      .replace(/\u06A9/g, '\u0643').replace(/\u0629/g, '\u0647').replace(/[^\u0621-\u064A]/g, '');
+  }
+  function vNorm(w){
+    return arSkeleton(w).replace(/[اءؤئع]/g, '')
+      .replace(/[ثص]/g, 'س').replace(/[ذظ]/g, 'ز').replace(/ض/g, 'د')
+      .replace(/ط/g, 'ت').replace(/ق/g, 'ك').replace(/ح/g, 'ه');
+  }
+  function vEdit(a, b){
+    if(Math.abs(a.length - b.length) > 1) return 2;
+    var prev = [], cur, i, j;
+    for(j = 0; j <= b.length; j++) prev[j] = j;
+    for(i = 1; i <= a.length; i++){
+      cur = [i];
+      for(j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+  function voiceMatch(arabic, transcript){
+    var target = String(arabic).replace(/\s+(?=[ً-ٰٟۖ-ۭ])/g, '').split(/\s+/).filter(function(w){ return vNorm(w).length; });
+    var words = String(transcript).split(/\s+/).map(vNorm).filter(Boolean);
+    var H = '', starts = [];
+    words.forEach(function(w){ starts.push(H.length); H += w; });
+    var p = 0, ok = 0;
+    var marks = target.map(function(w){
+      var t = vNorm(w), at = -1, len = 0, i, k;
+      var cands = [t];
+      if(t.length > 2 && /^[وفب]/.test(t)) cands.push(t.slice(1));
+      if(t.length > 2 && /ن$/.test(t)){ cands.push(t.slice(0, -1)); cands.push(t.slice(0, -1) + 'م'); }
+      if(t.length <= 2){
+        if(H.substr(p, t.length) === t){ at = p; len = t.length; }
+        else if(t.length === 2 && /ن$/.test(t) && H.substr(p, 1) === t[0] && starts.indexOf(p) >= 0){ at = p; len = 1; }
+        for(k = 0; at < 0 && k < words.length; k++){
+          if(starts[k] < p) continue;
+          if(starts[k] > p + 12) break;
+          if(words[k] === t){ at = starts[k]; len = t.length; }
+        }
+      } else {
+        var win = H.slice(p, p + t.length + 12);
+        for(i = 0; at < 0 && i < cands.length; i++){ var x = win.indexOf(cands[i]); if(x >= 0){ at = p + x; len = cands[i].length; } }
+        if(at < 0 && t.length >= 4){
+          for(i = 0; at < 0 && i <= Math.min(12, win.length - t.length + 1); i++){
+            [t.length, t.length - 1, t.length + 1].forEach(function(L){
+              if(at < 0 && i + L <= win.length && vEdit(t, win.substr(i, L)) <= 1){ at = p + i; len = L; }
+            });
+          }
+        }
+      }
+      if(at >= 0){ p = at + len; ok++; return { w: w, ok: true }; }
+      return { w: w, ok: false };
+    });
+    var total = target.length;
+    return { marks: marks, ok: ok, total: total, pct: total ? Math.round(ok / total * 100) : 0 };
+  }
+  function bcTo16k(ab){
+    var n = ab.length, ch = ab.numberOfChannels, mono = new Float32Array(n), i, c;
+    for(c = 0; c < ch; c++){ var d = ab.getChannelData(c); for(i = 0; i < n; i++) mono[i] += d[i] / ch; }
+    var ratio = ab.sampleRate / 16000;
+    if(Math.abs(ratio - 1) < 1e-6) return mono;
+    var out = new Float32Array(Math.floor(n / ratio));
+    for(var j = 0; j < out.length; j++){   // average each window, so higher sounds do not fold into speech
+      var a = Math.floor(j * ratio), b = Math.max(a + 1, Math.min(n, Math.floor((j + 1) * ratio))), s = 0;
+      for(i = a; i < b; i++) s += mono[i];
+      out[j] = s / (b - a);
+    }
+    return out;
+  }
+  function bcDecode(blob){
+    return blob.arrayBuffer().then(function(buf){
+      var AC = window.AudioContext || window.webkitAudioContext, ctx = new AC();
+      return new Promise(function(res, rej){ ctx.decodeAudioData(buf, res, rej); })
+        .then(function(ab){ try{ ctx.close(); }catch(e){} return bcTo16k(ab); });
+    });
+  }
+var CASES = [{"no": 1, "key": "3:191", "arabic": "ٱلَّذِینَ یَذۡكُرُونَ ٱللَّهَ قِیَـٰمࣰا وَقُعُودࣰا وَعَلَىٰ جُنُوبِهِمۡ وَیَتَفَكَّرُونَ فِی خَلۡقِ ٱلسَّمَـٰوَ ٰتِ وَٱلۡأَرۡضِ رَبَّنَا مَا خَلَقۡتَ هَـٰذَا بَـٰطِلࣰا سُبۡحَـٰنَكَ فَقِنَا عَذَابَ ٱلنَّارِ"}, {"no": 19, "key": "23:72", "arabic": "أَمۡ تَسۡـَٔلُهُمۡ خَرۡجࣰا فَخَرَاجُ رَبِّكَ خَیۡرࣱۖ وَهُوَ خَیۡرُ ٱلرَّ ٰزِقِینَ"}, {"no": 77, "key": "31:14", "arabic": "وَوَصَّیۡنَا ٱلۡإِنسَـٰنَ بِوَ ٰلِدَیۡهِ حَمَلَتۡهُ أُمُّهُۥ وَهۡنًا عَلَىٰ وَهۡنࣲ وَفِصَـٰلُهُۥ فِی عَامَیۡنِ أَنِ ٱشۡكُرۡ لِی وَلِوَ ٰلِدَیۡكَ إِلَیَّ ٱلۡمَصِیرُ"}, {"no": 101, "key": "6:79", "arabic": "إِنِّی وَجَّهۡتُ وَجۡهِیَ لِلَّذِی فَطَرَ ٱلسَّمَـٰوَ ٰتِ وَٱلۡأَرۡضَ حَنِیفࣰاۖ وَمَاۤ أَنَا۠ مِنَ ٱلۡمُشۡرِكِینَ"}, {"no": 150, "key": "30:8", "arabic": "أَوَ لَمۡ یَتَفَكَّرُوا۟ فِیۤ أَنفُسِهِمۗ مَّا خَلَقَ ٱللَّهُ ٱلسَّمَـٰوَ ٰتِ وَٱلۡأَرۡضَ وَمَا بَیۡنَهُمَاۤ إِلَّا بِٱلۡحَقِّ وَأَجَلࣲ مُّسَمࣰّىۗ وَإِنَّ كَثِیرࣰا مِّنَ ٱلنَّاسِ بِلِقَاۤىِٕ رَبِّهِمۡ لَكَـٰفِرُونَ"}, {"no": 200, "key": "43:36", "arabic": "وَمَن یَعۡشُ عَن ذِكۡرِ ٱلرَّحۡمَـٰنِ نُقَیِّضۡ لَهُۥ شَیۡطَـٰنࣰا فَهُوَ لَهُۥ قَرِینࣱ"}];
+var w = new Worker(URL.createObjectURL(new Blob([BC_WORKER_SRC], {type:'text/javascript'})), {type:'module'});
+var seq = 0, wait = {};
+w.onmessage = function(e){ var m = e.data; if(m.type === 'progress'){ if(m.p && m.p.file && m.p.total) st('Muat turun ' + m.p.file + ' ' + Math.round((m.p.loaded||0)/1e6) + '/' + Math.round(m.p.total/1e6) + ' MB'); return; }
+  var x = wait[m.id]; if(!x) return; delete wait[m.id]; m.type === 'error' ? x.rej(new Error(m.error)) : x.res(m); };
+w.onerror = function(e){ st('WORKER ERROR ' + (e.message || '')); };
+function call(msg, tr){ return new Promise(function(res, rej){ var id = ++seq; wait[id] = {res:res, rej:rej}; msg.id = id; w.postMessage(msg, tr || []); }); }
+function st(s){ document.getElementById('st').textContent = s; }
+function row(c, kase, secs, ms, r, text){ var tr = document.createElement('tr'); tr.innerHTML = '<td>' + c.no + ' (' + c.key + ')</td><td>' + kase + '</td><td>' + secs.toFixed(1) + '</td><td>' + ms + '</td><td>' + r.pct + '% (' + r.ok + '/' + r.total + ')</td><td class="ar">' + text + '</td>'; document.getElementById('tb').appendChild(tr); }
+function audioFor(key){ return fetch('https://api.quran.com/api/v4/verses/by_key/' + key + '?audio=5').then(function(r){ return r.json(); }).then(function(j){ var u = j.verse.audio.url; return fetch(/^https?:/.test(u) ? u : (/^\/\//.test(u) ? 'https:' + u : 'https://verses.quran.com/' + u)); }).then(function(r){ return r.blob(); }).then(bcDecode); }
+async function run(pcm, c, kase){ var t0 = Date.now(); var m = await call({type:'run', audio: pcm}, [pcm.buffer]); var r = voiceMatch(c.arabic, m.text); row(c, kase, pcm.length/16000, Date.now() - t0, r, m.text); return r; }
+document.getElementById('go').onclick = async function(){
+  try{
+    st('Memuatkan model…'); var t0 = Date.now(); await call({type:'load'}); st('Model sedia dalam ' + (Date.now()-t0) + ' ms. Menguji…');
+    var pcms = [];
+    for(var i = 0; i < CASES.length; i++){ pcms.push(await audioFor(CASES[i].key)); }
+    for(i = 0; i < CASES.length; i++){
+      var c = CASES[i], p = pcms[i];
+      await run(p.slice(), c, 'penuh');
+      await run(p.slice(0, Math.floor(p.length/2)), c, 'separuh pertama');
+      await run(p.slice(0, Math.floor(p.length/4)), c, 'suku pertama');
+      await run(pcms[(i+1) % pcms.length].slice(), c, 'ayat lain');
+    }
+    st('Selesai.');
+  }catch(e){ st('RALAT: ' + (e && e.message || e)); }
+};
+</script>
