@@ -4,6 +4,15 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
 
 ## 2026-11-25
 
+### Added (demo branch `bacaan-demo`, demo link only)
+
+- Mod bacaan: an opt-in switch in the account menu. Turning it on downloads a Quran-trained speech
+  model (tarteel-ai/whisper-base-ar-quran, ONNX int8, about 103 MB) that runs on the phone; turning
+  it off deletes it. With the mode on, Kaji asks the student to recite before anything is shown:
+  70% of the kalimah or more marks Ingat, two tries below 70% mark Belum ingat, and "Tak boleh baca
+  sekarang" falls back to Dedah and the usual buttons for that card. Students with the mode off see
+  no change and never load the model. See ADR 0004.
+
 ### Changed
 
 - A julat must hold at least 10 Kaji cards (a Kaji group counts once), so a small range can no longer

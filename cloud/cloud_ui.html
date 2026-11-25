@@ -301,6 +301,7 @@ function render() {
       <button class="namebtn acct-ghost" id="acctPd" style="margin-top:10px">${T('Pandangan', 'Reflections')}</button>
       <button class="namebtn acct-ghost" id="acctTour" style="margin-top:10px">${T('Panduan aplikasi', 'App guide')}</button>
       <button class="namebtn acct-ghost" id="acctSound" style="margin-top:10px"></button>
+      <button class="namebtn acct-ghost" id="acctBacaan" style="margin-top:10px">&#127908; ${T('Mod bacaan', 'Recitation mode')}: ${window.FN_APP && window.FN_APP.bacaanOn() ? T('Hidup', 'On') : T('Mati', 'Off')} (demo)</button>
       <button class="namebtn acct-ghost" id="acctLang" style="margin-top:10px">${T('English version', 'Versi Bahasa Melayu')}</button>
       ${isAdminUser() ? '<button class="namebtn acct-ghost" id="acctAdmin" style="margin-top:10px">' + T('Papan pentadbir', 'Admin panel') + '</button>' : ''}
       <div class="acct-row"><button class="namebtn acct-ghost" id="acctOut">${T('Log keluar', 'Log out')}</button><button class="namebtn acct-ghost" id="acctClose">${T('Tutup', 'Close')}</button></div>
@@ -313,6 +314,7 @@ function render() {
     $('acctPd').onclick = () => { closeSheet(); openPandangan('tulis'); };
     $('acctShare').onclick = shareApp;
     $('acctLang').onclick = switchLang;
+    $('acctBacaan').onclick = () => { closeSheet(); setTimeout(() => window.FN_APP && window.FN_APP.openBacaan(), 300); };
     const sndLabel = () => { $('acctSound').innerHTML = (lsGet(KEYS.sound) === 'off' ? '&#128263; ' : '&#128276; ') + T('Bunyi: ', 'Sound: ') + (lsGet(KEYS.sound) === 'off' ? T('Mati', 'Off') : T('Hidup', 'On')); };
     sndLabel();
     $('acctSound').onclick = () => {

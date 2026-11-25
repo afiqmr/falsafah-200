@@ -405,6 +405,42 @@
   }
   .revealbtn:hover{ filter:brightness(1.08); }
 
+  /* ---------- Mod bacaan (recite from memory, Quran speech model on the phone) ---------- */
+  .bc-box{ margin-top:18px; }
+  .bc-mic{ display:inline-flex; align-items:center; gap:9px; }
+  .bc-mic.on{ background:var(--rose); color:#fff; }
+  .bc-mic.on .bc-ic{ animation:bcPulse 1.1s ease-in-out infinite; }
+  .bc-mic[disabled]{ opacity:.6; cursor:default; }
+  @keyframes bcPulse{ 50%{ opacity:.35; } }
+  .bc-status:empty{ display:none; }
+  .bc-status{ margin:14px 0 0; font-size:14px; color:var(--muted); line-height:1.55; }
+  .bc-status b{ color:var(--ink); }
+  .bc-spin{ display:inline-block; width:14px; height:14px; margin-right:7px; vertical-align:-2px; border-radius:50%;
+    border:2px solid var(--border); border-top-color:var(--gold); animation:bcSpin .8s linear infinite; }
+  @keyframes bcSpin{ to{ transform:rotate(360deg); } }
+  .bc-try{ margin:14px 0 0; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); font-size:14px; line-height:1.55; }
+  .bc-try b{ color:var(--gold-cite, var(--gold)); }
+  .bc-manual{ display:block; margin:16px 0 0; padding:0; background:none; border:0; font:inherit; font-size:13.5px; font-weight:700;
+    color:var(--muted); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+  .bc-result{ margin:14px 0 4px; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); }
+  .bc-result.pass{ border-color:var(--emerald); }
+  .bc-result.fail{ border-color:var(--rose); }
+  .bc-head{ font-size:15px; font-weight:800; }
+  .bc-result.pass .bc-head{ color:var(--emerald); }
+  .bc-result.fail .bc-head{ color:var(--rose); }
+  .bc-words{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:23px; line-height:2; margin:6px 0 0; }
+  .bc-words .ok{ color:var(--emerald); }
+  .bc-words .no{ color:var(--rose); text-decoration:underline dotted; text-underline-offset:6px; }
+  .bc-heard{ font-size:12.5px; color:var(--muted); margin:6px 0 0; line-height:1.5; }
+  .bc-heard span{ font-family:"Scheherazade New","Traditional Arabic",serif; font-size:17px; }
+  .bc-next{ width:100%; margin-top:16px; }
+  .bc-card h3{ text-align:center; }
+  .bc-card p{ text-align:left; }
+  .bc-card .bc-state{ margin:0 0 14px; padding:10px 12px; border-radius:10px; background:var(--surface-2); border:1px solid var(--border); font-size:13px; text-align:left; line-height:1.5; }
+  .bc-bar{ height:8px; border-radius:8px; background:var(--surface-2); border:1px solid var(--border); overflow:hidden; margin:8px 0 4px; }
+  .bc-bar i{ display:block; height:100%; width:0; background:var(--gold); transition:width .3s ease; }
+  .bc-stats{ font-size:12px; color:var(--muted); margin:12px 0 0; text-align:left; line-height:1.6; }
+
   .gradebar{
     display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;
   }
@@ -1364,6 +1400,10 @@
 
 <div class="nameoverlay" id="summaryOverlay">
   <div class="namecard summarycard" id="summaryCard"></div>
+</div>
+
+<div class="nameoverlay" id="bacaanOverlay">
+  <div class="namecard bc-card" id="bacaanCard"></div>
 </div>
 
 <div class="nameoverlay" id="nameOverlay">
@@ -2940,6 +2980,11 @@
   }
   function renderFolioBody(entry){
     var el = document.getElementById('folioBody');
+    if(bcCard && bcCard.id !== entry.id){ bcCancelRecording(); bcCard = null; }
+    if(bacaanOn() && !(bcCard && bcCard.manual)){
+      if(!revealed){ renderBacaanPre(el, entry); return; }
+      if(bcCard && bcCard.result){ renderBacaanResult(el, entry); return; }
+    }
     if(!revealed){
       el.innerHTML =
         '<h3 class="folio-title">' + escapeHtml(displayTitle(entry.title)) + '</h3>' +
@@ -2956,12 +3001,445 @@
       el.querySelectorAll('.gradebtn').forEach(function(b){
         b.onclick = function(){
           var g = parseInt(b.getAttribute('data-g'),10);
+          bcCard = null;
           if(qadaRun) recordQada(entry.id, g); else recordKaji(entry.id, g);
           renderStudy();
           window.scrollTo(0, 0);
         };
       });
     }
+  }
+
+  /* ---------------- MOD BACAAN (demo) ---------------- */
+  // Opt-in, per device. A Quran-trained speech model (tarteel-ai/whisper-base-ar-quran, ONNX int8,
+  // about 103 MB) is downloaded once and runs on the phone in a Web Worker, so the voice never
+  // leaves the phone. Students who leave the mode off never download or load it.
+  // In Kaji, the student recites before anything is shown: 70% of the kalimah or more marks Ingat;
+  // two tries below 70% mark Belum ingat. "Tak boleh baca sekarang" falls back to Dedah and the
+  // usual buttons for that card only.
+  var BC_KEY = 'falsafah200_bacaan_v1';          // 'on' = model downloaded and mode on (this device only, not synced)
+  var BC_LOG_KEY = 'falsafah200_bacaan_log_v1';  // demo counts on this device
+  var BC_PASS = 70, BC_TRIES = 2, BC_MAX_S = 60;
+  var BC_MODEL = 'iqbalaesthetic/Basira';        // ONNX export of tarteel-ai/whisper-base-ar-quran (Apache-2.0)
+  var BC_LIB = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.2';
+  var BC_CACHE = 'transformers-cache';
+  var BC_BYTES = 106300000, BC_MB = 103;
+  function bacaanOn(){ try{ return localStorage.getItem(BC_KEY) === 'on'; }catch(e){ return false; } }
+  function bcLogGet(){ try{ return JSON.parse(localStorage.getItem(BC_LOG_KEY) || '{}') || {}; }catch(e){ return {}; } }
+  function bcLog(k){ try{ var l = bcLogGet(); l[k] = (l[k] || 0) + 1; localStorage.setItem(BC_LOG_KEY, JSON.stringify(l)); }catch(e){} }
+
+  // The worker loads transformers.js and the model, and turns 16 kHz audio into Arabic text.
+  var BC_WORKER_SRC = [
+    'import { pipeline, env } from "' + BC_LIB + '";',
+    'env.allowLocalModels = false;',
+    'var loading = null;',
+    'function load(){',
+    '  if(!loading) loading = pipeline("automatic-speech-recognition", "' + BC_MODEL + '", { dtype: "q8", device: "wasm",',
+    '    progress_callback: function(p){ self.postMessage({ type: "progress", p: { status: p.status, file: p.file, loaded: p.loaded, total: p.total } }); } })',
+    '    .catch(function(e){ loading = null; throw e; });',
+    '  return loading;',
+    '}',
+    'function fail(id, e){ self.postMessage({ id: id, type: "error", error: String(e && e.message || e) }); }',
+    'self.onmessage = function(e){',
+    '  var m = e.data;',
+    '  if(m.type === "load") load().then(function(){ self.postMessage({ id: m.id, type: "ready" }); }, function(err){ fail(m.id, err); });',
+    '  else if(m.type === "run") load().then(function(asr){',
+    '    var long = { chunk_length_s: 30, stride_length_s: 5 };',
+    '    return asr(m.audio, Object.assign({ language: "arabic", task: "transcribe" }, long))',
+    '      .catch(function(){ return asr(m.audio, long); });',   // in case the fine-tuned config has no language table
+    '  }).then(function(out){ self.postMessage({ id: m.id, type: "text", text: (out && out.text) || "" }); }, function(err){ fail(m.id, err); });',
+    '};'
+  ].join('\n');
+  var bcWorker = null, bcSeq = 0, bcWait = {}, bcProgressFn = null, bcReady = false, bcCachedOk = false;
+  function bcKillWorker(){
+    if(bcWorker){ try{ bcWorker.terminate(); }catch(e){} }
+    bcWorker = null; bcReady = false;
+    Object.keys(bcWait).forEach(function(k){ bcWait[k].reject(new Error('stopped')); delete bcWait[k]; });
+  }
+  function bcGetWorker(){
+    if(bcWorker) return bcWorker;
+    var url = URL.createObjectURL(new Blob([BC_WORKER_SRC], { type: 'text/javascript' }));
+    bcWorker = new Worker(url, { type: 'module' });
+    bcWorker.onmessage = function(e){
+      var m = e.data;
+      if(m.type === 'progress'){ if(bcProgressFn) bcProgressFn(m.p); return; }
+      var w = bcWait[m.id];
+      if(!w) return;
+      delete bcWait[m.id]; clearTimeout(w.t);
+      if(m.type === 'error') w.reject(new Error(m.error));
+      else { bcReady = true; w.resolve(m); }
+    };
+    bcWorker.onerror = function(e){
+      var msg = (e && e.message) || T('pustaka model tidak dapat dimuatkan', 'the model library could not load');
+      Object.keys(bcWait).forEach(function(k){ clearTimeout(bcWait[k].t); bcWait[k].reject(new Error(msg)); delete bcWait[k]; });
+      bcKillWorker();
+    };
+    return bcWorker;
+  }
+  // every call has a time limit, so the page is never left waiting on a worker that went quiet
+  function bcCall(msg, transfer, ms){
+    return new Promise(function(res, rej){
+      var id = ++bcSeq;
+      bcWait[id] = { resolve: res, reject: rej, t: setTimeout(function(){
+        if(bcWait[id]){ delete bcWait[id]; rej(new Error(T('terlalu lama', 'took too long'))); }
+      }, ms || 120000) };
+      msg.id = id;
+      try{ bcGetWorker().postMessage(msg, transfer || []); }catch(err){ clearTimeout(bcWait[id].t); delete bcWait[id]; rej(err); }
+    });
+  }
+  function bcCached(){
+    if(bcCachedOk) return Promise.resolve(true);
+    if(!window.caches) return Promise.resolve(false);
+    return caches.open(BC_CACHE).then(function(c){ return c.keys(); }).then(function(keys){
+      var n = keys.filter(function(r){ return /Basira\/resolve\/[^/]+\/onnx\/(encoder|decoder)_model(_merged)?_quantized\.onnx/.test(r.url); }).length;
+      bcCachedOk = n >= 2;
+      return bcCachedOk;
+    }).catch(function(){ return false; });
+  }
+  function bcDeleteModel(){
+    bcKillWorker(); bcCachedOk = false;
+    return (window.caches ? caches.delete(BC_CACHE) : Promise.resolve()).catch(function(){});
+  }
+
+  // Recording: MediaRecorder, then decoded and turned into 16 kHz mono for the model.
+  var bcRec = null;
+  function bcStartRecording(){
+    return navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
+      .then(function(stream){
+        var mr = new MediaRecorder(stream), chunks = [];
+        mr.ondataavailable = function(e){ if(e.data && e.data.size) chunks.push(e.data); };
+        mr.start(1000);
+        bcRec = { stream: stream, mr: mr, chunks: chunks };
+        return bcRec;
+      });
+  }
+  function bcStopRecording(){
+    var r = bcRec; bcRec = null;
+    if(!r) return Promise.resolve(null);
+    return new Promise(function(res){
+      var sent = false;
+      function done(){
+        if(sent) return; sent = true;
+        r.stream.getTracks().forEach(function(t){ t.stop(); });
+        res(r.chunks.length ? new Blob(r.chunks, { type: r.mr.mimeType || 'audio/webm' }) : null);
+      }
+      if(r.mr.state === 'inactive') return done();
+      r.mr.onstop = done;
+      try{ r.mr.stop(); }catch(e){ done(); }
+      setTimeout(done, 3000);
+    });
+  }
+  function bcCancelRecording(){
+    var r = bcRec; bcRec = null;
+    if(!r) return;
+    try{ r.mr.stop(); }catch(e){}
+    r.stream.getTracks().forEach(function(t){ t.stop(); });
+  }
+  function bcDecode(blob){
+    return blob.arrayBuffer().then(function(buf){
+      var AC = window.AudioContext || window.webkitAudioContext, ctx = new AC();
+      return new Promise(function(res, rej){ ctx.decodeAudioData(buf, res, rej); })
+        .then(function(ab){ try{ ctx.close(); }catch(e){} return bcTo16k(ab); });
+    });
+  }
+  function bcTo16k(ab){
+    var n = ab.length, ch = ab.numberOfChannels, mono = new Float32Array(n), i, c;
+    for(c = 0; c < ch; c++){ var d = ab.getChannelData(c); for(i = 0; i < n; i++) mono[i] += d[i] / ch; }
+    var ratio = ab.sampleRate / 16000;
+    if(Math.abs(ratio - 1) < 1e-6) return mono;
+    var out = new Float32Array(Math.floor(n / ratio));
+    for(var j = 0; j < out.length; j++){   // average each window, so higher sounds do not fold into speech
+      var a = Math.floor(j * ratio), b = Math.max(a + 1, Math.min(n, Math.floor((j + 1) * ratio))), s = 0;
+      for(i = a; i < b; i++) s += mono[i];
+      out[j] = s / (b - a);
+    }
+    return out;
+  }
+  function bcRms(pcm){ var s = 0; for(var i = 0; i < pcm.length; i++) s += pcm[i] * pcm[i]; return Math.sqrt(s / Math.max(1, pcm.length)); }
+  function bcTranscribe(pcm){
+    // the first call also loads the model from the phone's storage, so it gets more time
+    return bcCall({ type: 'run', audio: pcm }, [pcm.buffer], bcReady ? 90000 : 240000).then(function(m){ return m.text || ''; });
+  }
+  function bcPauseOtherAudio(){
+    try{ if(typeof lpAudio !== 'undefined' && !lpAudio.paused){ lpAudio.pause(); } if(typeof LP !== 'undefined' && LP.active){ LP.userPaused = true; lpBedOff(); } }catch(e){}
+  }
+
+  // Word check. Letters that sound alike are treated as one (ص/س/ث, ذ/ظ/ز, ض/د, ط/ت, ق/ك, ح/ه),
+  // and alif, hamza and ain are dropped, so small slips of the ear do not cost a kalimah.
+  function vNorm(w){
+    return arSkeleton(w).replace(/[اءؤئع]/g, '')
+      .replace(/[ثص]/g, 'س').replace(/[ذظ]/g, 'ز').replace(/ض/g, 'د')
+      .replace(/ط/g, 'ت').replace(/ق/g, 'ك').replace(/ح/g, 'ه');
+  }
+  function vEdit(a, b){
+    if(Math.abs(a.length - b.length) > 1) return 2;
+    var prev = [], cur, i, j;
+    for(j = 0; j <= b.length; j++) prev[j] = j;
+    for(i = 1; i <= a.length; i++){
+      cur = [i];
+      for(j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+  // Marks each ayat word as heard, in order. Works on the letters of the whole reading, so a word
+  // joined to the next one, or split in two, still counts; skipped or extra words are allowed.
+  function voiceMatch(arabic, transcript){
+    var target = String(arabic).replace(/\s+(?=[ً-ٰٟۖ-ۭ])/g, '').split(/\s+/).filter(function(w){ return vNorm(w).length; });
+    var words = String(transcript).split(/\s+/).map(vNorm).filter(Boolean);
+    var H = '', starts = [];
+    words.forEach(function(w){ starts.push(H.length); H += w; });
+    var p = 0, ok = 0;
+    var marks = target.map(function(w){
+      var t = vNorm(w), at = -1, len = 0, i, k;
+      var cands = [t];
+      if(t.length > 2 && /^[وفب]/.test(t)) cands.push(t.slice(1));
+      if(t.length > 2 && /ن$/.test(t)){ cands.push(t.slice(0, -1)); cands.push(t.slice(0, -1) + 'م'); }
+      if(t.length <= 2){
+        if(H.substr(p, t.length) === t){ at = p; len = t.length; }
+        else if(t.length === 2 && /ن$/.test(t) && H.substr(p, 1) === t[0] && starts.indexOf(p) >= 0){ at = p; len = 1; }
+        for(k = 0; at < 0 && k < words.length; k++){
+          if(starts[k] < p) continue;
+          if(starts[k] > p + 12) break;
+          if(words[k] === t){ at = starts[k]; len = t.length; }
+        }
+      } else {
+        var win = H.slice(p, p + t.length + 12);
+        for(i = 0; at < 0 && i < cands.length; i++){ var x = win.indexOf(cands[i]); if(x >= 0){ at = p + x; len = cands[i].length; } }
+        if(at < 0 && t.length >= 4){
+          for(i = 0; at < 0 && i <= Math.min(12, win.length - t.length + 1); i++){
+            [t.length, t.length - 1, t.length + 1].forEach(function(L){
+              if(at < 0 && i + L <= win.length && vEdit(t, win.substr(i, L)) <= 1){ at = p + i; len = L; }
+            });
+          }
+        }
+      }
+      if(at >= 0){ p = at + len; ok++; return { w: w, ok: true }; }
+      return { w: w, ok: false };
+    });
+    var total = target.length;
+    return { marks: marks, ok: ok, total: total, pct: total ? Math.round(ok / total * 100) : 0 };
+  }
+
+  var bcCard = null;   // { id, tries, manual, phase: 'idle'|'rec'|'check', last, result, grade, t0, tick }
+  function bcStatus(html){ var s = document.getElementById('bcStatus'); if(s) s.innerHTML = html || ''; }
+  function bcMicLabel(c){
+    var b = document.getElementById('bcMic');
+    if(!b) return;
+    b.classList.toggle('on', c.phase === 'rec');
+    b.disabled = c.phase === 'check';
+    b.querySelector('.bc-tx').textContent = c.phase === 'rec' ? T('Selesai', 'Done') : c.phase === 'check' ? T('Menyemak…', 'Checking…') : (c.tries ? T('Cuba lagi dari ingatan', 'Try again from memory') : T('Baca dari ingatan', 'Recite from memory'));
+  }
+  function bcSecs(c){ var s = Math.floor((Date.now() - c.t0) / 1000); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
+  function renderBacaanPre(el, entry){
+    if(!bcCard) bcCard = { id: entry.id, tries: 0, manual: false, phase: 'idle' };
+    var c = bcCard, last = c.last;
+    el.innerHTML =
+      '<h3 class="folio-title">' + escapeHtml(displayTitle(entry.title)) + '</h3>' +
+      '<p class="folio-hint">' + T('Baca ayat ini dari ingatan. ' + BC_PASS + '% kalimah betul ke atas: Ingat.', 'Recite this ayat from memory. ' + BC_PASS + '% of the words or more: Remembered.') + '</p>' +
+      (c.tries && last ? '<div class="bc-try">' + T('Cubaan 1: <b>' + last.pct + '%</b> (' + last.ok + '/' + last.total + ' kalimah). Cuba sekali lagi dari ingatan. Jika masih bawah ' + BC_PASS + '%, kad ini ditanda Belum ingat.',
+        'Try 1: <b>' + last.pct + '%</b> (' + last.ok + '/' + last.total + ' words). Try once more from memory. If it is still below ' + BC_PASS + '%, this card is marked Not yet.') + '</div>' : '') +
+      '<div class="bc-box" id="bcBox"><button class="revealbtn bc-mic" id="bcMic" type="button"><span class="bc-ic">&#127908;</span><span class="bc-tx"></span></button>' +
+        '<p class="bc-status" id="bcStatus"></p></div>' +
+      '<button class="bc-manual" id="bcManual" type="button">' + T('Tak boleh baca sekarang? Tanda sendiri', 'Can’t recite right now? Mark it yourself') + '</button>';
+    bcMicLabel(c);
+    if(c.phase === 'check') bcStatus('<span class="bc-spin"></span>' + T('Menyemak bacaan…', 'Checking your recitation…'));
+    document.getElementById('bcManual').onclick = function(){
+      bcCancelRecording(); clearInterval(c.tick);
+      c.manual = true; c.phase = 'idle'; bcLog('manual');
+      renderFolioBody(entry);
+    };
+    // the model may have been cleared by the phone (iPhone does this when storage runs low)
+    bcCached().then(function(ok){
+      if(ok || bcCard !== c || c.phase !== 'idle') return;
+      var box = document.getElementById('bcBox');
+      if(!box) return;
+      box.innerHTML = '<div class="bc-try">' + T('Model bacaan tiada di telefon ini lagi (mungkin dipadam oleh telefon). Muat turun semula, atau tanda sendiri di bawah.', 'The recitation model is no longer on this phone (the phone may have cleared it). Download it again, or mark it yourself below.') + '</div>' +
+        '<button class="revealbtn" id="bcFix" type="button">' + T('Muat turun model', 'Download the model') + '</button>';
+      document.getElementById('bcFix').onclick = function(){ openBacaan(); };
+    });
+    document.getElementById('bcMic').onclick = function(){
+      if(c.phase === 'rec'){ bcFinish(el, entry, c); return; }
+      if(c.phase !== 'idle') return;
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
+        bcStatus(T('Pelayar ini tidak dapat merakam suara. Cuba Chrome (Android) atau Safari (iPhone), atau tanda sendiri di bawah.', 'This browser cannot record your voice. Try Chrome (Android) or Safari (iPhone), or mark it yourself below.'));
+        return;
+      }
+      bcPauseOtherAudio();
+      c.phase = 'rec'; bcMicLabel(c);
+      bcStatus(T('Memulakan mikrofon…', 'Starting the microphone…'));
+      bcCall({ type: 'load' }, null, 240000).catch(function(){});   // load the model while the student recites
+      bcStartRecording().then(function(){
+        if(bcCard !== c || c.phase !== 'rec'){ bcCancelRecording(); return; }
+        c.t0 = Date.now();
+        var show = function(){
+          if(bcCard !== c || c.phase !== 'rec'){ clearInterval(c.tick); return; }
+          if(Date.now() - c.t0 > BC_MAX_S * 1000){ bcFinish(el, entry, c); return; }
+          bcStatus(T('<b>Mendengar… ' + bcSecs(c) + '</b><br>Bacalah ayat ini dari ingatan, kemudian tekan <b>Selesai</b>.', '<b>Listening… ' + bcSecs(c) + '</b><br>Recite this ayat from memory, then tap <b>Done</b>.'));
+        };
+        show(); c.tick = setInterval(show, 500);
+      }, function(err){
+        if(bcCard !== c) return;
+        c.phase = 'idle'; bcMicLabel(c);
+        var denied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
+        bcStatus(denied ? T('Mikrofon tidak dibenarkan. Benarkan mikrofon untuk laman ini dalam tetapan pelayar, kemudian cuba lagi.', 'The microphone is not allowed. Allow it for this site in your browser settings, then try again.')
+          : T('Mikrofon tidak dapat dibuka. Cuba lagi.', 'The microphone could not start. Try again.'));
+      });
+    };
+  }
+  function bcFinish(el, entry, c){
+    clearInterval(c.tick);
+    var secs = c.t0 ? (Date.now() - c.t0) / 1000 : 0;
+    c.phase = 'check'; bcMicLabel(c);
+    bcStatus('<span class="bc-spin"></span>' + T('Menyemak bacaan…', 'Checking your recitation…') + (bcReady ? '' : T(' Kali pertama mengambil masa lebih lama.', ' The first one takes longer.')));
+    bcStopRecording().then(function(blob){
+      if(!blob || secs < 0.8) throw { empty: true };
+      return bcDecode(blob);
+    }).then(function(pcm){
+      if(bcRms(pcm) < 0.002) throw { empty: true };
+      return bcTranscribe(pcm);
+    }).then(function(text){
+      if(bcCard !== c) return;
+      var r = voiceMatch(entry.arabic, text);
+      if(!text.trim() || !r.ok && text.trim().length < 3) throw { empty: true };
+      r.heard = text.trim();
+      c.tries++; c.last = r; bcLog('tries');
+      if(r.pct >= BC_PASS || c.tries >= BC_TRIES){
+        c.result = r; c.grade = r.pct >= BC_PASS ? 1 : 0; c.phase = 'idle';
+        bcLog(c.grade ? (c.tries === 1 ? 'pass1' : 'pass2') : 'fail');
+        revealed = true;
+        renderFolioBody(entry);
+        el.classList.remove('reveal-in'); void el.offsetWidth; el.classList.add('reveal-in');
+      } else {
+        c.phase = 'idle';
+        renderFolioBody(entry);
+      }
+    }).catch(function(err){
+      if(bcCard !== c) return;
+      c.phase = 'idle'; bcMicLabel(c);
+      if(err && err.empty){
+        bcLog('empty');
+        bcStatus(T('Tiada bacaan didengar. Cuba lagi dan baca dekat dengan mikrofon. Cubaan ini tidak dikira.', 'Nothing was heard. Try again closer to the microphone. This try does not count.'));
+      } else {
+        bcLog('error');
+        bcStatus(T('Bacaan tidak dapat disemak (', 'Your recitation could not be checked (') + escapeHtml(String(err && err.message || err)) + T('). Cuba lagi, atau tanda sendiri di bawah.', '). Try again, or mark it yourself below.'));
+      }
+    });
+  }
+  function renderBacaanResult(el, entry){
+    var c = bcCard, r = c.result, pass = c.grade === 1;
+    var n = r.pct + '% (' + r.ok + '/' + r.total + T(' kalimah)', ' words)');
+    var box = '<div class="bc-result ' + (pass ? 'pass' : 'fail') + '">' +
+      '<div class="bc-head">' + (pass ? '&#10003; ' + T('Ingat', 'Remembered') : T('Belum ingat', 'Not yet')) + ' &middot; ' + n + '</div>' +
+      '<p class="bc-words" lang="ar" dir="rtl">' + r.marks.map(function(m){ return '<span class="' + (m.ok ? 'ok' : 'no') + '">' + escapeHtml(m.w) + '</span>'; }).join(' ') + '</p>' +
+      '<p class="bc-heard">' + T('Didengar: ', 'Heard: ') + '<span lang="ar" dir="rtl">' + escapeHtml(r.heard) + '</span></p>' +
+      (pass ? '' : '<p class="bc-heard">' + T('Kalimah merah tidak didengar.', 'Words in red were not heard.') + '</p>') +
+    '</div>';
+    var html = folioRevealedHtml(entry, true);
+    html = html.replace('<hr class="divider">', box + '<hr class="divider">')
+      .replace(/<div class="gradebar">[\s\S]*?<\/div>/, '<button class="revealbtn bc-next" id="bcNext" type="button">' + T('Seterusnya', 'Next') + ' &rarr;</button>');
+    el.innerHTML = html;
+    applyWbw(el);
+    document.getElementById('bcNext').onclick = function(){
+      var g = c.grade;
+      bcCard = null;
+      if(qadaRun) recordQada(entry.id, g); else recordKaji(entry.id, g);
+      renderStudy();
+      window.scrollTo(0, 0);
+    };
+  }
+
+  // Settings sheet: turn the mode on (download) or off (delete), with this device's demo counts.
+  function openBacaan(){
+    var ov = document.getElementById('bacaanOverlay'), card = document.getElementById('bacaanCard');
+    var busy = false;
+    function close(){ if(busy) return; ov.classList.remove('active'); bcProgressFn = null; }
+    ov.onclick = function(e){ if(e.target === ov) close(); };
+    function stats(){
+      var l = bcLogGet(), t = l.tries || 0, pass = (l.pass1 || 0) + (l.pass2 || 0);
+      if(!t && !l.manual && !l.empty) return '';
+      return '<p class="bc-stats">' + T('Demo di telefon ini: ', 'Demo on this phone: ') + t + T(' bacaan disemak, ', ' readings checked, ') +
+        pass + T(' Ingat (', ' Remembered (') + (l.pass1 || 0) + T(' cubaan pertama), ', ' on the first try), ') + (l.fail || 0) + T(' Belum ingat, ', ' Not yet, ') +
+        (l.empty || 0) + T(' tidak didengar, ', ' not heard, ') + (l.manual || 0) + T(' kali tanda sendiri.', ' marked by hand.') + '</p>';
+    }
+    var about = '<p>' + T('Di Kaji, baca ayat dari ingatan dan aplikasi mendengar. ' + BC_PASS + '% kalimah betul ke atas: <b>Ingat</b>. Dua cubaan bawah ' + BC_PASS + '%: <b>Belum ingat</b>. Semak kalimah sahaja, bukan tajwid.',
+        'In Study, recite the ayat from memory and the app listens. ' + BC_PASS + '% of the words or more: <b>Remembered</b>. Two tries below ' + BC_PASS + '%: <b>Not yet</b>. It checks words only, not tajwid.') + '</p>' +
+      '<p>' + T('Model bacaan Al-Quran (lebih kurang ' + BC_MB + ' MB) dimuat turun sekali dan berjalan dalam telefon anda. Suara anda tidak dihantar ke mana-mana.',
+        'A Quran recitation model (about ' + BC_MB + ' MB) is downloaded once and runs on your phone. Your voice is not sent anywhere.') + '</p>';
+    function draw(state, info){
+      var on = bacaanOn(), h = '<h3>&#127908; ' + T('Mod bacaan', 'Recitation mode') + ' <span style="font-size:12px;color:var(--gold)">DEMO</span></h3>' + about;
+      if(state === 'download'){
+        h += '<div class="bc-state"><b>' + T('Memuat turun model…', 'Downloading the model…') + '</b>' +
+          '<div class="bc-bar"><i id="bcBarFill"></i></div><span id="bcBarTx">0%</span></div>' +
+          '<button class="nameskip" id="bcCancel" type="button">' + T('Batal', 'Cancel') + '</button>';
+      } else if(state === 'confirmOff'){
+        h += '<div class="bc-state">' + T('Model akan dipadam dari telefon ini. Perlu muat turun semula (lebih kurang ' + BC_MB + ' MB) jika anda hidupkan balik.', 'The model will be deleted from this phone. You will need to download it again (about ' + BC_MB + ' MB) if you turn it back on.') + '</div>' +
+          '<button class="namebtn" id="bcOffYes" type="button">' + T('Ya, matikan &amp; padam', 'Yes, turn off &amp; delete') + '</button>' +
+          '<button class="nameskip" id="bcBack" type="button" style="margin:10px auto 0">' + T('Batal', 'Cancel') + '</button>';
+      } else {
+        h += '<div class="bc-state">' + (state === 'error' ? '<b style="color:var(--rose)">' + T('Muat turun gagal', 'Download failed') + '</b> (' + escapeHtml(info || '') + '). ' + T('Semak internet, kemudian cuba lagi.', 'Check your internet, then try again.')
+            : on ? '<b style="color:var(--emerald)">' + T('Hidup', 'On') + '</b> &middot; ' + T('model sedia di telefon ini.', 'the model is ready on this phone.')
+            : '<b>' + T('Mati', 'Off') + '</b> &middot; ' + T('Kaji seperti biasa: Dedah, kemudian Ingat atau Belum ingat.', 'Study as usual: Reveal, then Remembered or Not yet.')) + '</div>' +
+          (on ? '<button class="namebtn" id="bcOff" type="button">' + T('Matikan &amp; padam model', 'Turn off &amp; delete the model') + '</button>'
+              : '<button class="namebtn" id="bcOn" type="button">' + T('Hidupkan &amp; muat turun (' + BC_MB + ' MB)', 'Turn on &amp; download (' + BC_MB + ' MB)') + '</button>' +
+                '<p style="margin:8px 0 0;font-size:12px;text-align:center">' + T('Guna Wi-Fi jika boleh.', 'Use Wi-Fi if you can.') + '</p>') +
+          '<button class="nameskip" id="bcClose" type="button" style="margin:10px auto 0">' + T('Tutup', 'Close') + '</button>' + stats();
+      }
+      card.innerHTML = h;
+      var q = function(id){ return document.getElementById(id); };
+      if(q('bcClose')) q('bcClose').onclick = close;
+      if(q('bcOff')) q('bcOff').onclick = function(){ draw('confirmOff'); };
+      if(q('bcBack')) q('bcBack').onclick = function(){ draw(); };
+      if(q('bcOffYes')) q('bcOffYes').onclick = function(){
+        try{ localStorage.removeItem(BC_KEY); }catch(e){}
+        bcCancelRecording(); bcCard = null;
+        bcDeleteModel().then(function(){ draw(); refreshKaji(); });
+      };
+      if(q('bcOn')) q('bcOn').onclick = startDownload;
+      if(q('bcCancel')) q('bcCancel').onclick = function(){
+        busy = false; bcProgressFn = null;
+        bcDeleteModel().then(function(){ draw(); });
+      };
+    }
+    function startDownload(){
+      busy = true; draw('download');
+      try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}   // asks the phone to keep the model
+      var files = {};
+      bcProgressFn = function(p){
+        if(!p || !p.file) return;
+        if(p.status === 'progress' && p.total) files[p.file] = p.loaded || 0;
+        else if(p.status === 'done' && files[p.file] != null && p.total) files[p.file] = p.total;
+        var got = 0; Object.keys(files).forEach(function(k){ got += files[k]; });
+        var pct = Math.min(99, Math.round(got / BC_BYTES * 100));
+        var f = document.getElementById('bcBarFill'), tx = document.getElementById('bcBarTx');
+        if(f) f.style.width = pct + '%';
+        if(tx) tx.textContent = pct + '% · ' + Math.round(got / 1e6) + ' / ' + BC_MB + ' MB';
+      };
+      bcCall({ type: 'load' }, null, 900000).then(function(){
+        if(!busy) return;
+        busy = false; bcProgressFn = null; bcCachedOk = true;
+        try{ localStorage.setItem(BC_KEY, 'on'); }catch(e){}
+        draw(); refreshKaji();
+      }, function(err){
+        if(!busy) return;
+        busy = false; bcProgressFn = null;
+        bcKillWorker();
+        draw('error', err && err.message);
+      });
+    }
+    function refreshKaji(){ bcCard = null; revealed = false; if(document.getElementById('view-study').classList.contains('active')) renderStudy(); }
+    draw();
+    ov.classList.add('active');
+  }
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden && bcCard && bcCard.phase === 'rec'){ bcCancelRecording(); clearInterval(bcCard.tick); bcCard.phase = 'idle'; bcMicLabel(bcCard); bcStatus(T('Rakaman dihentikan kerana aplikasi ditutup. Cuba lagi.', 'Recording stopped because the app was closed. Try again.')); }
+  });
+  // For checking the model without a microphone: runs an audio file (URL) through the same path.
+  function bacaanTest(url, arabic){
+    return fetch(url).then(function(r){ return r.blob(); }).then(bcDecode).then(function(pcm){
+      var t0 = Date.now();
+      return bcTranscribe(pcm).then(function(text){ var r = voiceMatch(arabic, text); return { text: text, pct: r.pct, ok: r.ok, total: r.total, ms: Date.now() - t0, secs: pcm.length / 16000 }; });
+    });
   }
 
   /* ---------------- BROWSE VIEW ---------------- */
@@ -4131,7 +4609,7 @@
   document.getElementById('miniPlayer').onclick = lpControl;
   document.getElementById('listenBtn').onclick = openListen;
 
-  window.FN_APP = { startTour: function(){ startTour(); }, weeklyCheck: function(){ weeklyCheck(); }, openWeekly: function(){ openWeekly(); }, displayTitle: function(t){ return displayTitle(t); }, refreshProgress: function(){ renderKajiStats(); if(document.getElementById('view-kemajuan').classList.contains('active')) renderKemajuan(); } };
+  window.FN_APP = { openBacaan: function(){ openBacaan(); }, bacaanOn: function(){ return bacaanOn(); }, bacaanTest: function(u, a){ return bacaanTest(u, a); }, bacaanLoad: function(){ return bcCall({ type: 'load' }, null, 900000); }, voiceMatch: function(a, t){ return voiceMatch(a, t); }, startTour: function(){ startTour(); }, weeklyCheck: function(){ weeklyCheck(); }, openWeekly: function(){ openWeekly(); }, displayTitle: function(t){ return displayTitle(t); }, refreshProgress: function(){ renderKajiStats(); if(document.getElementById('view-kemajuan').classList.contains('active')) renderKemajuan(); } };
 
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, function(c){
