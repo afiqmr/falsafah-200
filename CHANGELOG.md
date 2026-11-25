@@ -10,6 +10,8 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
   shrink the daily target. The picker widens a smaller range (for example 50–52 to 50–59) and asks
   the student to tap again; a saved smaller range (for example 1–11) is widened once on open, and the
   julat hint says so.
+- Kaji prompt: "Cuba lafazkan ayat ini dan ingat maksudnya sebelum menekan Dedah." (was "Cuba ingat &
+  lafazkan ayat ini serta maksudnya"): the ayat is recited, the maksud is recalled.
 
 ## 2026-11-24
 
