@@ -4349,9 +4349,21 @@
     return '<span class="wbl-seg" role="group" aria-label="' + T('Bahasa terjemahan', 'Translation language') + '">' +
       [['en','EN'],['id','BM']].map(function(o){ var on = wbl === 'both' || wbl === o[0]; return '<button type="button" data-wbl="' + o[0] + '" aria-pressed="' + on + '" class="' + (on ? 'active' : '') + '">' + o[1] + '</button>'; }).join('') + '</span>';
   }
+  // Quran.com's word text (Tanzil Uthmani) marks a tanwin read with idgham or ikhfa by adding a small low
+  // meem (U+06ED) after it. Quran.com draws that with its own mushaf font; ordinary Arabic fonts draw a real
+  // little mim under the word, which is wrong. Show the open (staggered) tanwin the printed mushaf uses
+  // instead, as the book text already does. Before a ba (iqlab) the small mim is a real mark and stays.
+  var OPEN_TANWIN = { '\u064B': '\u08F0', '\u064C': '\u08F1', '\u064D': '\u08F2' };
+  function mushafTanwin(ar, next){
+    if(!ar || ar.indexOf('\u06ED') < 0) return ar;
+    if(next && arSkeleton(next).charAt(0) === '\u0628') return ar;
+    return ar.replace(/([\u064B-\u064D])(\u0651?)([\u0627\u0649]?)\u06ED/g, function(m, t, sh, al){ return OPEN_TANWIN[t] + sh + al; })
+             .replace(/\u0651([\u064B-\u064D])\u06ED/g, function(m, t){ return '\u0651' + OPEN_TANWIN[t]; });
+  }
   function wordCells(words){
-    return words.map(function(w){
-      return '<div class="w' + (w.end ? ' w-end' : '') + '"><span class="w-ar">' + escapeHtml(w.ar) + '</span>' +
+    return words.map(function(w, i){
+      var next = words[i + 1] && !words[i + 1].end ? words[i + 1].ar : '';
+      return '<div class="w' + (w.end ? ' w-end' : '') + '"><span class="w-ar">' + escapeHtml(w.end ? w.ar : mushafTanwin(w.ar, next)) + '</span>' +
         (w.en ? '<span class="w-en" lang="en">' + escapeHtml(w.en) + '</span>' : '') +
         (w.id ? '<span class="w-id" lang="ms">' + escapeHtml(w.id) + '</span>' : '') + '</div>';
     }).join('');

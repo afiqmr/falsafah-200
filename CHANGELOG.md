@@ -2,6 +2,15 @@
 
 Notable changes to Falsafah 200, newest first. The live app is updated on every push to `main`.
 
+## 2026-11-28
+
+### Fixed
+
+- Word by word: a stray small mim appeared under some words (for example حَقٌّ in 51:19). Quran.com's
+  word text marks a tanwin read with idgham or ikhfa with a small low meem (U+06ED) that only its own
+  mushaf font draws correctly. The app now shows the open tanwin the printed mushaf uses (as the
+  book text already does). Before a ba (iqlab) the small mim is real and stays.
+
 ## 2026-11-25
 
 ### Changed
