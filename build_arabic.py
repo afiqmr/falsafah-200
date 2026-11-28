@@ -9,10 +9,11 @@ QUOTES lists the falsafah where the book quotes only part of the ayat range, as
 [first word, end word) over all the words of the range (0-based, end not included).
 Checked against the book (PDF page = printed page + 69).
 
-Class-extended falsafah keep the longer ayat their maksud covers, in the same KFGQPC text:
-46 (book 53:39-40, class 39-41), 53 (book 74:1-4, class 1-7), 117 (book 24:37, class 37-38),
-31 (book quotes only "inna Allaha baalighu amrih" of 65:3) and 174 (book quotes 66:6 up to
-"naaran"). To show only the book's part instead, add them to QUOTES or RANGES.
+Class-extended falsafah (the class notes extend them to cover more meaning) keep the longer
+ayat, in the same KFGQPC text: 31 (book quotes only "inna Allaha baalighu amrih" of 65:3, class
+the whole ayat), 46 (book 53:39-40, class 39-41), 53 (book 74:1-4, class 1-7), 117 (book 24:37,
+class 37 plus hafalan tambahan 38), 168 (book 3:103 up to "ikhwaanan", class the whole ayat) and
+174 (book 66:6 up to "naaran", class the whole ayat). Do not add them to QUOTES or RANGES.
 
     python build_arabic.py     # then python build.py and python build_cloud.py
 """
@@ -27,7 +28,7 @@ QUOTES = {
     9: (17, 26), 10: (17, 26), 11: (17, 26), 12: (24, 33), 13: (11, 17), 28: (8, 15),
     38: (27, 32), 39: (8, 14), 42: (0, 12), 55: (0, 5), 60: (0, 10),
     62: (37, 46), 72: (6, 25), 78: (11, 21), 81: (21, 30), 94: (0, 10), 164: (0, 5),
-    166: (39, 50), 168: (0, 19),
+    166: (39, 50),
 }
 RANGES = {}   # e.g. {46: '39-40'} would cut a class-extended falsafah back to the book's ayat
 

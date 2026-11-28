@@ -13,10 +13,10 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
 - Word by word shows the book's own words, one per Quran.com word (Quran.com still gives the
   meanings and timings). Words already saved on a phone are fetched again once.
 - The `arabic` of every falsafah is rebuilt from the KFGQPC text by `build_arabic.py`, cut to the
-  words the book quotes. All 200 were checked against the book. Two now follow the book's shorter
-  quote: 60 (103:1-3 up to ٱلصَّٰلِحَٰتِ) and 168 (3:103 up to إِخۡوَٰنٗا); 94 no longer
-  adds يُقَٰتِلُونَ after ٱلۡجَنَّةَۚ. The class-extended falsafah (31, 46, 53, 117, 174) keep the
-  longer ayat their maksud covers.
+  words the book quotes. All 200 were checked against the book. 60 now follows the book's shorter
+  quote (103:1-3 up to ٱلصَّٰلِحَٰتِ) and 94 no longer adds يُقَٰتِلُونَ after ٱلۡجَنَّةَۚ. The six
+  falsafah the class extended to cover more meaning (31, 46, 53, 117, 168, 174) keep the longer
+  ayat from the class notes.
 - The Tanzil text and its scripts (`tanzil_quran/`, `rebuild_tanzil.py`, `trim_tanzil.py`) are removed.
 
 ### Fixed

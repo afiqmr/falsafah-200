@@ -155,7 +155,8 @@ docs/                 Architecture, data formats, security, testing, decisions, 
   wording is Bahasa Melayu. Each ayat is fetched once and then kept on the device.
 - The Arabic is the King Fahd Complex (KFGQPC) Hafs text in the KFGQPC HAFS Uthmanic Script font,
   the same text and font Jilid 7 prints. The quoted words of all 200 were checked against the book.
-  Five class-extended falsafah (31, 46, 53, 117, 174) show more ayat than the book quotes.
+  Six falsafah the class extended to cover more meaning (31, 46, 53, 117, 168, 174) show more ayat
+  than the book quotes, as in the class notes.
 - Progress lives on the device and syncs through Firebase when signed in. The standalone
   `index.html` keeps progress only in that browser.
 - Dr. HALO-N's recordings are for registered students only and are never stored in this repository.
