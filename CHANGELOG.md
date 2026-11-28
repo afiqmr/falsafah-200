@@ -6,6 +6,10 @@ Notable changes to Falsafah 200, newest first. The live app is updated on every 
 
 ### Changed
 
+- Senarai: the search bar stays pinned under the tab row (frosted, like the tabs) while the list
+  scrolls, so a student can search from the bottom of the list. Searching from further down brings
+  the first result up to just under the search bar.
+
 - All Arabic now uses the Madinah Mushaf text and font Jilid 7 itself is printed in: the King Fahd
   Complex (KFGQPC) Hafs text and the KFGQPC HAFS Uthmanic Script font, embedded in the page. Sukun,
   open tanwin, hamza seats (for example وَٱلۡأٓصَالِ), the ۞ sign and the round ayat-number markers

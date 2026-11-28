@@ -592,7 +592,17 @@
   .studydone .big{ font-size:40px; color:var(--emerald); }
 
   /* ---------- Browse (Senarai) ---------- */
-  .searchrow{ position:relative; margin-bottom:16px; }
+  /* The search bar stays pinned under the tab row while the list scrolls, so it can be used from
+     anywhere in the list. --tabbar-h is the tab row's height, measured by script. */
+  .searchrow{ position:sticky; top:calc(var(--sb-h) + var(--tabbar-h, 69px)); z-index:15; margin-bottom:16px; }
+  .searchrow::before{
+    content:""; position:absolute; z-index:-1; left:-18px; right:-18px; top:-6px; bottom:-8px;
+    background:color-mix(in srgb, var(--bg) 78%, transparent);
+    -webkit-backdrop-filter:blur(20px) saturate(160%); backdrop-filter:blur(20px) saturate(160%);
+    border-bottom:1px solid var(--border);
+    opacity:0; transition:opacity .25s ease; pointer-events:none;
+  }
+  .searchrow.stuck::before{ opacity:1; }
   .searchrow svg{
     position:absolute; left:14px; top:50%; transform:translateY(-50%);
     width:16px; height:16px; color:var(--muted); pointer-events:none;
@@ -3572,7 +3582,17 @@
   var tabBar = document.getElementById('tabBar');
   var sbStrip = document.querySelector('.sb-strip');
   function updateTabBarStuck(){ var top = sbStrip ? sbStrip.getBoundingClientRect().height : 0; tabBar.classList.toggle('stuck', tabBar.getBoundingClientRect().top <= top + 0.5 && window.scrollY > 0); }
-  window.addEventListener('scroll', updateTabBarStuck, { passive:true });
+  // The Senarai search bar pins just under the tab row and frosts once it is pinned
+  var searchRow = document.querySelector('.searchrow');
+  function measureTabBar(){ document.documentElement.style.setProperty('--tabbar-h', tabBar.offsetHeight + 'px'); }
+  function updateSearchStuck(){
+    if(!searchRow.offsetParent){ searchRow.classList.remove('stuck'); return; }
+    var pin = tabBar.getBoundingClientRect().bottom;
+    searchRow.classList.toggle('stuck', window.scrollY > 0 && searchRow.getBoundingClientRect().top <= pin + 0.5);
+  }
+  window.addEventListener('scroll', function(){ updateTabBarStuck(); updateSearchStuck(); }, { passive:true });
+  window.addEventListener('resize', function(){ measureTabBar(); updateSearchStuck(); });
+  measureTabBar();
   updateTabBarStuck();
 
   // wait until typing pauses (0.3 s) before filtering
@@ -3580,7 +3600,13 @@
   document.getElementById('searchInput').addEventListener('input', function(e){
     var v = e.target.value;
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(function(){ renderBrowse(v); }, 300);
+    searchTimer = setTimeout(function(){
+      renderBrowse(v);
+      // searching from further down the list: bring the first result up to just under the search bar
+      var gap = document.getElementById('listCount').getBoundingClientRect().top - searchRow.getBoundingClientRect().bottom - 10;
+      if(gap < 0) window.scrollBy(0, gap);
+      updateSearchStuck();
+    }, 300);
   });
 
   /* ---------------- LISTEN (audio player) ---------------- */
