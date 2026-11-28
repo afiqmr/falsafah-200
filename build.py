@@ -15,6 +15,8 @@ ROOT = Path(__file__).parent
 
 template = (ROOT / 'template.html').read_text(encoding='utf-8')
 logo = 'data:image/png;base64,' + base64.b64encode((ROOT / 'logo-afiq.png').read_bytes()).decode('ascii')
+# the Madinah Mushaf font the book uses (KFGQPC HAFS Uthmanic Script), embedded so it also works offline
+hafs = 'data:font/woff2;base64,' + base64.b64encode((ROOT / 'kfgqpc' / 'hafs.18.woff2').read_bytes()).decode('ascii')
 
 
 def load(name, fallback=None):
@@ -41,7 +43,7 @@ def build(lang, out):
         assert len(q_en) == len(quiz) and all(str(q['id']) in q_en for q in quiz), 'i18n/quiz_en.json must have every Kuiz id'
         quiz = [dict(q, q=q_en[str(q['id'])]) for q in quiz]
     html = template
-    for placeholder in ('__DATA_JSON__', '__NOTES_JSON__', '__QUIZ_JSON__', '__LOGO_URI__', '__LANG__'):
+    for placeholder in ('__DATA_JSON__', '__NOTES_JSON__', '__QUIZ_JSON__', '__LOGO_URI__', '__HAFS_FONT_URI__', '__LANG__'):
         assert html.count(placeholder) == 1, 'template.html must contain exactly one %s placeholder' % placeholder
     if en:
         for old, new in json.loads((ROOT / 'i18n' / 'en_static.json').read_text(encoding='utf-8'))['pairs']:
@@ -52,6 +54,7 @@ def build(lang, out):
                 .replace('__NOTES_JSON__', inline(notes))
                 .replace('__QUIZ_JSON__', inline(quiz))
                 .replace('__LOGO_URI__', logo)
+                .replace('__HAFS_FONT_URI__', hafs)
                 .replace('__LANG__', lang))
     (ROOT / out).write_text(html, encoding='utf-8')
     print('Built %s (%s) with %d falsafah entries and %d note topics.' % (out, lang, len(data), len(notes['topics'])))

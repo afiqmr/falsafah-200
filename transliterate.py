@@ -9,7 +9,8 @@ CONS = {
 }
 VOWELS = {'َ': 'a', 'ِ': 'i', 'ُ': 'u',
           'ً': 'an', 'ٍ': 'in', 'ٌ': 'un',
-          'ࣰ': 'an', 'ࣱ': 'un', 'ࣲ': 'in'}
+          'ࣰ': 'an', 'ࣱ': 'un', 'ࣲ': 'in',
+          'ٗ': 'an', 'ٞ': 'un', 'ٖ': 'in'}   # KFGQPC Hafs open tanwin (U+0657, U+065E, U+0656)
 SHADDA = 'ّ'
 SUKUN = {'ْ', 'ۡ'}
 SILENT = {'۟', '۠'}

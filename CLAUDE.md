@@ -17,6 +17,7 @@ python quiz_bank.py      # validate the Kuiz bank and write quiz.json (must prin
 python build.py          # -> index.html (BM) and index_en.html (English), standalone, no accounts
 python build_cloud.py    # -> cloud-test/ and cloud-test/en/ (the live app: accounts, sync, install)
 python build_notes.py    # only after changing notes_source/*.docx or the summaries in the script
+python build_arabic.py   # only after changing which words a falsafah quotes (QUOTES in the script)
 ```
 
 Always run `build.py` then `build_cloud.py` after any change to `template.html`, `data.json`,
@@ -30,6 +31,10 @@ wait for READY.
 
 - **Content**: titles, maksud, Kata Kunci, Catitan and page numbers come from Jilid 7. Do not
   reword them unless asked. `bookPages` are printed page numbers (PDF page minus 69).
+- **Arabic**: the Madinah Mushaf script the book uses: KFGQPC Hafs text (`kfgqpc/hafs_v18.json`)
+  in the KFGQPC HAFS font (embedded by `build.py`). Never show Quran.com's Uthmani text or another
+  font for ayat; word by word uses the book's words from `arabic`. Change `arabic` only through
+  `build_arabic.py`, and check the quoted words against the book page.
 - **Kuiz**: edit questions in `quiz_bank.py`, never `quiz.json`. Distractors must not share an
   ayat with the answer.
 - **Recordings**: Dr. HALO-N's recordings are for signed-in students only. Never add audio files

@@ -26,7 +26,9 @@ Gred colours run from green (A+) through gold (B) to orange and red (C, D, G).
 ## Type
 
 - Interface: **Noto Sans**, 400 to 800.
-- Arabic: **Scheherazade New**, large (about 27 px on phones in Kaji), generous line height.
+- Arabic: **KFGQPC HAFS Uthmanic Script** (the Madinah Mushaf font Jilid 7 uses), with the KFGQPC
+  text, large (about 27 px on phones in Kaji), generous line height. Ayat numbers are drawn by the
+  font as the round mushaf marker.
 - Phones zoom the page to 90%, and text boxes stay at 16 px on screen so iPhone does not zoom in.
 
 ## Motif

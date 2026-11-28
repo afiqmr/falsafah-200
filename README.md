@@ -127,7 +127,7 @@ Never edit `index.html` or `cloud-test/index.html` by hand; the next build overw
 | `template.html` or `data.json`           | `build.py`, then `build_cloud.py`                                      |
 | a Word document in `notes_source/`       | `build_notes.py`, then both builds                                     |
 | a Kuiz question in `quiz_bank.py`        | `python quiz_bank.py` (validates and writes `quiz.json`), then builds  |
-| the Arabic text for many entries         | `rebuild_tanzil.py`, `trim_tanzil.py`, `transliterate.py`, then builds |
+| the Arabic text (which words are quoted) | `build_arabic.py` (and `transliterate.py` if needed), then builds      |
 
 ## 🗂️ Repository map
 
@@ -140,9 +140,8 @@ build.py              Builds index.html (standalone, no accounts)
 build_cloud.py        Builds cloud-test/ (accounts, sync, install, link previews)
 cloud/                Firebase layer, service worker, manifest, icons, moved notice, import
 cloud-test/           Built output that Vercel serves
-tanzil_quran/         Uthmani Quran text, one file per surah
-rebuild_tanzil.py     Regenerates Arabic from surah and ayah ranges
-trim_tanzil.py        Cuts Arabic where the book quotes part of an ayat
+kfgqpc/              KFGQPC Hafs Quran text and font (the Madinah Mushaf script the book uses)
+build_arabic.py       Writes the Arabic of each falsafah from kfgqpc/, cut to the book's quote
 transliterate.py      Builds the romanised text used by pronunciation search
 docs/                 Architecture, data formats, security, testing, decisions, screenshots
 ```
@@ -154,8 +153,9 @@ docs/                 Architecture, data formats, security, testing, decisions, 
   official exam material.
 - Word by word comes from Quran.com. The BM line is the word set Quran.com labels Indonesian; its
   wording is Bahasa Melayu. Each ayat is fetched once and then kept on the device.
-- The Arabic text comes from Tanzil via quran-data and has not been formally reviewed. Please
-  report any errors.
+- The Arabic is the King Fahd Complex (KFGQPC) Hafs text in the KFGQPC HAFS Uthmanic Script font,
+  the same text and font Jilid 7 prints. The quoted words of all 200 were checked against the book.
+  Five class-extended falsafah (31, 46, 53, 117, 174) show more ayat than the book quotes.
 - Progress lives on the device and syncs through Firebase when signed in. The standalone
   `index.html` keeps progress only in that browser.
 - Dr. HALO-N's recordings are for registered students only and are never stored in this repository.
@@ -164,12 +164,13 @@ docs/                 Architecture, data formats, security, testing, decisions, 
 
 - Falsafah titles, maksud, Kata Kunci, Catitan and page numbers: _Al-Fathun Nawa Jilid 7_ by
   Prof. Dr. HALO-N.
-- Quran text: [khaledhosny/quran-data](https://github.com/khaledhosny/quran-data), based on the
-  [Tanzil](https://tanzil.net) Uthmani text.
+- Quran text and font: King Fahd Glorious Quran Printing Complex (KFGQPC), Hafs text v18 and
+  KFGQPC HAFS Uthmanic Script (free to use and distribute, unmodified; see `kfgqpc/LICENSE.txt`),
+  from [quran-data-kfgqpc](https://github.com/thetruetruth/quran-data-kfgqpc).
 - Word by word and murattal audio: [Quran.com](https://quran.com) API.
 - Exam notes prepared by Peguam Ghazali.
-- Fonts: [Scheherazade New](https://software.sil.org/scheherazade/) by SIL and Noto Sans, from
-  Google Fonts.
+- Fonts: KFGQPC HAFS Uthmanic Script for all Arabic; Noto Sans (and Scheherazade New as a
+  fallback) from Google Fonts.
 
 ---
 

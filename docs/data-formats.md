@@ -18,7 +18,7 @@ An array of 200 objects, one per falsafah, in number order.
 | `ayahRange`     | string         | `"191"` or `"8-10"`                                                |
 | `surahDisplay`  | string         | `Surah 3: Al Imran, Ayat 191`                                      |
 | `rangeLabel`    | string         | `Falsafah 1`                                                       |
-| `arabic`        | string         | Uthmani text of the part of the ayat the book quotes               |
+| `arabic`        | string         | KFGQPC Hafs (Madinah Mushaf) text of the words the book quotes; each finished ayat ends with a no-break space and its number. Written by `build_arabic.py` |
 | `kataKunci`     | string[]       | Kata Kunci Falsafah                                                |
 | `catitan`       | string[]       | Catitan Kaedah Pembuka Mulut (split into points at Satu:, Dua: …)  |
 | `catitanShared` | string         | `"1–3"` when several falsafah share one Catitan, else empty        |
@@ -81,7 +81,7 @@ Firestore.
 | `lang_v1`            |   ✓    | `ms` or `en`, set at sign-up or by the menu switch; unset = BM   |
 | `wbw_v1`             |        | Word by word on or off                                           |
 | `wbwlang_v1`         |        | `en`, `id` (BM) or `both`                                        |
-| `wbwwords_v1`        |        | Cached word-by-word tables per falsafah                          |
+| `wbwwords_v2`        |        | Cached word-by-word tables per falsafah (Arabic in the book's KFGQPC text; v1 is removed on open) |
 | `listen_v1`          |        | Dengar settings                                                  |
 | `notes_topic_v1`     |        | Last Nota topic                                                  |
 | `weekly_seen_v1`     |        | Saturday of the last weekly popup shown                          |
